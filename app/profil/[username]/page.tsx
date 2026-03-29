@@ -75,17 +75,33 @@ export default function ProfilPage() {
       {/* Header */}
       <div className="px-5 pt-12 pb-6 border-b border-white/10">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-[#c9440e]/15 flex items-center justify-center shrink-0">
-            <span className="font-serif text-[#c9440e] text-2xl leading-none">
-              {username?.[0]?.toUpperCase()}
-            </span>
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c9440e]/15 flex items-center justify-center shrink-0">
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} className="w-full h-full object-cover" alt={username} />
+            ) : (
+              <span className="font-serif text-[#c9440e] text-2xl leading-none">
+                {username?.[0]?.toUpperCase()}
+              </span>
+            )}
           </div>
           <div className="flex-1 pt-1">
-            <h1 className="font-serif text-2xl text-white leading-tight">@{username}</h1>
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="font-serif text-2xl text-white leading-tight">@{username}</h1>
+              {isOwnProfile && (
+                <a
+                  href="/profil/edit"
+                  className="shrink-0 border border-white/15 text-[#7a7268] hover:text-white hover:border-white/30 transition px-3 py-1 rounded-full text-xs font-medium"
+                >
+                  Modifier
+                </a>
+              )}
+            </div>
             {profile.bio ? (
               <p className="text-[#7a7268] text-sm mt-1.5 leading-relaxed">{profile.bio}</p>
             ) : isOwnProfile ? (
-              <p className="text-[#7a7268]/40 text-sm mt-1.5 italic">Ajoute une bio...</p>
+              <a href="/profil/edit" className="text-[#7a7268]/40 text-sm mt-1.5 italic block hover:text-[#7a7268] transition">
+                Ajoute une bio...
+              </a>
             ) : null}
           </div>
         </div>

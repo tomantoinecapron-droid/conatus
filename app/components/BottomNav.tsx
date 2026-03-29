@@ -1,21 +1,22 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const [profileHref, setProfileHref] = useState('/profil')
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const username = data.user?.user_metadata?.username
-      if (username) setProfileHref(`/profil/${username}`)
-    })
-  }, [])
 
   const tabs = [
+    {
+      href: '/home',
+      label: 'Accueil',
+      active: pathname === '/home',
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+    },
     {
       href: '/bibliotheque',
       label: 'Biblio',
@@ -39,19 +40,7 @@ export default function BottomNav() {
       ),
     },
     {
-      href: '/objectifs',
-      label: 'Objectifs',
-      active: pathname.startsWith('/objectifs'),
-      icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="6" />
-          <circle cx="12" cy="12" r="2" />
-        </svg>
-      ),
-    },
-    {
-      href: profileHref,
+      href: '/profil/edit',
       label: 'Profil',
       active: pathname.startsWith('/profil'),
       icon: (active: boolean) => (

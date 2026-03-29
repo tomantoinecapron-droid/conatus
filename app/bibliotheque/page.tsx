@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
 
 type FilterType = 'tous' | 'en_cours' | 'lu' | 'a_lire'
+type ViewType = 'grid' | 'list'
 
 const FILTERS: { key: FilterType; label: string }[] = [
   { key: 'tous', label: 'Tous' },
@@ -19,6 +20,38 @@ const statusDot: Record<string, string> = {
   lu: 'bg-green-400',
 }
 
+const statusLabel: Record<string, string> = {
+  a_lire: 'À lire',
+  en_cours: 'En cours',
+  lu: 'Lu',
+}
+
+const statusTextColor: Record<string, string> = {
+  a_lire: 'text-[#7a7268]',
+  en_cours: 'text-[#c9440e]',
+  lu: 'text-green-400',
+}
+
+function IconGrid({ active }: { active: boolean }) {
+  const color = active ? '#ffffff' : '#7a7268'
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+    </svg>
+  )
+}
+
+function IconList({ active }: { active: boolean }) {
+  const color = active ? '#ffffff' : '#7a7268'
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  )
+}
+
 export default function Bibliotheque() {
   const [user, setUser] = useState<any>(null)
   const [search, setSearch] = useState('')
@@ -26,8 +59,12 @@ export default function Bibliotheque() {
   const [loading, setLoading] = useState(false)
   const [myBooks, setMyBooks] = useState<any[]>([])
   const [filter, setFilter] = useState<FilterType>('tous')
+  const [view, setView] = useState<ViewType>('list')
 
   useEffect(() => {
+    const saved = localStorage.getItem('bibliotheque-view') as ViewType | null
+    if (saved === 'grid' || saved === 'list') setView(saved)
+
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) window.location.href = '/auth'
       else {
@@ -36,6 +73,11 @@ export default function Bibliotheque() {
       }
     })
   }, [])
+
+  const switchView = (v: ViewType) => {
+    setView(v)
+    localStorage.setItem('bibliotheque-view', v)
+  }
 
   const loadMyBooks = async (userId: string) => {
     const { data } = await supabase
@@ -89,11 +131,30 @@ export default function Bibliotheque() {
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-24">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4">
-        <h1 className="font-serif text-3xl text-white">Ma bibliothèque</h1>
-        <p className="text-[#7a7268] text-sm mt-1">
-          {myBooks.length} livre{myBooks.length !== 1 ? 's' : ''}
-        </p>
+      <div className="px-5 pt-12 pb-4 flex items-end justify-between">
+        <div>
+          <h1 className="font-serif text-3xl text-white">Ma bibliothèque</h1>
+          <p className="text-[#7a7268] text-sm mt-1">
+            {myBooks.length} livre{myBooks.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        {/* View toggle */}
+        <div className="flex gap-1 bg-[#242018] border border-white/10 rounded-lg p-1">
+          <button
+            onClick={() => switchView('grid')}
+            className={`p-1.5 rounded transition ${view === 'grid' ? 'bg-[#c9440e]' : 'hover:bg-white/5'}`}
+            aria-label="Vue grille"
+          >
+            <IconGrid active={view === 'grid'} />
+          </button>
+          <button
+            onClick={() => switchView('list')}
+            className={`p-1.5 rounded transition ${view === 'list' ? 'bg-[#c9440e]' : 'hover:bg-white/5'}`}
+            aria-label="Vue liste"
+          >
+            <IconList active={view === 'list'} />
+          </button>
+        </div>
       </div>
 
       {/* Search bar */}
@@ -109,7 +170,7 @@ export default function Bibliotheque() {
           />
           <button
             onClick={searchBooks}
-            className="bg-[#c9440e] text-white px-4 py-3 rounded-xl text-sm font-medium hover:opacity-90 transition shrink-0 flex items-center justify-center w-12"
+            className="bg-[#c9440e] text-white px-4 py-3 rounded-xl hover:opacity-90 transition shrink-0 flex items-center justify-center w-12"
           >
             {loading ? (
               <span className="text-base">…</span>
@@ -179,7 +240,7 @@ export default function Bibliotheque() {
         </div>
       </div>
 
-      {/* Books grid */}
+      {/* Books */}
       {filteredBooks.length === 0 ? (
         <div className="text-center py-20 text-[#7a7268] px-5">
           <p className="font-serif text-lg">
@@ -193,8 +254,9 @@ export default function Bibliotheque() {
               : 'Change de filtre ou ajoute un livre'}
           </p>
         </div>
-      ) : (
-        <div className="px-5 grid grid-cols-3 gap-3">
+      ) : view === 'grid' ? (
+        /* Grid view */
+        <div className="px-5 grid grid-cols-3 gap-x-3 gap-y-5">
           {filteredBooks.map((reading) => (
             <a key={reading.id} href={`/fiche/${reading.id}`} className="block group">
               <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[#242018] mb-2">
@@ -215,6 +277,39 @@ export default function Bibliotheque() {
               </div>
               <p className="font-serif text-xs text-white leading-tight line-clamp-2">{reading.books?.title}</p>
               <p className="text-[#7a7268] text-[10px] mt-0.5 truncate">{reading.books?.author}</p>
+            </a>
+          ))}
+        </div>
+      ) : (
+        /* List view */
+        <div className="px-5 flex flex-col divide-y divide-white/5">
+          {filteredBooks.map((reading) => (
+            <a key={reading.id} href={`/fiche/${reading.id}`} className="flex gap-3 py-3 items-center group">
+              <div className="w-10 h-14 rounded overflow-hidden bg-[#242018] shrink-0">
+                {reading.books?.cover_url ? (
+                  <img
+                    src={reading.books.cover_url}
+                    className="w-full h-full object-cover"
+                    alt={reading.books.title}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-serif text-sm text-white leading-tight line-clamp-1 group-hover:text-white/80 transition-colors">
+                  {reading.books?.title}
+                </p>
+                <p className="text-[#7a7268] text-xs mt-0.5 truncate">{reading.books?.author}</p>
+                {reading.books?.published_year && (
+                  <p className="text-[#7a7268]/60 text-[10px] mt-0.5">{reading.books.published_year}</p>
+                )}
+              </div>
+              <div className="shrink-0 text-right">
+                <span className={`text-xs font-medium ${statusTextColor[reading.status]}`}>
+                  {statusLabel[reading.status]}
+                </span>
+              </div>
             </a>
           ))}
         </div>

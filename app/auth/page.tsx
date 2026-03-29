@@ -40,7 +40,7 @@ export default function AuthPage() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMessage(error.message)
-      else window.location.href = '/bibliotheque'
+      else window.location.href = '/home'
     }
     setLoading(false)
   }
