@@ -5,42 +5,45 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import BottomNav from '../../components/BottomNav'
 
+const STATUS_BADGE: Record<string, { label: string; dot: string; text: string }> = {
+  lu:       { label: 'Lu',       dot: 'bg-emerald-500',  text: 'text-emerald-500' },
+  en_cours: { label: 'En cours', dot: 'bg-[#c9440e]',    text: 'text-[#c9440e]' },
+  a_lire:   { label: 'À lire',   dot: 'bg-[#7a7268]',    text: 'text-[#7a7268]' },
+}
+
 export default function ProfilPage() {
   const params = useParams()
   const username = params?.username as string
+
   const [profile, setProfile] = useState<any>(null)
-  const [books, setBooks] = useState<any[]>([])
+  const [readings, setReadings] = useState<any[]>([])
+  const [notesCount, setNotesCount] = useState(0)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) window.location.href = '/auth'
-      else setCurrentUser(data.user)
+      if (!data.user) { window.location.href = '/auth'; return }
+      setCurrentUser(data.user)
     })
     if (username) loadProfile()
   }, [username])
 
   const loadProfile = async () => {
     const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', username)
-      .single()
+      .from('profiles').select('*').eq('username', username).single()
 
-    if (!profileData) {
-      setLoading(false)
-      return
-    }
+    if (!profileData) { setLoading(false); return }
     setProfile(profileData)
 
-    const { data: readingsData } = await supabase
-      .from('readings')
-      .select('*, books(*)')
-      .eq('user_id', profileData.id)
-      .order('created_at', { ascending: false })
+    const [readingsRes, notesRes] = await Promise.all([
+      supabase.from('readings').select('*, books(*)')
+        .eq('user_id', profileData.id).order('created_at', { ascending: false }),
+      supabase.from('notes').select('id', { count: 'exact' }).eq('user_id', profileData.id),
+    ])
 
-    setBooks(readingsData || [])
+    setReadings(readingsRes.data || [])
+    setNotesCount(notesRes.count || 0)
     setLoading(false)
   }
 
@@ -54,27 +57,25 @@ export default function ProfilPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center pb-24 px-5">
-        <p className="font-serif text-xl text-white text-center">Utilisateur introuvable</p>
-        <a href="/explorer" className="text-[#c9440e] text-sm mt-4">← Retour à l'explorateur</a>
+      <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center pb-24">
+        <p className="font-serif text-xl text-white">Utilisateur introuvable</p>
+        <a href="/explorer" className="text-[#c9440e] text-sm mt-3">← Explorateur</a>
         <BottomNav />
       </div>
     )
   }
 
-  const stats = {
-    lu: books.filter(r => r.status === 'lu').length,
-    en_cours: books.filter(r => r.status === 'en_cours').length,
-    a_lire: books.filter(r => r.status === 'a_lire').length,
-  }
-
   const isOwnProfile = currentUser?.user_metadata?.username === username
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-24">
-      {/* Header */}
-      <div className="px-5 pt-12 pb-6 border-b border-white/10">
-        <div className="flex items-start gap-4 mb-6">
+    <div className="min-h-screen bg-[#1a1714] text-white pb-20">
+
+      {/* ── Header ── */}
+      <div className="px-4 pt-14 pb-3">
+
+        {/* Ligne 1 : avatar + stats */}
+        <div className="flex items-center gap-5 mb-3">
+          {/* Avatar */}
           <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c9440e]/15 flex items-center justify-center shrink-0">
             {profile.avatar_url ? (
               <img src={profile.avatar_url} className="w-full h-full object-cover" alt={username} />
@@ -84,93 +85,92 @@ export default function ProfilPage() {
               </span>
             )}
           </div>
-          <div className="flex-1 pt-1">
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="font-serif text-2xl text-white leading-tight">@{username}</h1>
-              {isOwnProfile && (
-                <a
-                  href="/profil/edit"
-                  className="shrink-0 border border-white/15 text-[#7a7268] hover:text-white hover:border-white/30 transition px-3 py-1 rounded-full text-xs font-medium"
-                >
-                  Modifier
-                </a>
-              )}
+
+          {/* Stats */}
+          <div className="flex flex-1 justify-around">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-white font-bold text-lg leading-tight">{readings.length}</span>
+              <span className="text-[#7a7268] text-[11px]">Livres</span>
             </div>
-            {profile.bio ? (
-              <p className="text-[#7a7268] text-sm mt-1.5 leading-relaxed">{profile.bio}</p>
-            ) : isOwnProfile ? (
-              <a href="/profil/edit" className="text-[#7a7268]/40 text-sm mt-1.5 italic block hover:text-[#7a7268] transition">
-                Ajoute une bio...
-              </a>
-            ) : null}
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-white font-bold text-lg leading-tight">{notesCount}</span>
+              <span className="text-[#7a7268] text-[11px]">Fiches</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-white font-bold text-lg leading-tight">0</span>
+              <span className="text-[#7a7268] text-[11px]">Abonnés</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-4">
-          <div className="flex-1 text-center">
-            <p className="font-serif text-2xl text-white">{stats.lu}</p>
-            <p className="text-[#7a7268] text-xs mt-0.5">Lu</p>
-          </div>
-          <div className="w-px bg-white/10" />
-          <div className="flex-1 text-center">
-            <p className="font-serif text-2xl text-[#c9440e]">{stats.en_cours}</p>
-            <p className="text-[#7a7268] text-xs mt-0.5">En cours</p>
-          </div>
-          <div className="w-px bg-white/10" />
-          <div className="flex-1 text-center">
-            <p className="font-serif text-2xl text-white">{stats.a_lire}</p>
-            <p className="text-[#7a7268] text-xs mt-0.5">À lire</p>
-          </div>
+        {/* Ligne 2 : identité */}
+        <div className="mb-3">
+          {profile.full_name && (
+            <p className="text-white font-semibold text-sm leading-tight">{profile.full_name}</p>
+          )}
+          <p className="text-[#7a7268] text-xs mt-0.5">@{username}</p>
+          {profile.bio && (
+            <p className="text-white/70 text-xs mt-1.5 leading-relaxed">{profile.bio}</p>
+          )}
         </div>
+
+        {/* Bouton modifier / abonner */}
+        {isOwnProfile ? (
+          <a
+            href="/profil/edit"
+            className="block w-full text-center border border-white/20 text-white text-sm font-medium py-1.5 rounded-lg hover:border-white/40 transition"
+          >
+            Modifier le profil
+          </a>
+        ) : (
+          <button className="w-full text-center border border-white/20 text-[#7a7268] text-sm font-medium py-1.5 rounded-lg hover:border-white/40 hover:text-white transition">
+            S'abonner
+          </button>
+        )}
       </div>
 
-      {/* Recent books */}
-      <div className="px-5 pt-6">
-        <h2 className="font-serif text-lg text-white mb-4">
-          {isOwnProfile ? 'Mes lectures' : 'Dernières lectures'}
-        </h2>
-        {books.length === 0 ? (
-          <p className="text-[#7a7268] text-sm text-center py-8">Aucun livre pour l'instant</p>
+      {/* ── Liste des lectures ── */}
+      <div className="border-t border-white/8">
+        {readings.length === 0 ? (
+          <div className="py-16 flex flex-col items-center gap-2">
+            <p className="font-serif text-base text-white/40">Aucun livre pour l'instant</p>
+            {isOwnProfile && (
+              <a href="/bibliotheque" className="text-[#c9440e] text-sm">Ajouter des livres →</a>
+            )}
+          </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3">
-            {books.map((reading) => (
+          readings.map((reading, i) => {
+            const s = STATUS_BADGE[reading.status] ?? STATUS_BADGE['a_lire']
+            return (
               <a
                 key={reading.id}
                 href={isOwnProfile ? `/fiche/${reading.id}` : '#'}
-                className={`block group ${!isOwnProfile ? 'pointer-events-none' : ''}`}
+                className={`flex items-center gap-3 px-4 py-3 ${i < readings.length - 1 ? 'border-b border-white/5' : ''} ${isOwnProfile ? 'hover:bg-white/3 transition' : 'pointer-events-none'}`}
               >
-                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[#242018] mb-1.5">
-                  {reading.books?.cover_url ? (
-                    <img
-                      src={reading.books.cover_url}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      alt={reading.books.title}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-end p-2 bg-gradient-to-b from-[#2e2a24] to-[#1a1714]">
-                      <p className="font-serif text-xs text-white/60 leading-tight line-clamp-3">
-                        {reading.books?.title}
-                      </p>
-                    </div>
-                  )}
-                  {reading.rating > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 pb-1.5 pt-4">
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map(s => (
-                          <span key={s} className={`text-[8px] ${s <= reading.rating ? 'text-[#c9440e]' : 'text-white/20'}`}>★</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                {/* Badge statut */}
+                <span className={`shrink-0 flex items-center gap-1 text-[10px] font-medium ${s.text}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                  {s.label}
+                </span>
+
+                {/* Titre + auteur */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-serif text-sm text-white leading-tight truncate">
+                    {reading.books?.title}
+                  </p>
+                  <p className="text-[#7a7268] text-[11px] mt-0.5 truncate">
+                    {reading.books?.author}
+                  </p>
                 </div>
-                <p className="font-serif text-[10px] text-white leading-tight line-clamp-2">
-                  {reading.books?.title}
-                </p>
-                <p className="text-[#7a7268] text-[10px] mt-0.5 truncate">{reading.books?.author}</p>
+
+                {isOwnProfile && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                )}
               </a>
-            ))}
-          </div>
+            )
+          })
         )}
       </div>
 

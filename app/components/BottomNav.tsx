@@ -40,6 +40,18 @@ export default function BottomNav() {
       ),
     },
     {
+      href: '/objectifs',
+      label: 'Objectifs',
+      active: pathname.startsWith('/objectifs'),
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      ),
+    },
+    {
       href: '/profil/edit',
       label: 'Profil',
       active: pathname.startsWith('/profil'),
