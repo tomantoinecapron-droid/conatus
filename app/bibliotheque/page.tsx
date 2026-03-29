@@ -38,7 +38,7 @@ export default function Bibliotheque() {
     setLoading(false)
   }
 
-  const addBook = async (book) => {
+  const addBook = async (book: any) => {
     const { data: existingBook } = await supabase
       .from('books').select('id').eq('isbn', book.isbn_13?.[0] || book.key).single()
     let bookId

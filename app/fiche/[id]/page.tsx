@@ -6,12 +6,12 @@ import { supabase } from '../../lib/supabase'
 
 export default function Fiche() {
   const params = useParams()
-  const id = params.id
-  const [reading, setReading] = useState(null)
+  const id = params.id as string
+  const [reading, setReading] = useState<any>(null)
   const [note, setNote] = useState('')
   const [rating, setRating] = useState(0)
   const [citation, setCitation] = useState('')
-  const [citations, setCitations] = useState([])
+  const [citations, setCitations] = useState<any[]>([])
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -20,18 +20,11 @@ export default function Fiche() {
 
   const loadReading = async () => {
     const { data } = await supabase
-      .from('readings')
-      .select('*, books(*)')
-      .eq('id', id)
-      .single()
-    if (data) {
-      setReading(data)
-      setRating(data.rating || 0)
-    }
+      .from('readings').select('*, books(*)').eq('id', id).single()
+    if (data) { setReading(data); setRating(data.rating || 0) }
     const { data: notesData } = await supabase
       .from('notes').select('*').eq('reading_id', id).single()
     if (notesData) setNote(notesData.content || '')
-
     const { data: citationsData } = await supabase
       .from('citations').select('*').eq('reading_id', id)
     setCitations(citationsData || [])
@@ -56,18 +49,16 @@ export default function Fiche() {
     loadReading()
   }
 
-  const updateStatus = async (status) => {
+  const updateStatus = async (status: string) => {
     await supabase.from('readings').update({ status }).eq('id', id)
     setReading({ ...reading, status })
   }
 
   if (!reading) return (
-    <div className="min-h-screen bg-[#1a1714] flex items-center justify-center text-white">
-      Chargement...
-    </div>
+    <div className="min-h-screen bg-[#1a1714] flex items-center justify-center text-white">Chargement...</div>
   )
 
-  const statusLabel = { a_lire: 'À lire', en_cours: 'En cours', lu: 'Lu ✓' }
+  const statusLabel: Record<string, string> = { a_lire: 'À lire', en_cours: 'En cours', lu: 'Lu ✓' }
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white">
@@ -76,7 +67,6 @@ export default function Fiche() {
         <a href="/" className="text-2xl font-serif">con<span className="text-[#c9440e]">a</span>tus</a>
         <div className="w-24" />
       </div>
-
       <div className="bg-[#242018] border-b border-white/10 px-6 py-8">
         <div className="max-w-2xl mx-auto flex gap-6 items-start">
           {reading.books?.cover_url ? (
@@ -98,7 +88,6 @@ export default function Fiche() {
           </div>
         </div>
       </div>
-
       <div className="max-w-2xl mx-auto px-6 py-8 flex flex-col gap-8">
         <div>
           <p className="text-xs text-[#7a7268] uppercase tracking-widest mb-3">Ma note</p>
@@ -111,22 +100,16 @@ export default function Fiche() {
             {['', 'Pas convaincu', 'Correct', 'Bien', 'Très bon', 'Chef-d\'œuvre'][rating]}
           </p>
         </div>
-
         <div>
           <p className="text-xs text-[#7a7268] uppercase tracking-widest mb-3">Ma fiche de lecture</p>
-          <textarea
-            value={note}
-            onChange={e => setNote(e.target.value)}
+          <textarea value={note} onChange={e => setNote(e.target.value)}
             placeholder="Tes impressions, ce qui t'a marqué, l'essentiel du livre..."
             rows={6}
-            className="w-full bg-[#242018] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition resize-none"
-          />
+            className="w-full bg-[#242018] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition resize-none" />
         </div>
-
         <button onClick={saveNote} className={`py-3 rounded-xl text-sm font-medium transition ${saved ? 'bg-green-600 text-white' : 'bg-[#c9440e] text-white hover:opacity-90'}`}>
           {saved ? 'Sauvegardé ✓' : 'Sauvegarder'}
         </button>
-
         <div>
           <p className="text-xs text-[#7a7268] uppercase tracking-widest mb-3">Mes citations</p>
           {citations.map(c => (
@@ -135,14 +118,10 @@ export default function Fiche() {
             </div>
           ))}
           <div className="flex gap-3 mt-3">
-            <input
-              type="text"
-              placeholder="Ajouter une citation..."
-              value={citation}
+            <input type="text" placeholder="Ajouter une citation..." value={citation}
               onChange={e => setCitation(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addCitation()}
-              className="flex-1 bg-[#242018] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition"
-            />
+              className="flex-1 bg-[#242018] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition" />
             <button onClick={addCitation} className="bg-[#c9440e] text-white px-4 py-3 rounded-xl text-sm hover:opacity-90 transition">+</button>
           </div>
         </div>
