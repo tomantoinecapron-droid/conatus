@@ -1,0 +1,84 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+
+export default function BottomNav() {
+  const pathname = usePathname()
+  const [profileHref, setProfileHref] = useState('/profil')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const username = data.user?.user_metadata?.username
+      if (username) setProfileHref(`/profil/${username}`)
+    })
+  }, [])
+
+  const tabs = [
+    {
+      href: '/bibliotheque',
+      label: 'Biblio',
+      active: pathname.startsWith('/bibliotheque') || pathname.startsWith('/fiche'),
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/explorer',
+      label: 'Explorer',
+      active: pathname.startsWith('/explorer'),
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      ),
+    },
+    {
+      href: '/objectifs',
+      label: 'Objectifs',
+      active: pathname.startsWith('/objectifs'),
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      ),
+    },
+    {
+      href: profileHref,
+      label: 'Profil',
+      active: pathname.startsWith('/profil'),
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      ),
+    },
+  ]
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#1a1714]/95 backdrop-blur border-t border-white/10 z-50">
+      <div className="max-w-lg mx-auto flex">
+        {tabs.map((tab) => (
+          <a
+            key={tab.href}
+            href={tab.href}
+            className="flex-1 flex flex-col items-center gap-1 py-3 transition-opacity"
+          >
+            {tab.icon(tab.active)}
+            <span className={`text-[10px] font-medium transition-colors ${tab.active ? 'text-[#c9440e]' : 'text-[#7a7268]'}`}>
+              {tab.label}
+            </span>
+          </a>
+        ))}
+      </div>
+    </nav>
+  )
+}
