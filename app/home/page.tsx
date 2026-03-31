@@ -42,11 +42,13 @@ const STATUS_ACTION: Record<string, string> = {
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [enCours, setEnCours] = useState<any[]>([])
+  const [nextBook, setNextBook] = useState<any>(null)
   const [myRecentBooks, setMyRecentBooks] = useState<any[]>([])
   const [myCircles, setMyCircles] = useState<any[]>([])
   const [feed, setFeed] = useState<any[]>([])
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [stats, setStats] = useState({ booksThisMonth: 0, totalNotes: 0, streak: 0 })
   const [loading, setLoading] = useState(true)
   const [greeting, setGreeting] = useState('Bonjour')
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
@@ -71,20 +73,57 @@ export default function HomePage() {
   }
 
   const loadAll = async (userId: string) => {
-    const [enCoursRes, myRecentRes, followsRes, myCirclesRes, allMyBooksRes] = await Promise.all([
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const [enCoursRes, nextBookRes, myRecentRes, followsRes, myCirclesRes, allMyBooksRes, booksMonthRes, notesCountRes] = await Promise.all([
       supabase.from('readings').select('*, books(*)')
         .eq('user_id', userId).eq('status', 'en_cours')
-        .order('created_at', { ascending: false }).limit(3),
+        .order('created_at', { ascending: false }).limit(1),
+      supabase.from('readings').select('*, books(*)')
+        .eq('user_id', userId).eq('status', 'a_lire')
+        .order('created_at', { ascending: false }).limit(1),
       supabase.from('readings').select('*, books(*)')
         .eq('user_id', userId).order('created_at', { ascending: false }).limit(3),
       supabase.from('follows').select('following_id').eq('follower_id', userId),
       supabase.from('circle_members').select('*, circles(*)')
         .eq('user_id', userId).order('joined_at', { ascending: false }).limit(6),
       supabase.from('readings').select('book_id').eq('user_id', userId),
+      supabase.from('readings').select('id', { count: 'exact', head: true })
+        .eq('user_id', userId).eq('status', 'lu').gte('updated_at', startOfMonth.toISOString()),
+      supabase.from('notes').select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
     ])
 
     setEnCours(enCoursRes.data || [])
+    setNextBook((nextBookRes.data || [])[0] ?? null)
     setMyRecentBooks(myRecentRes.data || [])
+
+    // Streak: count consecutive days with notes activity (last 30 days)
+    const { data: recentNotes } = await supabase
+      .from('notes').select('created_at')
+      .eq('user_id', userId)
+      .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
+      .order('created_at', { ascending: false })
+
+    const uniqueDays = new Set((recentNotes || []).map((n: any) =>
+      new Date(n.created_at).toDateString()
+    ))
+    let streak = 0
+    const today = new Date()
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      if (uniqueDays.has(d.toDateString())) streak++
+      else if (i > 0) break
+    }
+
+    setStats({
+      booksThisMonth: booksMonthRes.count || 0,
+      totalNotes: notesCountRes.count || 0,
+      streak,
+    })
     setMyCircles((myCirclesRes.data || []).filter((m: any) => m.circles))
 
     const followingIds = (followsRes.data || []).map((f: any) => f.following_id)
@@ -180,7 +219,7 @@ export default function HomePage() {
 
           {/* Citation inline */}
           <p className="text-white/30 text-[11px] italic font-serif leading-snug mt-1.5">
-            &ldquo;{quote.text}&rdquo; — {quote.author}
+            &ldquo;{quote.text.length > 80 ? quote.text.slice(0, 80) + '…' : quote.text}&rdquo; — {quote.author}
           </p>
         </div>
 
@@ -198,88 +237,87 @@ export default function HomePage() {
         </a>
       </div>
 
-      {/* ── EN COURS ── */}
-      <section className="px-5 mb-6">
+      {/* ── EN COURS + À LIRE ── */}
+      <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">En cours</h2>
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Lecture</h2>
           <a href="/bibliotheque" className="text-[#7a7268] text-[10px] hover:text-white transition">Bibliothèque →</a>
         </div>
 
-        {enCours.length > 0 ? (
-          <div className="flex flex-col gap-2.5">
-            {enCours.map(reading => {
+        {enCours.length > 0 || nextBook ? (
+          <div className="grid grid-cols-2 gap-2.5">
+            {/* Colonne gauche : en cours */}
+            {enCours[0] ? (() => {
+              const reading = enCours[0]
               const progress = reading.progress ?? 0
               return (
-                <div key={reading.id} className="bg-[#211e1a] border border-white/8 rounded-2xl p-3 flex gap-3">
-                  {/* Couverture grande */}
+                <div className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
                   <a href={`/fiche/${reading.id}`} className="shrink-0">
-                    <div className="w-[60px] h-[88px] rounded-lg overflow-hidden bg-[#3a3530]">
-                      {reading.books?.cover_url ? (
-                        <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />
-                      )}
+                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530]">
+                      {reading.books?.cover_url
+                        ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
+                        : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
                     </div>
                   </a>
-
-                  {/* Infos */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                     <div>
-                      <p className="font-serif text-[15px] text-white leading-snug line-clamp-2">
-                        {reading.books?.title}
-                      </p>
-                      <p className="text-[#7a7268] text-xs mt-0.5 truncate">{reading.books?.author}</p>
+                      <p className="text-[9px] text-[#c9440e] font-medium uppercase tracking-wide mb-0.5">En cours</p>
+                      <p className="font-serif text-[13px] text-white leading-snug line-clamp-3">{reading.books?.title}</p>
                     </div>
-
                     <div>
-                      {/* Barre de progression seulement si > 0 */}
-                      {progress > 0 && (
-                        <div className="mb-2">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-[#7a7268] text-[10px]">{progress}%</span>
-                          </div>
-                          <div className="relative w-full h-1 bg-white/8 rounded-full overflow-hidden">
-                            <div className="h-full bg-[#c9440e] rounded-full" style={{ width: `${progress}%` }} />
-                            <input
-                              type="range" min={0} max={100} value={progress}
-                              onChange={e => updateProgress(reading.id, Number(e.target.value))}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              aria-label="Progression"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Slider invisible si pas encore de progression */}
-                      {progress === 0 && (
-                        <div className="relative w-full h-1 bg-white/8 rounded-full overflow-hidden mb-2">
-                          <input
-                            type="range" min={0} max={100} value={0}
-                            onChange={e => updateProgress(reading.id, Number(e.target.value))}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            aria-label="Progression"
-                          />
-                        </div>
-                      )}
-
-                      <a
-                        href={`/fiche/${reading.id}`}
-                        className="text-[#c9440e] text-[11px] font-medium hover:opacity-80 transition"
-                      >
-                        Reprendre →
+                      <div className="relative w-full h-0.5 bg-white/8 rounded-full overflow-hidden mb-1.5">
+                        <div className="h-full bg-[#c9440e] rounded-full" style={{ width: `${progress}%` }} />
+                        <input type="range" min={0} max={100} value={progress}
+                          onChange={e => updateProgress(reading.id, Number(e.target.value))}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      </div>
+                      <a href={`/fiche/${reading.id}`} className="text-[#c9440e] text-[10px] font-medium">
+                        {progress > 0 ? `${progress}% · ` : ''}Reprendre →
                       </a>
                     </div>
                   </div>
                 </div>
               )
-            })}
+            })() : (
+              <a href="/bibliotheque" className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
+                <div>
+                  <p className="text-white/30 font-serif text-xs mb-1">Rien en cours</p>
+                  <p className="text-[#c9440e] text-[10px]">Commencer →</p>
+                </div>
+              </a>
+            )}
+
+            {/* Colonne droite : à lire */}
+            {nextBook ? (
+              <a href={`/fiche/${nextBook.id}`} className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
+                <div className="shrink-0">
+                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530]">
+                    {nextBook.books?.cover_url
+                      ? <img src={nextBook.books.cover_url} className="w-full h-full object-cover" alt={nextBook.books.title} />
+                      : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                  <div>
+                    <p className="text-[9px] text-[#7a7268] font-medium uppercase tracking-wide mb-0.5">À lire</p>
+                    <p className="font-serif text-[13px] text-white leading-snug line-clamp-3">{nextBook.books?.title}</p>
+                  </div>
+                  <p className="text-[#7a7268] text-[10px] truncate">{nextBook.books?.author?.split(' ').pop()}</p>
+                </div>
+              </a>
+            ) : (
+              <a href="/bibliotheque" className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
+                <div>
+                  <p className="text-white/30 font-serif text-xs mb-1">File vide</p>
+                  <p className="text-[#c9440e] text-[10px]">Ajouter →</p>
+                </div>
+              </a>
+            )}
           </div>
         ) : myRecentBooks.length > 0 ? (
           <div className="bg-[#211e1a] border border-white/8 rounded-2xl overflow-hidden">
             {myRecentBooks.map((reading, i) => (
-              <a
-                key={reading.id}
-                href={`/fiche/${reading.id}`}
+              <a key={reading.id} href={`/fiche/${reading.id}`}
                 className={`flex items-center gap-3 px-4 py-2.5 hover:bg-white/3 transition ${i < myRecentBooks.length - 1 ? 'border-b border-white/5' : ''}`}
               >
                 <div className="w-7 h-10 rounded overflow-hidden bg-[#3a3530] shrink-0">
@@ -298,6 +336,25 @@ export default function HomePage() {
             <a href="/bibliotheque" className="text-[#c9440e] text-xs font-medium">Ajouter un livre →</a>
           </div>
         )}
+      </section>
+
+      {/* ── MA SEMAINE EN CHIFFRES ── */}
+      <section className="px-5 mb-5">
+        <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.booksThisMonth}</p>
+            <p className="text-[#7a7268] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
+          </div>
+          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.totalNotes}</p>
+            <p className="text-[#7a7268] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
+          </div>
+          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.streak}</p>
+            <p className="text-[#7a7268] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
       </section>
 
       {/* ── MES CERCLES — pills horizontal ── */}
@@ -339,6 +396,28 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── OBJECTIFS ── */}
+      <section className="px-5 mb-5">
+        <div className="flex items-center justify-between mb-2.5">
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Objectifs</h2>
+          <a href="/objectifs" className="text-[#7a7268] text-[10px] hover:text-white transition">Voir →</a>
+        </div>
+        <a href="/objectifs" className="flex items-center gap-3 bg-[#211e1a] border border-white/8 rounded-xl px-4 py-3 hover:bg-white/3 transition">
+          <div className="w-8 h-8 rounded-lg bg-[#c9440e]/10 border border-[#c9440e]/20 flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9440e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-xs font-medium">Définis tes objectifs de lecture</p>
+            <p className="text-[#7a7268] text-[10px] mt-0.5">Rythme quotidien, hebdomadaire...</p>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </a>
+      </section>
 
       {/* ── FEED ── */}
       <section className="px-5 mb-6">
