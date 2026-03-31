@@ -91,10 +91,50 @@ export default function Bibliotheque() {
   const searchBooks = async () => {
     if (!search.trim()) return
     setLoading(true)
-    const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(search)}&limit=10`)
-    const data = await res.json()
-    setResults(data.docs || [])
-    setLoading(false)
+
+    const q = encodeURIComponent(search.trim())
+    const fields = 'key,title,author_name,cover_i,first_publish_year,isbn,isbn_13,language,edition_count'
+
+    try {
+      const [authorRes, titleRes] = await Promise.all([
+        fetch(`https://openlibrary.org/search.json?author=${q}&limit=10&lang=fre,eng&fields=${fields}`),
+        fetch(`https://openlibrary.org/search.json?title=${q}&limit=10&lang=fre,eng&fields=${fields}`),
+      ])
+      const [authorData, titleData] = await Promise.all([authorRes.json(), titleRes.json()])
+
+      // Un résultat est valide s'il a un titre, un auteur et une date
+      const isValid = (doc: any) =>
+        doc.title?.trim() &&
+        doc.author_name?.[0]?.trim() &&
+        doc.first_publish_year
+
+      // Clé de déduplication : titre + auteur normalisés
+      const seen = new Set<string>()
+      const dedupeKey = (doc: any) =>
+        `${doc.title?.toLowerCase().trim()}__${doc.author_name?.[0]?.toLowerCase().trim()}`
+
+      const processGroup = (docs: any[], match: 'author' | 'title') => {
+        const result: any[] = []
+        for (const doc of (docs || [])) {
+          if (!isValid(doc)) continue
+          const key = dedupeKey(doc)
+          if (seen.has(key)) continue
+          seen.add(key)
+          result.push({ ...doc, _match: match })
+        }
+        return result
+      }
+
+      const authorDocs = processGroup(authorData.docs, 'author')
+      const titleDocs  = processGroup(titleData.docs,  'title')
+
+      // Auteurs d'abord, titres ensuite, max 20
+      setResults([...authorDocs, ...titleDocs].slice(0, 20))
+    } catch {
+      setResults([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const addBook = async (book: any) => {
@@ -186,10 +226,12 @@ export default function Bibliotheque() {
       {/* Search results */}
       {results.length > 0 && (
         <div className="px-5 mb-6">
-          <p className="text-[#7a7268] text-xs mb-3">{results.length} résultats — appuie sur + pour ajouter</p>
+          <p className="text-[#7a7268] text-xs mb-3">
+            {results.length} résultat{results.length > 1 ? 's' : ''} — appuie sur + pour ajouter
+          </p>
           <div className="flex flex-col gap-2">
             {results.map((book, i) => (
-              <div key={i} className="flex gap-3 bg-[#242018] border border-white/10 rounded-xl p-3 items-center">
+              <div key={book.key ?? i} className="flex gap-3 bg-[#242018] border border-white/10 rounded-xl p-3 items-center">
                 {book.cover_i ? (
                   <img
                     src={`https://covers.openlibrary.org/b/id/${book.cover_i}-S.jpg`}
@@ -197,14 +239,30 @@ export default function Bibliotheque() {
                     alt={book.title}
                   />
                 ) : (
-                  <div className="w-10 h-14 bg-[#3a3530] rounded shrink-0" />
+                  <div className="w-10 h-14 bg-[#3a3530] rounded shrink-0 flex items-center justify-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                  </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-serif text-sm leading-tight">{book.title}</p>
-                  <p className="text-[#7a7268] text-xs mt-0.5">{book.author_name?.[0] || 'Auteur inconnu'}</p>
-                  {book.first_publish_year && (
-                    <p className="text-[#7a7268] text-[10px] mt-0.5">{book.first_publish_year}</p>
-                  )}
+                  <p className="font-serif text-sm leading-tight line-clamp-2">{book.title}</p>
+                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">
+                    {book.author_name?.[0] || 'Auteur inconnu'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {book.first_publish_year && (
+                      <span className="text-[#7a7268] text-[10px]">{book.first_publish_year}</span>
+                    )}
+                    {book.edition_count > 0 && (
+                      <span className="text-[#7a7268]/60 text-[10px]">
+                        {book.edition_count} édition{book.edition_count > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {book._match === 'author' && (
+                      <span className="text-[#c9440e] text-[10px]">auteur</span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => addBook(book)}
