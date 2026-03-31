@@ -51,6 +51,7 @@ export default function HomePage() {
   const [enCours, setEnCours] = useState<any[]>([])
   const [feed, setFeed] = useState<any[]>([])
   const [suggestions, setSuggestions] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [greeting, setGreeting] = useState('Bonjour')
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
@@ -63,8 +64,18 @@ export default function HomePage() {
       if (!data.user) { window.location.href = '/auth'; return }
       setUser(data.user)
       loadAll(data.user.id)
+      loadUnread(data.user.id)
     })
   }, [])
+
+  const loadUnread = async (userId: string) => {
+    const { count } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('read', false)
+    setUnreadCount(count || 0)
+  }
 
   const loadAll = async (userId: string) => {
     const [enCoursRes, myBooksRes, recentRes] = await Promise.all([
@@ -183,11 +194,28 @@ export default function HomePage() {
       </div>
 
       {/* ── Header ── */}
-      <div className="px-5 pt-12 pb-2 relative">
-        <p className="text-[#7a7268] text-sm capitalize">{today}</p>
-        <h1 className="font-serif text-3xl text-white mt-1">
-          {greeting}{firstName ? `, ${firstName}` : ''}
-        </h1>
+      <div className="px-5 pt-12 pb-2 relative flex items-start justify-between">
+        <div>
+          <p className="text-[#7a7268] text-sm capitalize">{today}</p>
+          <h1 className="font-serif text-3xl text-white mt-1">
+            {greeting}{firstName ? `, ${firstName}` : ''}
+          </h1>
+        </div>
+
+        {/* Cloche notifications */}
+        <a href="/notifications" className="relative mt-1 p-1.5 -mr-1">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          {unreadCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 bg-[#c9440e] rounded-full flex items-center justify-center px-1">
+              <span className="text-white text-[10px] font-bold leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            </span>
+          )}
+        </a>
       </div>
 
       {/* ── Citation du jour ── */}

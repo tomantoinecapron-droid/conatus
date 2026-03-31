@@ -18,6 +18,9 @@ export default function ProfilPage() {
   const [profile, setProfile] = useState<any>(null)
   const [readings, setReadings] = useState<any[]>([])
   const [notesCount, setNotesCount] = useState(0)
+  const [followersCount, setFollowersCount] = useState(0)
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -29,6 +32,28 @@ export default function ProfilPage() {
     if (username) loadProfile()
   }, [username])
 
+  // Charge l'état du follow une fois qu'on a le profil ET currentUser
+  useEffect(() => {
+    if (!profile || !currentUser) return
+    const isOwn = currentUser.user_metadata?.username === username
+    if (isOwn) return
+
+    Promise.all([
+      supabase
+        .from('follows')
+        .select('id', { count: 'exact', head: true })
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', profile.id),
+      supabase
+        .from('follows')
+        .select('id', { count: 'exact', head: true })
+        .eq('following_id', profile.id),
+    ]).then(([followRes, countRes]) => {
+      setIsFollowing((followRes.count ?? 0) > 0)
+      setFollowersCount(countRes.count ?? 0)
+    })
+  }, [profile, currentUser])
+
   const loadProfile = async () => {
     const { data: profileData } = await supabase
       .from('profiles').select('*').eq('username', username).single()
@@ -36,15 +61,40 @@ export default function ProfilPage() {
     if (!profileData) { setLoading(false); return }
     setProfile(profileData)
 
-    const [readingsRes, notesRes] = await Promise.all([
+    const [readingsRes, notesRes, followersRes] = await Promise.all([
       supabase.from('readings').select('*, books(*)')
         .eq('user_id', profileData.id).order('created_at', { ascending: false }),
       supabase.from('notes').select('id', { count: 'exact' }).eq('user_id', profileData.id),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', profileData.id),
     ])
 
     setReadings(readingsRes.data || [])
     setNotesCount(notesRes.count || 0)
+    setFollowersCount(followersRes.count || 0)
     setLoading(false)
+  }
+
+  const handleFollow = async () => {
+    if (!currentUser || !profile || followLoading) return
+    setFollowLoading(true)
+
+    if (isFollowing) {
+      await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', profile.id)
+      setIsFollowing(false)
+      setFollowersCount(c => Math.max(0, c - 1))
+    } else {
+      await supabase
+        .from('follows')
+        .insert({ follower_id: currentUser.id, following_id: profile.id })
+      setIsFollowing(true)
+      setFollowersCount(c => c + 1)
+    }
+
+    setFollowLoading(false)
   }
 
   if (loading) {
@@ -97,7 +147,7 @@ export default function ProfilPage() {
               <span className="text-[#7a7268] text-[11px]">Fiches</span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
-              <span className="text-white font-bold text-lg leading-tight">0</span>
+              <span className="text-white font-bold text-lg leading-tight">{followersCount}</span>
               <span className="text-[#7a7268] text-[11px]">Abonnés</span>
             </div>
           </div>
@@ -123,8 +173,16 @@ export default function ProfilPage() {
             Modifier le profil
           </a>
         ) : (
-          <button className="w-full text-center border border-white/20 text-[#7a7268] text-sm font-medium py-1.5 rounded-lg hover:border-white/40 hover:text-white transition">
-            S'abonner
+          <button
+            onClick={handleFollow}
+            disabled={followLoading}
+            className={`w-full text-center border text-sm font-medium py-1.5 rounded-lg transition disabled:opacity-50 ${
+              isFollowing
+                ? 'border-white/40 text-white bg-white/8 hover:bg-white/5'
+                : 'border-white/20 text-[#7a7268] hover:border-white/40 hover:text-white'
+            }`}
+          >
+            {isFollowing ? 'Abonné' : "S'abonner"}
           </button>
         )}
       </div>
