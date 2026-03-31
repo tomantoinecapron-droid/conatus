@@ -93,43 +93,27 @@ export default function Bibliotheque() {
     setLoading(true)
 
     const q = encodeURIComponent(search.trim())
-    const fields = 'key,title,author_name,cover_i,first_publish_year,isbn,isbn_13,language,edition_count'
+    const key = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY
 
     try {
-      const [authorRes, titleRes] = await Promise.all([
-        fetch(`https://openlibrary.org/search.json?author=${q}&limit=10&lang=fre,eng&fields=${fields}`),
-        fetch(`https://openlibrary.org/search.json?title=${q}&limit=10&lang=fre,eng&fields=${fields}`),
-      ])
-      const [authorData, titleData] = await Promise.all([authorRes.json(), titleRes.json()])
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${q}&key=${key}&maxResults=20`
+      )
+      const data = await res.json()
 
-      // Un résultat est valide s'il a un titre, un auteur et une date
-      const isValid = (doc: any) =>
-        doc.title?.trim() &&
-        doc.author_name?.[0]?.trim() &&
-        doc.first_publish_year
+      const items = (data.items || [])
+        .map((item: any) => ({
+          _id: item.id,
+          title: item.volumeInfo.title,
+          author: item.volumeInfo.authors?.[0],
+          cover: item.volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://'),
+          isbn: item.volumeInfo.industryIdentifiers?.[0]?.identifier,
+          published_year: item.volumeInfo.publishedDate?.slice(0, 4),
+          edition_count: null,
+        }))
+        .filter((b: any) => b.title?.trim() && b.author?.trim() && b.published_year)
 
-      // Clé de déduplication : titre + auteur normalisés
-      const seen = new Set<string>()
-      const dedupeKey = (doc: any) =>
-        `${doc.title?.toLowerCase().trim()}__${doc.author_name?.[0]?.toLowerCase().trim()}`
-
-      const processGroup = (docs: any[], match: 'author' | 'title') => {
-        const result: any[] = []
-        for (const doc of (docs || [])) {
-          if (!isValid(doc)) continue
-          const key = dedupeKey(doc)
-          if (seen.has(key)) continue
-          seen.add(key)
-          result.push({ ...doc, _match: match })
-        }
-        return result
-      }
-
-      const authorDocs = processGroup(authorData.docs, 'author')
-      const titleDocs  = processGroup(titleData.docs,  'title')
-
-      // Auteurs d'abord, titres ensuite, max 20
-      setResults([...authorDocs, ...titleDocs].slice(0, 20))
+      setResults(items)
     } catch {
       setResults([])
     } finally {
@@ -139,20 +123,21 @@ export default function Bibliotheque() {
 
   const addBook = async (book: any) => {
     const { data: existingBook } = await supabase
-      .from('books').select('id').eq('isbn', book.isbn_13?.[0] || book.key).single()
+      .from('books').select('id').eq('isbn', book.isbn).single()
     let bookId
     if (existingBook) {
       bookId = existingBook.id
     } else {
       const { data: newBook } = await supabase.from('books').insert({
         title: book.title,
-        author: book.author_name?.[0] || 'Auteur inconnu',
-        cover_url: book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : null,
-        isbn: book.isbn_13?.[0] || book.key,
-        published_year: book.first_publish_year,
+        author: book.author || 'Auteur inconnu',
+        cover_url: book.cover || null,
+        isbn: book.isbn || book._id,
+        published_year: book.published_year ? Number(book.published_year) : null,
       }).select().single()
-      bookId = newBook.id
+      bookId = newBook?.id
     }
+    if (!bookId) return
     await supabase.from('readings').insert({ user_id: user.id, book_id: bookId, status: 'a_lire' })
     setResults([])
     setSearch('')
@@ -231,10 +216,10 @@ export default function Bibliotheque() {
           </p>
           <div className="flex flex-col gap-2">
             {results.map((book, i) => (
-              <div key={book.key ?? i} className="flex gap-3 bg-[#242018] border border-white/10 rounded-xl p-3 items-center">
-                {book.cover_i ? (
+              <div key={book._id ?? i} className="flex gap-3 bg-[#242018] border border-white/10 rounded-xl p-3 items-center">
+                {book.cover ? (
                   <img
-                    src={`https://covers.openlibrary.org/b/id/${book.cover_i}-S.jpg`}
+                    src={book.cover}
                     className="w-10 h-14 rounded object-cover shrink-0"
                     alt={book.title}
                   />
@@ -247,22 +232,10 @@ export default function Bibliotheque() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-sm leading-tight line-clamp-2">{book.title}</p>
-                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">
-                    {book.author_name?.[0] || 'Auteur inconnu'}
-                  </p>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    {book.first_publish_year && (
-                      <span className="text-[#7a7268] text-[10px]">{book.first_publish_year}</span>
-                    )}
-                    {book.edition_count > 0 && (
-                      <span className="text-[#7a7268]/60 text-[10px]">
-                        {book.edition_count} édition{book.edition_count > 1 ? 's' : ''}
-                      </span>
-                    )}
-                    {book._match === 'author' && (
-                      <span className="text-[#c9440e] text-[10px]">auteur</span>
-                    )}
-                  </div>
+                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">{book.author}</p>
+                  {book.published_year && (
+                    <span className="text-[#7a7268] text-[10px]">{book.published_year}</span>
+                  )}
                 </div>
                 <button
                   onClick={() => addBook(book)}
