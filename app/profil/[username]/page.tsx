@@ -174,6 +174,20 @@ export default function ProfilPage() {
         )}
       </div>
 
+      {isOwnProfile && (
+        <div className="flex justify-center py-8">
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut()
+              window.location.href = '/'
+            }}
+            className="text-red-500/70 text-sm hover:text-red-500 transition"
+          >
+            Se déconnecter
+          </button>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   )
