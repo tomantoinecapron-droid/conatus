@@ -215,38 +215,92 @@ export default function HomePage() {
 
       {/* ── Header ── */}
       <div className="px-5 pt-12 pb-5 flex items-start justify-between relative overflow-hidden">
-        {/* Colonnes grecques décoratives */}
+        {/* Panorama décoratif pleine largeur */}
         <svg
           aria-hidden
-          viewBox="0 0 220 180"
-          className="pointer-events-none absolute right-0 top-0 h-full w-auto"
-          style={{ opacity: 0.05 }}
+          viewBox="0 0 800 120"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute bottom-0 left-0 w-full"
+          style={{ opacity: 0.05, height: '120px', zIndex: -1 }}
           fill="none"
+          stroke="white"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Colonne gauche */}
-          <rect x="30" y="20" width="28" height="4" fill="white" rx="1"/>
-          <rect x="34" y="24" width="20" height="3" fill="white" rx="1"/>
-          <rect x="36" y="27" width="16" height="100" fill="white" rx="1"/>
-          <line x1="44" y1="27" x2="44" y2="127" stroke="#888" strokeWidth="1.5"/>
-          <line x1="40" y1="27" x2="40" y2="127" stroke="#888" strokeWidth="0.8"/>
-          <line x1="48" y1="27" x2="48" y2="127" stroke="#888" strokeWidth="0.8"/>
-          <rect x="34" y="127" width="20" height="3" fill="white" rx="1"/>
-          <rect x="30" y="130" width="28" height="4" fill="white" rx="1"/>
-          <rect x="28" y="134" width="32" height="6" fill="white" rx="1"/>
-          {/* Colonne droite */}
-          <rect x="110" y="20" width="28" height="4" fill="white" rx="1"/>
-          <rect x="114" y="24" width="20" height="3" fill="white" rx="1"/>
-          <rect x="116" y="27" width="16" height="100" fill="white" rx="1"/>
-          <line x1="124" y1="27" x2="124" y2="127" stroke="#888" strokeWidth="1.5"/>
-          <line x1="120" y1="27" x2="120" y2="127" stroke="#888" strokeWidth="0.8"/>
-          <line x1="128" y1="27" x2="128" y2="127" stroke="#888" strokeWidth="0.8"/>
-          <rect x="114" y="127" width="20" height="3" fill="white" rx="1"/>
-          <rect x="110" y="130" width="28" height="4" fill="white" rx="1"/>
-          <rect x="108" y="134" width="32" height="6" fill="white" rx="1"/>
+          {/* ── Colonnes grecques (gauche) ── */}
+          {/* Stylobate */}
+          <line x1="8" y1="118" x2="232" y2="118" />
+          <line x1="12" y1="114" x2="228" y2="114" />
           {/* Entablement */}
-          <rect x="26" y="14" width="118" height="6" fill="white" rx="1"/>
-          <rect x="22" y="10" width="126" height="4" fill="white" rx="1"/>
+          <line x1="6" y1="16" x2="234" y2="16" />
+          <line x1="10" y1="20" x2="230" y2="20" />
+          <line x1="14" y1="24" x2="226" y2="24" />
+          {/* Colonne 1, cx=52 */}
+          <line x1="38" y1="26" x2="66" y2="26" />
+          <line x1="41" y1="28" x2="63" y2="28" />
+          <line x1="42" y1="30" x2="42" y2="112" strokeWidth="0.7" />
+          <line x1="52" y1="30" x2="52" y2="112" strokeWidth="0.7" />
+          <line x1="62" y1="30" x2="62" y2="112" strokeWidth="0.7" />
+          <line x1="40" y1="112" x2="64" y2="112" />
+          <line x1="37" y1="114" x2="67" y2="114" />
+          {/* Colonne 2, cx=118 */}
+          <line x1="104" y1="26" x2="132" y2="26" />
+          <line x1="107" y1="28" x2="129" y2="28" />
+          <line x1="108" y1="30" x2="108" y2="112" strokeWidth="0.7" />
+          <line x1="118" y1="30" x2="118" y2="112" strokeWidth="0.7" />
+          <line x1="128" y1="30" x2="128" y2="112" strokeWidth="0.7" />
+          <line x1="106" y1="112" x2="130" y2="112" />
+          <line x1="103" y1="114" x2="133" y2="114" />
+          {/* Colonne 3, cx=184 */}
+          <line x1="170" y1="26" x2="198" y2="26" />
+          <line x1="173" y1="28" x2="195" y2="28" />
+          <line x1="174" y1="30" x2="174" y2="112" strokeWidth="0.7" />
+          <line x1="184" y1="30" x2="184" y2="112" strokeWidth="0.7" />
+          <line x1="194" y1="30" x2="194" y2="112" strokeWidth="0.7" />
+          <line x1="172" y1="112" x2="196" y2="112" />
+          <line x1="169" y1="114" x2="199" y2="114" />
+
+          {/* ── Montagne (centre) ── */}
+          {/* Pic principal */}
+          <polyline points="280,120 390,10 500,120" />
+          {/* Pic secondaire (devant, droite) */}
+          <polyline points="430,120 492,46 558,120" />
+          {/* Suggestion neige */}
+          <polyline points="383,26 390,10 397,26" />
+
+          {/* ── Forêt de sapins (droite) ── */}
+          {/* Arbre 1, cx=612, grand */}
+          <line x1="612" y1="48" x2="612" y2="120" />
+          <line x1="612" y1="62" x2="596" y2="76" /><line x1="612" y1="62" x2="628" y2="76" />
+          <line x1="612" y1="76" x2="592" y2="94" /><line x1="612" y1="76" x2="632" y2="94" />
+          <line x1="612" y1="90" x2="588" y2="112" /><line x1="612" y1="90" x2="636" y2="112" />
+          {/* Arbre 2, cx=650, moyen */}
+          <line x1="650" y1="62" x2="650" y2="120" />
+          <line x1="650" y1="74" x2="636" y2="86" /><line x1="650" y1="74" x2="664" y2="86" />
+          <line x1="650" y1="86" x2="632" y2="102" /><line x1="650" y1="86" x2="668" y2="102" />
+          <line x1="650" y1="98" x2="628" y2="118" /><line x1="650" y1="98" x2="672" y2="118" />
+          {/* Arbre 3, cx=688, grand */}
+          <line x1="688" y1="44" x2="688" y2="120" />
+          <line x1="688" y1="58" x2="672" y2="72" /><line x1="688" y1="58" x2="704" y2="72" />
+          <line x1="688" y1="72" x2="668" y2="90" /><line x1="688" y1="72" x2="708" y2="90" />
+          <line x1="688" y1="86" x2="664" y2="108" /><line x1="688" y1="86" x2="712" y2="108" />
+          {/* Arbre 4, cx=724, moyen */}
+          <line x1="724" y1="58" x2="724" y2="120" />
+          <line x1="724" y1="70" x2="710" y2="82" /><line x1="724" y1="70" x2="738" y2="82" />
+          <line x1="724" y1="82" x2="706" y2="98" /><line x1="724" y1="82" x2="742" y2="98" />
+          <line x1="724" y1="94" x2="702" y2="116" /><line x1="724" y1="94" x2="746" y2="116" />
+          {/* Arbre 5, cx=758, petit */}
+          <line x1="758" y1="66" x2="758" y2="120" />
+          <line x1="758" y1="78" x2="746" y2="88" /><line x1="758" y1="78" x2="770" y2="88" />
+          <line x1="758" y1="88" x2="742" y2="104" /><line x1="758" y1="88" x2="774" y2="104" />
+          <line x1="758" y1="100" x2="740" y2="118" /><line x1="758" y1="100" x2="776" y2="118" />
+          {/* Arbre 6, cx=790, moyen */}
+          <line x1="790" y1="54" x2="790" y2="120" />
+          <line x1="790" y1="66" x2="776" y2="78" /><line x1="790" y1="66" x2="800" y2="78" />
+          <line x1="790" y1="78" x2="772" y2="94" /><line x1="790" y1="78" x2="800" y2="94" />
+          <line x1="790" y1="92" x2="768" y2="114" /><line x1="790" y1="92" x2="800" y2="114" />
         </svg>
 
         <div className="flex-1 min-w-0 pr-3">
