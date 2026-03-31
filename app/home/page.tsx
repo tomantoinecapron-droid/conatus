@@ -215,7 +215,56 @@ export default function HomePage() {
 
       {/* ── Header ── */}
       <div className="px-5 pt-12 pb-5 flex items-start justify-between relative overflow-hidden">
-        <div className="flex-1 min-w-0 pr-3">
+
+        {/* Colonnes grecques décoratives */}
+        <svg
+          aria-hidden
+          viewBox="0 0 120 80"
+          width="120"
+          height="80"
+          fill="none"
+          stroke="white"
+          strokeOpacity="0.12"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="pointer-events-none absolute left-0 top-0 h-full"
+          style={{ zIndex: 0 }}
+        >
+          {/* Entablement */}
+          <line x1="2" y1="10" x2="118" y2="10" />
+          <line x1="4" y1="13" x2="116" y2="13" />
+          <line x1="6" y1="16" x2="114" y2="16" />
+          {/* Stylobate */}
+          <line x1="2" y1="74" x2="118" y2="74" />
+          <line x1="4" y1="77" x2="116" y2="77" />
+          {/* Colonne 1, cx=24 */}
+          <line x1="15" y1="17" x2="33" y2="17" />
+          <line x1="17" y1="19" x2="31" y2="19" />
+          <line x1="18" y1="21" x2="18" y2="72" strokeWidth="0.7" />
+          <line x1="24" y1="21" x2="24" y2="72" strokeWidth="0.7" />
+          <line x1="30" y1="21" x2="30" y2="72" strokeWidth="0.7" />
+          <line x1="17" y1="72" x2="31" y2="72" />
+          <line x1="15" y1="74" x2="33" y2="74" />
+          {/* Colonne 2, cx=60 */}
+          <line x1="51" y1="17" x2="69" y2="17" />
+          <line x1="53" y1="19" x2="67" y2="19" />
+          <line x1="54" y1="21" x2="54" y2="72" strokeWidth="0.7" />
+          <line x1="60" y1="21" x2="60" y2="72" strokeWidth="0.7" />
+          <line x1="66" y1="21" x2="66" y2="72" strokeWidth="0.7" />
+          <line x1="53" y1="72" x2="67" y2="72" />
+          <line x1="51" y1="74" x2="69" y2="74" />
+          {/* Colonne 3, cx=96 */}
+          <line x1="87" y1="17" x2="105" y2="17" />
+          <line x1="89" y1="19" x2="103" y2="19" />
+          <line x1="90" y1="21" x2="90" y2="72" strokeWidth="0.7" />
+          <line x1="96" y1="21" x2="96" y2="72" strokeWidth="0.7" />
+          <line x1="102" y1="21" x2="102" y2="72" strokeWidth="0.7" />
+          <line x1="89" y1="72" x2="103" y2="72" />
+          <line x1="87" y1="74" x2="105" y2="74" />
+        </svg>
+
+        <div className="flex-1 min-w-0 pr-3" style={{ position: 'relative', zIndex: 1 }}>
           {/* Date */}
           <p className="text-[#7a7268] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
 
@@ -243,90 +292,6 @@ export default function HomePage() {
           )}
         </a>
       </div>
-
-      {/* ── Panorama décoratif ── */}
-      <svg
-        aria-hidden
-        viewBox="0 0 400 60"
-        preserveAspectRatio="none"
-        width="100%"
-        height="60"
-        fill="none"
-        stroke="white"
-        strokeOpacity="0.15"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="pointer-events-none block"
-      >
-        {/* Colonnes grecques (gauche) */}
-        <line x1="4" y1="58" x2="116" y2="58" />
-        <line x1="6" y1="56" x2="114" y2="56" />
-        <line x1="4" y1="8" x2="116" y2="8" />
-        <line x1="6" y1="10" x2="114" y2="10" />
-        <line x1="8" y1="12" x2="112" y2="12" />
-        {/* Colonne 1, cx=26 */}
-        <line x1="19" y1="13" x2="33" y2="13" />
-        <line x1="20" y1="15" x2="32" y2="15" />
-        <line x1="21" y1="16" x2="21" y2="54" strokeWidth="0.6" />
-        <line x1="26" y1="16" x2="26" y2="54" strokeWidth="0.6" />
-        <line x1="31" y1="16" x2="31" y2="54" strokeWidth="0.6" />
-        <line x1="20" y1="54" x2="32" y2="54" />
-        <line x1="19" y1="56" x2="33" y2="56" />
-        {/* Colonne 2, cx=58 */}
-        <line x1="51" y1="13" x2="65" y2="13" />
-        <line x1="52" y1="15" x2="64" y2="15" />
-        <line x1="53" y1="16" x2="53" y2="54" strokeWidth="0.6" />
-        <line x1="58" y1="16" x2="58" y2="54" strokeWidth="0.6" />
-        <line x1="63" y1="16" x2="63" y2="54" strokeWidth="0.6" />
-        <line x1="52" y1="54" x2="64" y2="54" />
-        <line x1="51" y1="56" x2="65" y2="56" />
-        {/* Colonne 3, cx=90 */}
-        <line x1="83" y1="13" x2="97" y2="13" />
-        <line x1="84" y1="15" x2="96" y2="15" />
-        <line x1="85" y1="16" x2="85" y2="54" strokeWidth="0.6" />
-        <line x1="90" y1="16" x2="90" y2="54" strokeWidth="0.6" />
-        <line x1="95" y1="16" x2="95" y2="54" strokeWidth="0.6" />
-        <line x1="84" y1="54" x2="96" y2="54" />
-        <line x1="83" y1="56" x2="97" y2="56" />
-
-        {/* Montagne (centre) */}
-        <polyline points="140,60 200,4 260,60" />
-        <polyline points="215,60 248,22 278,60" />
-        <polyline points="196,10 200,4 204,10" />
-
-        {/* Forêt sapins (droite) */}
-        {/* Arbre 1, cx=306 */}
-        <line x1="306" y1="24" x2="306" y2="60" />
-        <line x1="306" y1="31" x2="298" y2="38" /><line x1="306" y1="31" x2="314" y2="38" />
-        <line x1="306" y1="38" x2="297" y2="47" /><line x1="306" y1="38" x2="315" y2="47" />
-        <line x1="306" y1="47" x2="296" y2="58" /><line x1="306" y1="47" x2="316" y2="58" />
-        {/* Arbre 2, cx=326 */}
-        <line x1="326" y1="30" x2="326" y2="60" />
-        <line x1="326" y1="37" x2="319" y2="43" /><line x1="326" y1="37" x2="333" y2="43" />
-        <line x1="326" y1="43" x2="318" y2="51" /><line x1="326" y1="43" x2="334" y2="51" />
-        <line x1="326" y1="51" x2="317" y2="60" /><line x1="326" y1="51" x2="335" y2="60" />
-        {/* Arbre 3, cx=344 */}
-        <line x1="344" y1="22" x2="344" y2="60" />
-        <line x1="344" y1="29" x2="336" y2="36" /><line x1="344" y1="29" x2="352" y2="36" />
-        <line x1="344" y1="36" x2="335" y2="45" /><line x1="344" y1="36" x2="353" y2="45" />
-        <line x1="344" y1="45" x2="334" y2="56" /><line x1="344" y1="45" x2="354" y2="56" />
-        {/* Arbre 4, cx=362 */}
-        <line x1="362" y1="28" x2="362" y2="60" />
-        <line x1="362" y1="35" x2="355" y2="41" /><line x1="362" y1="35" x2="369" y2="41" />
-        <line x1="362" y1="41" x2="354" y2="50" /><line x1="362" y1="41" x2="370" y2="50" />
-        <line x1="362" y1="50" x2="353" y2="60" /><line x1="362" y1="50" x2="371" y2="60" />
-        {/* Arbre 5, cx=379 */}
-        <line x1="379" y1="32" x2="379" y2="60" />
-        <line x1="379" y1="39" x2="372" y2="45" /><line x1="379" y1="39" x2="386" y2="45" />
-        <line x1="379" y1="45" x2="371" y2="53" /><line x1="379" y1="45" x2="387" y2="53" />
-        <line x1="379" y1="53" x2="370" y2="60" /><line x1="379" y1="53" x2="388" y2="60" />
-        {/* Arbre 6, cx=394 */}
-        <line x1="394" y1="26" x2="394" y2="60" />
-        <line x1="394" y1="33" x2="387" y2="40" /><line x1="394" y1="33" x2="400" y2="40" />
-        <line x1="394" y1="40" x2="386" y2="49" /><line x1="394" y1="40" x2="400" y2="49" />
-        <line x1="394" y1="49" x2="385" y2="60" /><line x1="394" y1="49" x2="400" y2="60" />
-      </svg>
 
       {/* ── Séparateur dégradé ── */}
       <div
