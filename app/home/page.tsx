@@ -214,57 +214,9 @@ export default function HomePage() {
       />
 
       {/* ── Header ── */}
-      <div className="px-5 pt-12 pb-5 flex items-start justify-between relative overflow-hidden">
+      <div className="px-5 pt-12 pb-5 flex items-center justify-between relative overflow-hidden">
 
-        {/* Colonnes grecques décoratives */}
-        <svg
-          aria-hidden
-          viewBox="0 0 120 80"
-          width="120"
-          height="80"
-          fill="none"
-          stroke="white"
-          strokeOpacity="0.12"
-          strokeWidth="0.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="pointer-events-none absolute left-0 top-0 h-full"
-          style={{ zIndex: 0 }}
-        >
-          {/* Entablement */}
-          <line x1="2" y1="10" x2="118" y2="10" />
-          <line x1="4" y1="13" x2="116" y2="13" />
-          <line x1="6" y1="16" x2="114" y2="16" />
-          {/* Stylobate */}
-          <line x1="2" y1="74" x2="118" y2="74" />
-          <line x1="4" y1="77" x2="116" y2="77" />
-          {/* Colonne 1, cx=24 */}
-          <line x1="15" y1="17" x2="33" y2="17" />
-          <line x1="17" y1="19" x2="31" y2="19" />
-          <line x1="18" y1="21" x2="18" y2="72" strokeWidth="0.7" />
-          <line x1="24" y1="21" x2="24" y2="72" strokeWidth="0.7" />
-          <line x1="30" y1="21" x2="30" y2="72" strokeWidth="0.7" />
-          <line x1="17" y1="72" x2="31" y2="72" />
-          <line x1="15" y1="74" x2="33" y2="74" />
-          {/* Colonne 2, cx=60 */}
-          <line x1="51" y1="17" x2="69" y2="17" />
-          <line x1="53" y1="19" x2="67" y2="19" />
-          <line x1="54" y1="21" x2="54" y2="72" strokeWidth="0.7" />
-          <line x1="60" y1="21" x2="60" y2="72" strokeWidth="0.7" />
-          <line x1="66" y1="21" x2="66" y2="72" strokeWidth="0.7" />
-          <line x1="53" y1="72" x2="67" y2="72" />
-          <line x1="51" y1="74" x2="69" y2="74" />
-          {/* Colonne 3, cx=96 */}
-          <line x1="87" y1="17" x2="105" y2="17" />
-          <line x1="89" y1="19" x2="103" y2="19" />
-          <line x1="90" y1="21" x2="90" y2="72" strokeWidth="0.7" />
-          <line x1="96" y1="21" x2="96" y2="72" strokeWidth="0.7" />
-          <line x1="102" y1="21" x2="102" y2="72" strokeWidth="0.7" />
-          <line x1="89" y1="72" x2="103" y2="72" />
-          <line x1="87" y1="74" x2="105" y2="74" />
-        </svg>
-
-        <div className="flex-1 min-w-0 pr-3" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex-1 min-w-0 pr-3">
           {/* Date */}
           <p className="text-[#7a7268] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
 
@@ -280,7 +232,7 @@ export default function HomePage() {
         </div>
 
         {/* Cloche */}
-        <a href="/notifications" className="relative p-1.5 -mr-1 shrink-0 mt-0.5">
+        <a href="/notifications" className="relative p-1.5 shrink-0">
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -291,6 +243,52 @@ export default function HomePage() {
             </span>
           )}
         </a>
+
+        {/* Colonnes grecques décoratives */}
+        <svg
+          aria-hidden
+          viewBox="0 0 80 60"
+          width="80"
+          height="60"
+          fill="none"
+          stroke="white"
+          strokeOpacity="0.15"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="pointer-events-none shrink-0 ml-3"
+        >
+          {/* Entablement */}
+          <line x1="2" y1="6" x2="78" y2="6" />
+          <line x1="4" y1="9" x2="76" y2="9" />
+          {/* Stylobate */}
+          <line x1="2" y1="54" x2="78" y2="54" />
+          <line x1="4" y1="57" x2="76" y2="57" />
+          {/* Colonne 1, cx=16 */}
+          <line x1="9" y1="10" x2="23" y2="10" />
+          <line x1="10" y1="12" x2="22" y2="12" />
+          <line x1="11" y1="13" x2="11" y2="52" strokeWidth="0.6" />
+          <line x1="16" y1="13" x2="16" y2="52" strokeWidth="0.6" />
+          <line x1="21" y1="13" x2="21" y2="52" strokeWidth="0.6" />
+          <line x1="10" y1="52" x2="22" y2="52" />
+          <line x1="9" y1="54" x2="23" y2="54" />
+          {/* Colonne 2, cx=40 */}
+          <line x1="33" y1="10" x2="47" y2="10" />
+          <line x1="34" y1="12" x2="46" y2="12" />
+          <line x1="35" y1="13" x2="35" y2="52" strokeWidth="0.6" />
+          <line x1="40" y1="13" x2="40" y2="52" strokeWidth="0.6" />
+          <line x1="45" y1="13" x2="45" y2="52" strokeWidth="0.6" />
+          <line x1="34" y1="52" x2="46" y2="52" />
+          <line x1="33" y1="54" x2="47" y2="54" />
+          {/* Colonne 3, cx=64 */}
+          <line x1="57" y1="10" x2="71" y2="10" />
+          <line x1="58" y1="12" x2="70" y2="12" />
+          <line x1="59" y1="13" x2="59" y2="52" strokeWidth="0.6" />
+          <line x1="64" y1="13" x2="64" y2="52" strokeWidth="0.6" />
+          <line x1="69" y1="13" x2="69" y2="52" strokeWidth="0.6" />
+          <line x1="58" y1="52" x2="70" y2="52" />
+          <line x1="57" y1="54" x2="71" y2="54" />
+        </svg>
       </div>
 
       {/* ── Séparateur dégradé ── */}
