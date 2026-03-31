@@ -206,8 +206,49 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-28 relative overflow-x-hidden">
 
+      {/* ── Vignetting bords ── */}
+      <div
+        className="pointer-events-none fixed inset-0 z-50"
+        style={{ boxShadow: 'inset 0 0 120px 40px rgba(0,0,0,0.30)' }}
+        aria-hidden
+      />
+
       {/* ── Header ── */}
-      <div className="px-5 pt-12 pb-5 flex items-start justify-between">
+      <div className="px-5 pt-12 pb-5 flex items-start justify-between relative overflow-hidden">
+        {/* Colonnes grecques décoratives */}
+        <svg
+          aria-hidden
+          viewBox="0 0 220 180"
+          className="pointer-events-none absolute right-0 top-0 h-full w-auto"
+          style={{ opacity: 0.05 }}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Colonne gauche */}
+          <rect x="30" y="20" width="28" height="4" fill="white" rx="1"/>
+          <rect x="34" y="24" width="20" height="3" fill="white" rx="1"/>
+          <rect x="36" y="27" width="16" height="100" fill="white" rx="1"/>
+          <line x1="44" y1="27" x2="44" y2="127" stroke="#888" strokeWidth="1.5"/>
+          <line x1="40" y1="27" x2="40" y2="127" stroke="#888" strokeWidth="0.8"/>
+          <line x1="48" y1="27" x2="48" y2="127" stroke="#888" strokeWidth="0.8"/>
+          <rect x="34" y="127" width="20" height="3" fill="white" rx="1"/>
+          <rect x="30" y="130" width="28" height="4" fill="white" rx="1"/>
+          <rect x="28" y="134" width="32" height="6" fill="white" rx="1"/>
+          {/* Colonne droite */}
+          <rect x="110" y="20" width="28" height="4" fill="white" rx="1"/>
+          <rect x="114" y="24" width="20" height="3" fill="white" rx="1"/>
+          <rect x="116" y="27" width="16" height="100" fill="white" rx="1"/>
+          <line x1="124" y1="27" x2="124" y2="127" stroke="#888" strokeWidth="1.5"/>
+          <line x1="120" y1="27" x2="120" y2="127" stroke="#888" strokeWidth="0.8"/>
+          <line x1="128" y1="27" x2="128" y2="127" stroke="#888" strokeWidth="0.8"/>
+          <rect x="114" y="127" width="20" height="3" fill="white" rx="1"/>
+          <rect x="110" y="130" width="28" height="4" fill="white" rx="1"/>
+          <rect x="108" y="134" width="32" height="6" fill="white" rx="1"/>
+          {/* Entablement */}
+          <rect x="26" y="14" width="118" height="6" fill="white" rx="1"/>
+          <rect x="22" y="10" width="126" height="4" fill="white" rx="1"/>
+        </svg>
+
         <div className="flex-1 min-w-0 pr-3">
           {/* Date */}
           <p className="text-[#7a7268] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
@@ -237,6 +278,13 @@ export default function HomePage() {
         </a>
       </div>
 
+      {/* ── Séparateur dégradé ── */}
+      <div
+        aria-hidden
+        className="mx-5 mb-5 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent 0%, #c9440e22 30%, #c9440e40 50%, #c9440e22 70%, transparent 100%)' }}
+      />
+
       {/* ── EN COURS + À LIRE ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
@@ -253,10 +301,11 @@ export default function HomePage() {
               return (
                 <div className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
                   <a href={`/fiche/${reading.id}`} className="shrink-0">
-                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530]">
+                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530] relative">
                       {reading.books?.cover_url
                         ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
                         : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                      <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                     </div>
                   </a>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
@@ -291,10 +340,11 @@ export default function HomePage() {
             {nextBook ? (
               <a href={`/fiche/${nextBook.id}`} className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
                 <div className="shrink-0">
-                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530]">
+                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530] relative">
                     {nextBook.books?.cover_url
                       ? <img src={nextBook.books.cover_url} className="w-full h-full object-cover" alt={nextBook.books.title} />
                       : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                    <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
@@ -343,15 +393,15 @@ export default function HomePage() {
         <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.booksThisMonth}</p>
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.booksThisMonth}</p>
             <p className="text-[#7a7268] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
           </div>
           <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.totalNotes}</p>
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.totalNotes}</p>
             <p className="text-[#7a7268] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
           </div>
           <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-bold text-white text-xl leading-none mb-0.5">{stats.streak}</p>
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.streak}</p>
             <p className="text-[#7a7268] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
           </div>
         </div>
