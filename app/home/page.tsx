@@ -221,7 +221,7 @@ export default function HomePage() {
           viewBox="0 0 800 120"
           preserveAspectRatio="none"
           className="pointer-events-none absolute bottom-0 left-0 w-full"
-          style={{ opacity: 0.05, height: '120px', zIndex: -1 }}
+          style={{ opacity: 0.13, height: '120px', zIndex: -1 }}
           fill="none"
           stroke="white"
           strokeWidth="0.9"
