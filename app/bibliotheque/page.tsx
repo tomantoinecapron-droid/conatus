@@ -60,6 +60,8 @@ export default function Bibliotheque() {
   const [myBooks, setMyBooks] = useState<any[]>([])
   const [filter, setFilter] = useState<FilterType>('tous')
   const [view, setView] = useState<ViewType>('list')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('bibliotheque-view') as ViewType | null
@@ -142,6 +144,14 @@ export default function Bibliotheque() {
     setResults([])
     setSearch('')
     loadMyBooks(user.id)
+  }
+
+  const deleteReading = async (readingId: string) => {
+    setDeleting(true)
+    await supabase.from('readings').delete().eq('id', readingId)
+    setMyBooks(prev => prev.filter(r => r.id !== readingId))
+    setConfirmDeleteId(null)
+    setDeleting(false)
   }
 
   const filteredBooks = filter === 'tous' ? myBooks : myBooks.filter(r => r.status === filter)
@@ -315,33 +325,70 @@ export default function Bibliotheque() {
         /* List view */
         <div className="px-5 flex flex-col divide-y divide-white/5">
           {filteredBooks.map((reading) => (
-            <a key={reading.id} href={`/fiche/${reading.id}`} className="flex gap-3 py-3 items-center group">
-              <div className="w-10 h-14 rounded overflow-hidden bg-[#242018] shrink-0">
-                {reading.books?.cover_url ? (
-                  <img
-                    src={reading.books.cover_url}
-                    className="w-full h-full object-cover"
-                    alt={reading.books.title}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />
-                )}
+            <div key={reading.id}>
+              {/* Ligne principale */}
+              <div className="flex gap-3 py-3 items-center group">
+                <a href={`/fiche/${reading.id}`} className="shrink-0">
+                  <div className="w-10 h-14 rounded overflow-hidden bg-[#242018]">
+                    {reading.books?.cover_url ? (
+                      <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />
+                    )}
+                  </div>
+                </a>
+
+                <a href={`/fiche/${reading.id}`} className="flex-1 min-w-0">
+                  <p className="font-serif text-sm text-white leading-tight line-clamp-1 group-hover:text-white/80 transition-colors">
+                    {reading.books?.title}
+                  </p>
+                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">{reading.books?.author}</p>
+                  {reading.books?.published_year && (
+                    <p className="text-[#7a7268]/60 text-[10px] mt-0.5">{reading.books.published_year}</p>
+                  )}
+                </a>
+
+                <div className="shrink-0 flex items-center gap-2">
+                  <span className={`text-xs font-medium ${statusTextColor[reading.status]}`}>
+                    {statusLabel[reading.status]}
+                  </span>
+                  <button
+                    onClick={() => setConfirmDeleteId(reading.id === confirmDeleteId ? null : reading.id)}
+                    className="p-1.5 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
+                    aria-label="Supprimer"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4h6v2" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-serif text-sm text-white leading-tight line-clamp-1 group-hover:text-white/80 transition-colors">
-                  {reading.books?.title}
-                </p>
-                <p className="text-[#7a7268] text-xs mt-0.5 truncate">{reading.books?.author}</p>
-                {reading.books?.published_year && (
-                  <p className="text-[#7a7268]/60 text-[10px] mt-0.5">{reading.books.published_year}</p>
-                )}
-              </div>
-              <div className="shrink-0 text-right">
-                <span className={`text-xs font-medium ${statusTextColor[reading.status]}`}>
-                  {statusLabel[reading.status]}
-                </span>
-              </div>
-            </a>
+
+              {/* Confirmation inline */}
+              {confirmDeleteId === reading.id && (
+                <div className="mb-3 -mt-1 bg-[#242018] border border-red-500/20 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                  <p className="text-white text-xs">Supprimer ce livre de ta bibliothèque ?</p>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-[#7a7268] text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:text-white transition"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={() => deleteReading(reading.id)}
+                      disabled={deleting}
+                      className="text-white text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition disabled:opacity-50"
+                    >
+                      {deleting ? '…' : 'Supprimer'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
