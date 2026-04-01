@@ -2,14 +2,12 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest } from 'next/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
 

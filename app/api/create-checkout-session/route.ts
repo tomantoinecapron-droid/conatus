@@ -3,9 +3,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   const { plan } = await request.json()
 
   const cookieStore = await cookies()
