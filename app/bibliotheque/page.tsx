@@ -4,82 +4,81 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
 
-type FilterType = 'tous' | 'en_cours' | 'lu' | 'a_lire'
-type ViewType = 'grid' | 'list'
+// ── Catégories normalisées ─────────────────────────────────────────────────
 
-const FILTERS: { key: FilterType; label: string }[] = [
+const CATEGORY_LIST = [
+  'Philosophie',
+  'Littérature française',
+  'Littérature étrangère',
+  'Sciences humaines',
+  'Histoire',
+  'Droit & Politique',
+  'Sciences & Tech',
+  'Développement personnel',
+  'BD & Manga',
+  'Autre',
+] as const
+
+type Category = typeof CATEGORY_LIST[number]
+
+function normalizeCategory(cats?: string[]): Category {
+  if (!cats?.length) return 'Autre'
+  const s = cats.join(' ').toLowerCase()
+  if (/philo/.test(s)) return 'Philosophie'
+  if (/litt.*fr|french lit|po[eé]sie/.test(s)) return 'Littérature française'
+  if (/fiction|novel|litt[eé]|roman/.test(s)) return 'Littérature étrangère'
+  if (/social|psycho|sociolog|anthropo|linguist|educat/.test(s)) return 'Sciences humaines'
+  if (/histor|biograph/.test(s)) return 'Histoire'
+  if (/\blaw\b|droit|polit/.test(s)) return 'Droit & Politique'
+  if (/science|technolog|math|physic|comput|biolog|nature/.test(s)) return 'Sciences & Tech'
+  if (/self.help|personal.develop|self develop|motivat|coaching/.test(s)) return 'Développement personnel'
+  if (/comic|manga|bande.dessin|graphic novel/.test(s)) return 'BD & Manga'
+  return 'Autre'
+}
+
+// ── Statuts ────────────────────────────────────────────────────────────────
+
+type Status = 'tous' | 'en_cours' | 'lu' | 'a_lire'
+
+const STATUS_FILTERS: { key: Status; label: string }[] = [
   { key: 'tous', label: 'Tous' },
   { key: 'en_cours', label: 'En cours' },
   { key: 'lu', label: 'Lu' },
   { key: 'a_lire', label: 'À lire' },
 ]
 
-const statusDot: Record<string, string> = {
-  a_lire: 'bg-[#7a7268]',
-  en_cours: 'bg-[#c9440e]',
-  lu: 'bg-green-400',
-}
-
-const statusLabel: Record<string, string> = {
+const STATUS_LABEL: Record<string, string> = {
   a_lire: 'À lire',
   en_cours: 'En cours',
   lu: 'Lu',
 }
 
-const statusTextColor: Record<string, string> = {
+const STATUS_COLOR: Record<string, string> = {
   a_lire: 'text-[#7a7268]',
   en_cours: 'text-[#c9440e]',
-  lu: 'text-green-400',
+  lu: 'text-emerald-400',
 }
 
-function IconGrid({ active }: { active: boolean }) {
-  const color = active ? '#ffffff' : '#7a7268'
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-    </svg>
-  )
-}
-
-function IconList({ active }: { active: boolean }) {
-  const color = active ? '#ffffff' : '#7a7268'
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-    </svg>
-  )
-}
+// ── Page ───────────────────────────────────────────────────────────────────
 
 export default function Bibliotheque() {
   const [user, setUser] = useState<any>(null)
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loadingSearch, setLoadingSearch] = useState(false)
   const [myBooks, setMyBooks] = useState<any[]>([])
-  const [filter, setFilter] = useState<FilterType>('tous')
-  const [view, setView] = useState<ViewType>('list')
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null)
+  const [activeStatus, setActiveStatus] = useState<Status>('tous')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('bibliotheque-view') as ViewType | null
-    if (saved === 'grid' || saved === 'list') setView(saved)
-
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) window.location.href = '/auth'
-      else {
-        setUser(data.user)
-        loadMyBooks(data.user.id)
-      }
+      if (!data.user) { window.location.href = '/auth'; return }
+      setUser(data.user)
+      loadMyBooks(data.user.id)
     })
   }, [])
-
-  const switchView = (v: ViewType) => {
-    setView(v)
-    localStorage.setItem('bibliotheque-view', v)
-  }
 
   const loadMyBooks = async (userId: string) => {
     const { data } = await supabase
@@ -92,17 +91,12 @@ export default function Bibliotheque() {
 
   const searchBooks = async () => {
     if (!search.trim()) return
-    setLoading(true)
-
+    setLoadingSearch(true)
     const q = encodeURIComponent(search.trim())
     const key = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY
-
     try {
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${q}&key=${key}&maxResults=20`
-      )
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&key=${key}&maxResults=20`)
       const data = await res.json()
-
       const items = (data.items || [])
         .map((item: any) => ({
           _id: item.id,
@@ -111,19 +105,19 @@ export default function Bibliotheque() {
           cover: item.volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://'),
           isbn: item.volumeInfo.industryIdentifiers?.[0]?.identifier,
           published_year: item.volumeInfo.publishedDate?.slice(0, 4),
-          edition_count: null,
+          rawCategories: item.volumeInfo.categories,
         }))
         .filter((b: any) => b.title?.trim() && b.author?.trim() && b.published_year)
-
       setResults(items)
     } catch {
       setResults([])
     } finally {
-      setLoading(false)
+      setLoadingSearch(false)
     }
   }
 
   const addBook = async (book: any) => {
+    const category = normalizeCategory(book.rawCategories)
     const { data: existingBook } = await supabase
       .from('books').select('id').eq('isbn', book.isbn).single()
     let bookId
@@ -136,6 +130,7 @@ export default function Bibliotheque() {
         cover_url: book.cover || null,
         isbn: book.isbn || book._id,
         published_year: book.published_year ? Number(book.published_year) : null,
+        category,
       }).select().single()
       bookId = newBook?.id
     }
@@ -154,61 +149,63 @@ export default function Bibliotheque() {
     setDeleting(false)
   }
 
-  const filteredBooks = filter === 'tous' ? myBooks : myBooks.filter(r => r.status === filter)
+  // ── Dérivés ──────────────────────────────────────────────────────────────
 
-  const counts: Record<FilterType, number> = {
-    tous: myBooks.length,
-    en_cours: myBooks.filter(r => r.status === 'en_cours').length,
-    lu: myBooks.filter(r => r.status === 'lu').length,
-    a_lire: myBooks.filter(r => r.status === 'a_lire').length,
-  }
+  // Livres filtrés par statut
+  const byStatus = activeStatus === 'tous'
+    ? myBooks
+    : myBooks.filter(r => r.status === activeStatus)
+
+  // Livres filtrés par catégorie + statut
+  const filtered = activeCategory
+    ? byStatus.filter(r => (r.books?.category ?? 'Autre') === activeCategory)
+    : byStatus
+
+  // Comptage des catégories (sur les livres déjà filtrés par statut)
+  const categoryCounts = CATEGORY_LIST.reduce((acc, cat) => {
+    acc[cat] = byStatus.filter(r => (r.books?.category ?? 'Autre') === cat).length
+    return acc
+  }, {} as Record<Category, number>)
+
+  // Catégories présentes (avec au moins 1 livre dans le filtre statut courant)
+  const activeCategories = CATEGORY_LIST.filter(cat => categoryCounts[cat] > 0)
+
+  const searchQuery = search.trim().toLowerCase()
+  const displayedBooks = searchQuery
+    ? filtered.filter(r =>
+        r.books?.title?.toLowerCase().includes(searchQuery) ||
+        r.books?.author?.toLowerCase().includes(searchQuery)
+      )
+    : filtered
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-24">
-      {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-end justify-between">
-        <div>
-          <h1 className="font-serif text-3xl text-white">Ma bibliothèque</h1>
-          <p className="text-[#7a7268] text-sm mt-1">
-            {myBooks.length} livre{myBooks.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        {/* View toggle */}
-        <div className="flex gap-1 bg-[#242018] border border-white/10 rounded-lg p-1">
-          <button
-            onClick={() => switchView('grid')}
-            className={`p-1.5 rounded transition ${view === 'grid' ? 'bg-[#c9440e]' : 'hover:bg-white/5'}`}
-            aria-label="Vue grille"
-          >
-            <IconGrid active={view === 'grid'} />
-          </button>
-          <button
-            onClick={() => switchView('list')}
-            className={`p-1.5 rounded transition ${view === 'list' ? 'bg-[#c9440e]' : 'hover:bg-white/5'}`}
-            aria-label="Vue liste"
-          >
-            <IconList active={view === 'list'} />
-          </button>
-        </div>
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-12 pb-4">
+        <h1 className="font-serif text-3xl text-white">Ma bibliothèque</h1>
+        <p className="text-[#7a7268] text-sm mt-1">
+          {myBooks.length} livre{myBooks.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
-      {/* Search bar */}
+      {/* ── Barre de recherche / ajout ── */}
       <div className="px-5 mb-5">
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Ajouter un livre..."
+            placeholder="Ajouter ou chercher un livre..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && searchBooks()}
+            onKeyDown={e => e.key === 'Enter' && (results.length > 0 ? undefined : searchBooks())}
             className="flex-1 bg-[#242018] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition"
           />
           <button
             onClick={searchBooks}
-            className="bg-[#c9440e] text-white px-4 py-3 rounded-xl hover:opacity-90 transition shrink-0 flex items-center justify-center w-12"
+            className="bg-[#c9440e] text-white px-4 py-3 rounded-xl hover:opacity-90 transition shrink-0 w-12 flex items-center justify-center"
           >
-            {loading ? (
-              <span className="text-base">…</span>
+            {loadingSearch ? (
+              <span className="text-base leading-none">…</span>
             ) : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -218,38 +215,33 @@ export default function Bibliotheque() {
         </div>
       </div>
 
-      {/* Search results */}
+      {/* ── Résultats de recherche Google Books ── */}
       {results.length > 0 && (
         <div className="px-5 mb-6">
-          <p className="text-[#7a7268] text-xs mb-3">
-            {results.length} résultat{results.length > 1 ? 's' : ''} — appuie sur + pour ajouter
-          </p>
-          <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[#7a7268] text-xs">
+              {results.length} résultat{results.length > 1 ? 's' : ''} — appuie sur + pour ajouter
+            </p>
+            <button onClick={() => setResults([])} className="text-[#7a7268] text-xs hover:text-white transition">
+              Fermer
+            </button>
+          </div>
+          <div className="bg-[#242018] border border-white/10 rounded-xl overflow-hidden divide-y divide-white/5">
             {results.map((book, i) => (
-              <div key={book._id ?? i} className="flex gap-3 bg-[#242018] border border-white/10 rounded-xl p-3 items-center">
-                {book.cover ? (
-                  <img
-                    src={book.cover}
-                    className="w-10 h-14 rounded object-cover shrink-0"
-                    alt={book.title}
-                  />
-                ) : (
-                  <div className="w-10 h-14 bg-[#3a3530] rounded shrink-0 flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                    </svg>
-                  </div>
-                )}
+              <div key={book._id ?? i} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-serif text-sm leading-tight line-clamp-2">{book.title}</p>
-                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">{book.author}</p>
-                  {book.published_year && (
-                    <span className="text-[#7a7268] text-[10px]">{book.published_year}</span>
-                  )}
+                  <p className="font-serif text-sm text-white leading-tight line-clamp-1">{book.title}</p>
+                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">
+                    {book.author}
+                    {book.published_year && <span className="ml-1.5 opacity-60">· {book.published_year}</span>}
+                  </p>
+                  <p className="text-[#7a7268]/50 text-[10px] mt-0.5">
+                    {normalizeCategory(book.rawCategories)}
+                  </p>
                 </div>
                 <button
                   onClick={() => addBook(book)}
-                  className="shrink-0 bg-[#c9440e] text-white w-8 h-8 rounded-lg text-lg hover:opacity-90 transition flex items-center justify-center font-medium leading-none"
+                  className="shrink-0 bg-[#c9440e] text-white w-7 h-7 rounded-lg text-lg hover:opacity-90 transition flex items-center justify-center font-medium leading-none"
                 >
                   +
                 </button>
@@ -259,137 +251,124 @@ export default function Bibliotheque() {
         </div>
       )}
 
-      {/* Filter tabs */}
-      <div className="px-5 mb-5">
+      {/* ── Filtre statut ── */}
+      <div className="px-5 mb-3">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {FILTERS.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                filter === f.key
-                  ? 'bg-[#c9440e] text-white'
-                  : 'bg-[#242018] text-[#7a7268] border border-white/10'
-              }`}
-            >
-              {f.label}
-              {counts[f.key] > 0 && (
-                <span className="ml-1.5 opacity-60 text-xs">{counts[f.key]}</span>
-              )}
-            </button>
-          ))}
+          {STATUS_FILTERS.map(f => {
+            const count = f.key === 'tous' ? myBooks.length : myBooks.filter(r => r.status === f.key).length
+            return (
+              <button
+                key={f.key}
+                onClick={() => { setActiveStatus(f.key); setActiveCategory(null) }}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
+                  activeStatus === f.key
+                    ? 'bg-[#c9440e] text-white'
+                    : 'bg-[#242018] text-[#7a7268] border border-white/10 hover:border-white/20'
+                }`}
+              >
+                {f.label}
+                {count > 0 && <span className="ml-1.5 opacity-60">{count}</span>}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Books */}
-      {filteredBooks.length === 0 ? (
+      {/* ── Pills catégories ── */}
+      {activeCategories.length > 0 && (
+        <div className="px-5 mb-5">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {activeCategories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+                className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-medium transition ${
+                  activeCategory === cat
+                    ? 'bg-white/15 text-white border border-white/30'
+                    : 'bg-white/5 text-[#7a7268] border border-white/8 hover:border-white/20 hover:text-white/80'
+                }`}
+              >
+                {cat}
+                <span className="ml-1.5 opacity-50">{categoryCounts[cat]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Liste des livres ── */}
+      {displayedBooks.length === 0 ? (
         <div className="text-center py-20 text-[#7a7268] px-5">
           <p className="font-serif text-lg">
-            {filter === 'tous'
-              ? 'Ta bibliothèque est vide'
-              : `Aucun livre « ${FILTERS.find(f => f.key === filter)?.label} »`}
+            {myBooks.length === 0 ? 'Ta bibliothèque est vide' : 'Aucun livre pour ce filtre'}
           </p>
           <p className="text-sm mt-2">
-            {filter === 'tous'
-              ? 'Cherche un livre ci-dessus pour commencer'
-              : 'Change de filtre ou ajoute un livre'}
+            {myBooks.length === 0 ? 'Cherche un livre ci-dessus pour commencer' : 'Essaie un autre filtre'}
           </p>
         </div>
-      ) : view === 'grid' ? (
-        /* Grid view */
-        <div className="px-5 grid grid-cols-3 gap-x-3 gap-y-5">
-          {filteredBooks.map((reading) => (
-            <a key={reading.id} href={`/fiche/${reading.id}`} className="block group">
-              <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[#242018] mb-2">
-                {reading.books?.cover_url ? (
-                  <img
-                    src={reading.books.cover_url}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    alt={reading.books.title}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-end p-2 bg-gradient-to-b from-[#2e2a24] to-[#1a1714]">
-                    <p className="font-serif text-xs text-white/60 leading-tight line-clamp-3">
-                      {reading.books?.title}
+      ) : (
+        <div className="px-5 divide-y divide-white/5">
+          {displayedBooks.map((reading) => {
+            const book = reading.books
+            const category: Category = book?.category ?? 'Autre'
+            return (
+              <div key={reading.id}>
+                <div className="flex items-center gap-3 py-3.5 group">
+                  {/* Titre + auteur + catégorie */}
+                  <a href={`/fiche/${reading.id}`} className="flex-1 min-w-0">
+                    <p className="font-serif text-[15px] text-white leading-snug line-clamp-1">
+                      {book?.title}
                     </p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <p className="text-[#7a7268] text-xs truncate">{book?.author}</p>
+                      <span className="text-[#7a7268]/40 text-[10px] border border-white/8 rounded px-1.5 py-px leading-none shrink-0">
+                        {category}
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* Statut + suppression */}
+                  <div className="shrink-0 flex items-center gap-2">
+                    <span className={`text-xs font-medium ${STATUS_COLOR[reading.status]}`}>
+                      {STATUS_LABEL[reading.status]}
+                    </span>
+                    <button
+                      onClick={() => setConfirmDeleteId(reading.id === confirmDeleteId ? null : reading.id)}
+                      className="p-1 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
+                      aria-label="Supprimer"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirmation suppression inline */}
+                {confirmDeleteId === reading.id && (
+                  <div className="mb-3 -mt-1 bg-[#242018] border border-red-500/20 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                    <p className="text-white text-xs">Supprimer ce livre de ta bibliothèque ?</p>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="text-[#7a7268] text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:text-white transition"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={() => deleteReading(reading.id)}
+                        disabled={deleting}
+                        className="text-white text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition disabled:opacity-50"
+                      >
+                        {deleting ? '…' : 'Supprimer'}
+                      </button>
+                    </div>
                   </div>
                 )}
-                <div className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${statusDot[reading.status]}`} />
               </div>
-              <p className="font-serif text-xs text-white leading-tight line-clamp-2">{reading.books?.title}</p>
-              <p className="text-[#7a7268] text-[10px] mt-0.5 truncate">{reading.books?.author}</p>
-            </a>
-          ))}
-        </div>
-      ) : (
-        /* List view */
-        <div className="px-5 flex flex-col divide-y divide-white/5">
-          {filteredBooks.map((reading) => (
-            <div key={reading.id}>
-              {/* Ligne principale */}
-              <div className="flex gap-3 py-3 items-center group">
-                <a href={`/fiche/${reading.id}`} className="shrink-0">
-                  <div className="w-10 h-14 rounded overflow-hidden bg-[#242018]">
-                    {reading.books?.cover_url ? (
-                      <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />
-                    )}
-                  </div>
-                </a>
-
-                <a href={`/fiche/${reading.id}`} className="flex-1 min-w-0">
-                  <p className="font-serif text-sm text-white leading-tight line-clamp-1 group-hover:text-white/80 transition-colors">
-                    {reading.books?.title}
-                  </p>
-                  <p className="text-[#7a7268] text-xs mt-0.5 truncate">{reading.books?.author}</p>
-                  {reading.books?.published_year && (
-                    <p className="text-[#7a7268]/60 text-[10px] mt-0.5">{reading.books.published_year}</p>
-                  )}
-                </a>
-
-                <div className="shrink-0 flex items-center gap-2">
-                  <span className={`text-xs font-medium ${statusTextColor[reading.status]}`}>
-                    {statusLabel[reading.status]}
-                  </span>
-                  <button
-                    onClick={() => setConfirmDeleteId(reading.id === confirmDeleteId ? null : reading.id)}
-                    className="p-1.5 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
-                    aria-label="Supprimer"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6l-1 14H6L5 6" />
-                      <path d="M10 11v6M14 11v6" />
-                      <path d="M9 6V4h6v2" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirmation inline */}
-              {confirmDeleteId === reading.id && (
-                <div className="mb-3 -mt-1 bg-[#242018] border border-red-500/20 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-                  <p className="text-white text-xs">Supprimer ce livre de ta bibliothèque ?</p>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="text-[#7a7268] text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:text-white transition"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      onClick={() => deleteReading(reading.id)}
-                      disabled={deleting}
-                      className="text-white text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition disabled:opacity-50"
-                    >
-                      {deleting ? '…' : 'Supprimer'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
