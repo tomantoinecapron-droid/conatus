@@ -192,8 +192,8 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-        <div className="text-[#7a7268] text-sm">Chargement...</div>
+      <div className="min-h-screen bg-[#0e1a14] flex items-center justify-center">
+        <div className="text-[#9a9485] text-sm">Chargement...</div>
       </div>
     )
   }
@@ -204,7 +204,7 @@ export default function HomePage() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-28 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#0e1a14] text-[#f0ebe0] pb-28 relative overflow-x-hidden">
 
       {/* ── Vignetting bords ── */}
       <div
@@ -218,7 +218,7 @@ export default function HomePage() {
 
         <div className="flex-1 min-w-0 pr-3">
           {/* Date */}
-          <p className="text-[#7a7268] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
+          <p className="text-[#9a9485] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
 
           {/* Salutation */}
           <h1 className="font-serif text-[28px] leading-tight text-white">
@@ -233,7 +233,7 @@ export default function HomePage() {
 
         {/* Cloche */}
         <a href="/notifications" className="relative p-1.5 shrink-0">
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9a9485" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
@@ -301,8 +301,8 @@ export default function HomePage() {
       {/* ── EN COURS + À LIRE ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Lecture</h2>
-          <a href="/bibliotheque" className="text-[#7a7268] text-[10px] hover:text-white transition">Bibliothèque →</a>
+          <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase">Lecture</h2>
+          <a href="/bibliotheque" className="text-[#9a9485] text-[10px] hover:text-white transition">Bibliothèque →</a>
         </div>
 
         {enCours.length > 0 || nextBook ? (
@@ -312,12 +312,12 @@ export default function HomePage() {
               const reading = enCours[0]
               const progress = reading.progress ?? 0
               return (
-                <div className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
+                <div className="bg-[#152318] border border-white/8 rounded-xl p-3 flex gap-2.5">
                   <a href={`/fiche/${reading.id}`} className="shrink-0">
-                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530] relative">
+                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#1e3028] relative">
                       {reading.books?.cover_url
                         ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
-                        : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                        : <div className="w-full h-full bg-gradient-to-b from-[#1a2b1e] to-[#0e1a14]" />}
                       <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                     </div>
                   </a>
@@ -341,7 +341,7 @@ export default function HomePage() {
                 </div>
               )
             })() : (
-              <a href="/bibliotheque" className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
+              <a href="/bibliotheque" className="bg-[#152318] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
                 <div>
                   <p className="text-white/30 font-serif text-xs mb-1">Rien en cours</p>
                   <p className="text-[#c9440e] text-[10px]">Commencer →</p>
@@ -351,25 +351,25 @@ export default function HomePage() {
 
             {/* Colonne droite : à lire */}
             {nextBook ? (
-              <a href={`/fiche/${nextBook.id}`} className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex gap-2.5">
+              <a href={`/fiche/${nextBook.id}`} className="bg-[#152318] border border-white/8 rounded-xl p-3 flex gap-2.5">
                 <div className="shrink-0">
-                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#3a3530] relative">
+                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#1e3028] relative">
                     {nextBook.books?.cover_url
                       ? <img src={nextBook.books.cover_url} className="w-full h-full object-cover" alt={nextBook.books.title} />
-                      : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                      : <div className="w-full h-full bg-gradient-to-b from-[#1a2b1e] to-[#0e1a14]" />}
                     <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                   <div>
-                    <p className="text-[9px] text-[#7a7268] font-medium uppercase tracking-wide mb-0.5">À lire</p>
+                    <p className="text-[9px] text-[#9a9485] font-medium uppercase tracking-wide mb-0.5">À lire</p>
                     <p className="font-serif text-[13px] text-white leading-snug line-clamp-3">{nextBook.books?.title}</p>
                   </div>
-                  <p className="text-[#7a7268] text-[10px] truncate">{nextBook.books?.author?.split(' ').pop()}</p>
+                  <p className="text-[#9a9485] text-[10px] truncate">{nextBook.books?.author?.split(' ').pop()}</p>
                 </div>
               </a>
             ) : (
-              <a href="/bibliotheque" className="bg-[#211e1a] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
+              <a href="/bibliotheque" className="bg-[#152318] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
                 <div>
                   <p className="text-white/30 font-serif text-xs mb-1">File vide</p>
                   <p className="text-[#c9440e] text-[10px]">Ajouter →</p>
@@ -378,23 +378,23 @@ export default function HomePage() {
             )}
           </div>
         ) : myRecentBooks.length > 0 ? (
-          <div className="bg-[#211e1a] border border-white/8 rounded-2xl overflow-hidden">
+          <div className="bg-[#152318] border border-white/8 rounded-2xl overflow-hidden">
             {myRecentBooks.map((reading, i) => (
               <a key={reading.id} href={`/fiche/${reading.id}`}
                 className={`flex items-center gap-3 px-4 py-2.5 hover:bg-white/3 transition ${i < myRecentBooks.length - 1 ? 'border-b border-white/5' : ''}`}
               >
-                <div className="w-7 h-10 rounded overflow-hidden bg-[#3a3530] shrink-0">
+                <div className="w-7 h-10 rounded overflow-hidden bg-[#1e3028] shrink-0">
                   {reading.books?.cover_url
                     ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt="" />
-                    : <div className="w-full h-full bg-gradient-to-b from-[#2e2a24] to-[#1a1714]" />}
+                    : <div className="w-full h-full bg-gradient-to-b from-[#1a2b1e] to-[#0e1a14]" />}
                 </div>
                 <p className="flex-1 font-serif text-sm text-white leading-tight truncate">{reading.books?.title}</p>
-                <span className="text-[#7a7268] text-[10px] shrink-0">{reading.books?.author?.split(' ').pop()}</span>
+                <span className="text-[#9a9485] text-[10px] shrink-0">{reading.books?.author?.split(' ').pop()}</span>
               </a>
             ))}
           </div>
         ) : (
-          <div className="bg-[#211e1a] border border-white/8 rounded-2xl px-5 py-6 text-center">
+          <div className="bg-[#152318] border border-white/8 rounded-2xl px-5 py-6 text-center">
             <p className="text-white/40 text-sm font-serif mb-3">Ta bibliothèque est vide</p>
             <a href="/bibliotheque" className="text-[#c9440e] text-xs font-medium">Ajouter un livre →</a>
           </div>
@@ -403,19 +403,19 @@ export default function HomePage() {
 
       {/* ── MA SEMAINE EN CHIFFRES ── */}
       <section className="px-5 mb-5">
-        <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
+        <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+          <div className="bg-[#152318] border border-white/8 rounded-xl px-3 py-2.5 text-center">
             <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.booksThisMonth}</p>
-            <p className="text-[#7a7268] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
+            <p className="text-[#9a9485] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+          <div className="bg-[#152318] border border-white/8 rounded-xl px-3 py-2.5 text-center">
             <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.totalNotes}</p>
-            <p className="text-[#7a7268] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
+            <p className="text-[#9a9485] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-[#211e1a] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+          <div className="bg-[#152318] border border-white/8 rounded-xl px-3 py-2.5 text-center">
             <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.streak}</p>
-            <p className="text-[#7a7268] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
+            <p className="text-[#9a9485] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
           </div>
         </div>
       </section>
@@ -424,8 +424,8 @@ export default function HomePage() {
       {myCircles.length > 0 && (
         <section className="mb-6">
           <div className="flex items-center justify-between px-5 mb-2.5">
-            <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Mes cercles</h2>
-            <a href="/cercles" className="text-[#7a7268] text-[10px] hover:text-white transition">Voir tout →</a>
+            <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase">Mes cercles</h2>
+            <a href="/cercles" className="text-[#9a9485] text-[10px] hover:text-white transition">Voir tout →</a>
           </div>
 
           <div className="flex gap-2 px-5 overflow-x-auto pb-1 scrollbar-hide">
@@ -452,7 +452,7 @@ export default function HomePage() {
             })}
             <a
               href="/cercles"
-              className="shrink-0 flex items-center px-3 py-1.5 rounded-full border border-white/10 text-[#7a7268] text-xs hover:text-white transition"
+              className="shrink-0 flex items-center px-3 py-1.5 rounded-full border border-white/10 text-[#9a9485] text-xs hover:text-white transition"
             >
               + Nouveau
             </a>
@@ -463,10 +463,10 @@ export default function HomePage() {
       {/* ── OBJECTIFS ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Objectifs</h2>
-          <a href="/objectifs" className="text-[#7a7268] text-[10px] hover:text-white transition">Voir →</a>
+          <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase">Objectifs</h2>
+          <a href="/objectifs" className="text-[#9a9485] text-[10px] hover:text-white transition">Voir →</a>
         </div>
-        <a href="/objectifs" className="flex items-center gap-3 bg-[#211e1a] border border-white/8 rounded-xl px-4 py-3 hover:bg-white/3 transition">
+        <a href="/objectifs" className="flex items-center gap-3 bg-[#152318] border border-white/8 rounded-xl px-4 py-3 hover:bg-white/3 transition">
           <div className="w-8 h-8 rounded-lg bg-[#c9440e]/10 border border-[#c9440e]/20 flex items-center justify-center shrink-0">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9440e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
@@ -474,9 +474,9 @@ export default function HomePage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium">Définis tes objectifs de lecture</p>
-            <p className="text-[#7a7268] text-[10px] mt-0.5">Rythme quotidien, hebdomadaire...</p>
+            <p className="text-[#9a9485] text-[10px] mt-0.5">Rythme quotidien, hebdomadaire...</p>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9485" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </a>
@@ -485,17 +485,17 @@ export default function HomePage() {
       {/* ── FEED ── */}
       <section className="px-5 mb-6">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Activité</h2>
-          <a href="/explorer" className="text-[#7a7268] text-[10px] hover:text-white transition">Explorer →</a>
+          <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase">Activité</h2>
+          <a href="/explorer" className="text-[#9a9485] text-[10px] hover:text-white transition">Explorer →</a>
         </div>
 
         {feed.length === 0 ? (
-          <div className="bg-[#211e1a] border border-white/8 rounded-2xl px-5 py-6 text-center">
+          <div className="bg-[#152318] border border-white/8 rounded-2xl px-5 py-6 text-center">
             <p className="text-white/40 text-sm font-serif mb-3">Aucune activité</p>
             <a href="/explorer" className="text-[#c9440e] text-xs font-medium">Suivre des lecteurs →</a>
           </div>
         ) : (
-          <div className="bg-[#211e1a] border border-white/8 rounded-2xl overflow-hidden">
+          <div className="bg-[#152318] border border-white/8 rounded-2xl overflow-hidden">
             {feed.map((item, i) => {
               const username = item.profile?.username
               const avatarUrl = item.profile?.avatar_url
@@ -519,7 +519,7 @@ export default function HomePage() {
                     {' '}
                     {item.type === 'reading' && (
                       <>
-                        <span className="text-[#7a7268]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>
+                        <span className="text-[#9a9485]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>
                         {' '}
                         <span className="font-serif italic text-white/70">{item.book?.title}</span>
                         {item.status === 'lu' && item.rating > 0 && (
@@ -529,7 +529,7 @@ export default function HomePage() {
                     )}
                     {item.type === 'circle_join' && (
                       <>
-                        <span className="text-[#7a7268]">a rejoint</span>
+                        <span className="text-[#9a9485]">a rejoint</span>
                         {' '}
                         <a href={`/cercles/${item.circle?.id}`} className="font-medium text-white">{item.circle?.name}</a>
                       </>
@@ -537,7 +537,7 @@ export default function HomePage() {
                   </p>
 
                   {/* Timestamp */}
-                  <span className="text-[#7a7268] text-[10px] shrink-0 ml-1">{timeAgo(item.date)}</span>
+                  <span className="text-[#9a9485] text-[10px] shrink-0 ml-1">{timeAgo(item.date)}</span>
                 </div>
               )
             })}
@@ -548,14 +548,14 @@ export default function HomePage() {
       {/* ── SUGGESTIONS ── */}
       {suggestions.length > 0 && (
         <section className="px-5 mb-6">
-          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">À découvrir</h2>
-          <div className="bg-[#211e1a] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
+          <h2 className="text-[#9a9485] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">À découvrir</h2>
+          <div className="bg-[#152318] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
             {suggestions.map(book => (
               <div key={book.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-sm text-white leading-snug line-clamp-1">{book.title}</p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <p className="text-[#7a7268] text-xs truncate">{book.author}</p>
+                    <p className="text-[#9a9485] text-xs truncate">{book.author}</p>
                     {book.category && book.category !== 'Autre' && (
                       <span className="text-white/70 text-[10px] border border-white/30 bg-white/5 rounded px-1.5 py-px leading-none shrink-0">
                         {book.category}
