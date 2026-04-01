@@ -13,8 +13,11 @@ export async function POST(request: NextRequest) {
     console.log('[checkout] env check — STRIPE_PRICE_MONTHLY:', priceMonthly ?? '✗ MISSING')
     console.log('[checkout] env check — STRIPE_PRICE_YEARLY:', priceYearly ?? '✗ MISSING')
 
+    const stripeEnvKeys = Object.keys(process.env).filter(k => k.includes('STRIPE'))
+    console.log('[env]', stripeEnvKeys)
+
     if (!stripeKey) {
-      return Response.json({ error: 'STRIPE_SECRET_KEY manquante' }, { status: 500 })
+      return Response.json({ error: 'STRIPE_SECRET_KEY manquante', stripeEnvKeys }, { status: 500 })
     }
 
     // 2. Parse body
