@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
       .eq('id', userId)
 
     if (error) {
-      console.error('Webhook: failed to update is_pro', error)
       return new Response('Failed to update profile', { status: 500 })
     }
   }

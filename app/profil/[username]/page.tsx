@@ -156,7 +156,14 @@ export default function ProfilPage() {
         {/* Ligne 2 : identité */}
         <div className="mb-3">
           {profile.full_name && (
-            <p className="text-white font-semibold text-sm leading-tight">{profile.full_name}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-white font-semibold text-sm leading-tight">{profile.full_name}</p>
+              {profile.is_pro && (
+                <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-1.5 py-0.5 leading-none">
+                  ✦ Pro
+                </span>
+              )}
+            </div>
           )}
           <p className="text-[#7a7268] text-xs mt-0.5">@{username}</p>
           {profile.bio && (

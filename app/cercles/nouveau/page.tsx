@@ -14,6 +14,8 @@ const COLORS = [
 
 export default function NouveauCerclePage() {
   const [userId, setUserId] = useState<string | null>(null)
+  const [isPro, setIsPro] = useState(false)
+  const [circlesCount, setCirclesCount] = useState(0)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('#c9440e')
@@ -22,9 +24,16 @@ export default function NouveauCerclePage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { window.location.href = '/auth'; return }
       setUserId(data.user.id)
+
+      const [profileRes, circlesRes] = await Promise.all([
+        supabase.from('profiles').select('is_pro').eq('id', data.user.id).single(),
+        supabase.from('circles').select('id', { count: 'exact', head: true }).eq('owner_id', data.user.id),
+      ])
+      setIsPro(profileRes.data?.is_pro ?? false)
+      setCirclesCount(circlesRes.count ?? 0)
     })
   }, [])
 
@@ -80,8 +89,27 @@ export default function NouveauCerclePage() {
         <h1 className="font-serif text-2xl text-white">Nouveau cercle</h1>
       </div>
 
+      {/* Limite non-Pro */}
+      {!isPro && circlesCount >= 2 && (
+        <div className="mx-5 mb-2 border border-white/10 rounded-xl p-4 text-center">
+          <p className="text-white text-sm font-medium mb-1">Limite atteinte</p>
+          <p className="text-[#7a7268] text-xs leading-relaxed mb-3">
+            Les membres gratuits peuvent créer jusqu'à 2 cercles.
+          </p>
+          <a
+            href="/premium"
+            className="inline-block px-5 py-2 rounded-full text-sm font-medium bg-[#c9440e] text-white hover:opacity-90 transition"
+          >
+            Passe à Pro pour des cercles illimités
+          </a>
+        </div>
+      )}
+
       {/* Formulaire */}
-      <form onSubmit={handleSubmit} className="px-5 flex flex-col gap-5 pb-16">
+      <form
+        onSubmit={handleSubmit}
+        className={`px-5 flex flex-col gap-5 pb-16 ${!isPro && circlesCount >= 2 ? 'opacity-40 pointer-events-none select-none' : ''}`}
+      >
 
         {/* Nom */}
         <div>

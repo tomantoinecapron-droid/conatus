@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
 
@@ -23,6 +23,18 @@ const PRO_FEATURES = [
 export default function PremiumPage() {
   const [loading, setLoading] = useState<'monthly' | 'yearly' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isPro, setIsPro] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { window.location.href = '/auth'; return }
+      const { data: profile } = await supabase
+        .from('profiles').select('is_pro').eq('id', data.user.id).single()
+      setIsPro(profile?.is_pro ?? false)
+      setProfileLoading(false)
+    })
+  }, [])
 
   const handleCheckout = async (plan: 'monthly' | 'yearly') => {
     setLoading(plan)
@@ -117,60 +129,76 @@ export default function PremiumPage() {
 
         </div>
 
-        {/* Plans tarifaires */}
-        <div className="flex flex-col gap-3">
-
-          {/* Annuel — le plus populaire */}
-          <div className="relative border border-[#c9440e]/50 rounded-xl p-4 bg-[#c9440e]/5">
-            <div className="absolute -top-3 left-4 bg-[#c9440e] text-white text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full">
-              Le plus populaire
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <div>
-                <p className="text-white font-semibold text-base">12,99 €<span className="text-[#7a7268] text-xs font-normal"> / an</span></p>
-                <p className="text-[#7a7268] text-xs mt-0.5">soit 1,08 €/mois</p>
-              </div>
-              <span className="text-[10px] font-semibold text-[#c9440e] bg-[#c9440e]/15 px-2 py-0.5 rounded-full">
-                −62 %
-              </span>
-            </div>
-            <button
-              onClick={() => handleCheckout('yearly')}
-              disabled={loading !== null}
-              className="mt-3 w-full py-2.5 rounded-full text-sm font-semibold bg-[#c9440e] text-white hover:opacity-90 transition disabled:opacity-50"
-            >
-              {loading === 'yearly' ? 'Redirection…' : 'S\'abonner — 12,99 €/an'}
-            </button>
+        {profileLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="text-[#7a7268] text-sm">Chargement...</div>
           </div>
-
-          {/* Mensuel */}
-          <div className="border border-white/10 rounded-xl p-4 bg-white/2">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-semibold text-base">3,49 €<span className="text-[#7a7268] text-xs font-normal"> / mois</span></p>
-                <p className="text-[#7a7268] text-xs mt-0.5">Sans engagement</p>
-              </div>
-            </div>
-            <button
-              onClick={() => handleCheckout('monthly')}
-              disabled={loading !== null}
-              className="mt-3 w-full py-2.5 rounded-full text-sm font-medium border border-white/20 text-white hover:border-white/40 transition disabled:opacity-50"
-            >
-              {loading === 'monthly' ? 'Redirection…' : 'S\'abonner — 3,49 €/mois'}
-            </button>
+        ) : isPro ? (
+          <div className="border border-white/10 rounded-xl p-6 text-center">
+            <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-2 py-0.5">✦ Pro</span>
+            <p className="text-white font-semibold mt-3">Tu es abonné Pro</p>
+            <p className="text-[#7a7268] text-xs mt-1.5">
+              Ton abonnement est actif. Toutes les fonctionnalités Pro sont débloquées.
+            </p>
           </div>
+        ) : (
+          <>
+            {/* Plans tarifaires */}
+            <div className="flex flex-col gap-3">
 
-        </div>
+              {/* Annuel — le plus populaire */}
+              <div className="relative border border-[#c9440e]/50 rounded-xl p-4 bg-[#c9440e]/5">
+                <div className="absolute -top-3 left-4 bg-[#c9440e] text-white text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full">
+                  Le plus populaire
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <div>
+                    <p className="text-white font-semibold text-base">12,99 €<span className="text-[#7a7268] text-xs font-normal"> / an</span></p>
+                    <p className="text-[#7a7268] text-xs mt-0.5">soit 1,08 €/mois</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#c9440e] bg-[#c9440e]/15 px-2 py-0.5 rounded-full">
+                    −62 %
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleCheckout('yearly')}
+                  disabled={loading !== null}
+                  className="mt-3 w-full py-2.5 rounded-full text-sm font-semibold bg-[#c9440e] text-white hover:opacity-90 transition disabled:opacity-50"
+                >
+                  {loading === 'yearly' ? 'Redirection…' : 'S\'abonner — 12,99 €/an'}
+                </button>
+              </div>
 
-        {error && (
-          <p className="text-center text-[#c9440e] text-xs font-medium mt-4">
-            {error}
-          </p>
+              {/* Mensuel */}
+              <div className="border border-white/10 rounded-xl p-4 bg-white/2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-semibold text-base">3,49 €<span className="text-[#7a7268] text-xs font-normal"> / mois</span></p>
+                    <p className="text-[#7a7268] text-xs mt-0.5">Sans engagement</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleCheckout('monthly')}
+                  disabled={loading !== null}
+                  className="mt-3 w-full py-2.5 rounded-full text-sm font-medium border border-white/20 text-white hover:border-white/40 transition disabled:opacity-50"
+                >
+                  {loading === 'monthly' ? 'Redirection…' : 'S\'abonner — 3,49 €/mois'}
+                </button>
+              </div>
+
+            </div>
+
+            {error && (
+              <p className="text-center text-[#c9440e] text-xs font-medium mt-4">
+                {error}
+              </p>
+            )}
+
+            <p className="text-center text-[#7a7268]/50 text-[10px] mt-5">
+              Paiement sécurisé par Stripe · Résiliation à tout moment
+            </p>
+          </>
         )}
-
-        <p className="text-center text-[#7a7268]/50 text-[10px] mt-5">
-          Paiement sécurisé par Stripe · Résiliation à tout moment
-        </p>
 
       </div>
 
