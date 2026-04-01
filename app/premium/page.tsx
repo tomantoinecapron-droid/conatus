@@ -21,18 +21,37 @@ const PRO_FEATURES = [
 
 export default function PremiumPage() {
   const [loading, setLoading] = useState<'monthly' | 'yearly' | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCheckout = async (plan: 'monthly' | 'yearly') => {
     setLoading(plan)
+    setError(null)
     try {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
       })
-      const { url } = await res.json()
-      if (url) window.location.href = url
-    } catch {
+
+      const data = await res.json()
+      console.log('[checkout] status:', res.status, 'body:', data)
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/auth'
+          return
+        }
+        throw new Error(data.error || `Erreur ${res.status}`)
+      }
+
+      if (!data.url) {
+        throw new Error('URL Stripe manquante dans la réponse')
+      }
+
+      window.location.href = data.url
+    } catch (err) {
+      console.error('[checkout] erreur:', err)
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
       setLoading(null)
     }
   }
@@ -141,6 +160,12 @@ export default function PremiumPage() {
           </div>
 
         </div>
+
+        {error && (
+          <p className="text-center text-[#c9440e] text-xs font-medium mt-4">
+            {error}
+          </p>
+        )}
 
         <p className="text-center text-[#7a7268]/50 text-[10px] mt-5">
           Paiement sécurisé par Stripe · Résiliation à tout moment
