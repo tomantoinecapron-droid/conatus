@@ -80,7 +80,8 @@ export async function POST(request: NextRequest) {
     return Response.json({ url: session.url })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
+    const stack = err instanceof Error ? err.stack : undefined
     console.error('[checkout] ERREUR 500:', message)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: message, stack }, { status: 500 })
   }
 }
