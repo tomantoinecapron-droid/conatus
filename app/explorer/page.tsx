@@ -147,12 +147,12 @@ export default function ExplorerPage() {
                   {/* Infos */}
                   <a href={`/profil/${profile.username}`} className="flex-1 min-w-0">
                     {profile.full_name && (
-                      <p className="font-semibold text-white text-sm leading-tight truncate">
-                        {profile.full_name}
-                        {profile.is_pro && <span className="text-white/60 text-[10px] ml-1">✦</span>}
-                      </p>
+                      <p className="font-semibold text-white text-sm leading-tight truncate">{profile.full_name}</p>
                     )}
-                    <p className="text-[#7a7268] text-xs truncate">@{profile.username}</p>
+                    <p className="text-[#7a7268] text-xs truncate">
+                      @{profile.username}
+                      {profile.is_pro && <span className="text-white/60 text-[10px] ml-1">✦</span>}
+                    </p>
                     <p className="text-[#7a7268] text-[11px] mt-0.5">
                       {profile.booksCount} livre{profile.booksCount !== 1 ? 's' : ''}
                     </p>
