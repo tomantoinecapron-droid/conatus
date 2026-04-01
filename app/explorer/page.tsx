@@ -26,7 +26,7 @@ export default function ExplorerPage() {
 
     let q = supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
+      .select('id, username, full_name, avatar_url, is_pro')
       .limit(30)
 
     if (query.trim()) {
@@ -147,7 +147,10 @@ export default function ExplorerPage() {
                   {/* Infos */}
                   <a href={`/profil/${profile.username}`} className="flex-1 min-w-0">
                     {profile.full_name && (
-                      <p className="font-semibold text-white text-sm leading-tight truncate">{profile.full_name}</p>
+                      <p className="font-semibold text-white text-sm leading-tight truncate">
+                        {profile.full_name}
+                        {profile.is_pro && <span className="text-white/60 text-[10px] ml-1">✦</span>}
+                      </p>
                     )}
                     <p className="text-[#7a7268] text-xs truncate">@{profile.username}</p>
                     <p className="text-[#7a7268] text-[11px] mt-0.5">

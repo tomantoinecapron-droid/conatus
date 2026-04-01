@@ -144,7 +144,7 @@ export default function HomePage() {
       let profileMap: Record<string, any> = {}
       if (allUids.length > 0) {
         const { data: profs } = await supabase
-          .from('profiles').select('id, username, avatar_url').in('id', allUids)
+          .from('profiles').select('id, username, avatar_url, is_pro').in('id', allUids)
         profileMap = Object.fromEntries((profs || []).map((p: any) => [p.id, p]))
       }
 
@@ -515,7 +515,7 @@ export default function HomePage() {
 
                   {/* Texte compact sur une ligne */}
                   <p className="flex-1 min-w-0 text-xs leading-none truncate">
-                    <a href={`/profil/${username}`} className="font-medium text-white">@{username}</a>
+                    <a href={`/profil/${username}`} className="font-medium text-white">@{username}</a>{item.profile?.is_pro && <span className="text-white/60 text-[10px] ml-0.5">✦</span>}
                     {' '}
                     {item.type === 'reading' && (
                       <>

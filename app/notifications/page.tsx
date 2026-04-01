@@ -26,7 +26,7 @@ export default function NotificationsPage() {
 
       const { data: notifs } = await supabase
         .from('notifications')
-        .select('*, from_profile:profiles!from_user_id(id, username, avatar_url)')
+        .select('*, from_profile:profiles!from_user_id(id, username, avatar_url, is_pro)')
         .eq('user_id', data.user.id)
         .order('created_at', { ascending: false })
         .limit(50)
@@ -87,7 +87,7 @@ export default function NotificationsPage() {
                   {/* Texte */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm leading-snug">
-                      <span className="font-medium text-white">@{from?.username ?? 'quelqu\'un'}</span>
+                      <span className="font-medium text-white">@{from?.username ?? 'quelqu\'un'}</span>{from?.is_pro && <span className="text-white/60 text-[10px] ml-0.5">✦</span>}
                       {' '}
                       <span className="text-[#7a7268]">s'est abonné à toi</span>
                     </p>

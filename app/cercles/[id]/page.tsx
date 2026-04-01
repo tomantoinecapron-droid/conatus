@@ -64,7 +64,7 @@ export default function CerclePage() {
       const [circleRes, membersRes, profileRes] = await Promise.all([
         supabase.from('circles').select('*').eq('id', circleId).single(),
         supabase.from('circle_members')
-          .select('user_id, role, joined_at, profile:profiles(id, username, full_name, avatar_url)')
+          .select('user_id, role, joined_at, profile:profiles(id, username, full_name, avatar_url, is_pro)')
           .eq('circle_id', circleId)
           .order('joined_at', { ascending: true }),
         supabase.from('profiles').select('is_admin').eq('id', userId).single(),
@@ -307,7 +307,7 @@ export default function CerclePage() {
                     <p className="text-xs leading-snug">
                       <a href={`/profil/${item.profile?.username}`} className="font-medium text-white hover:text-[#c9440e] transition">
                         @{item.profile?.username}
-                      </a>{' '}
+                      </a>{item.profile?.is_pro && <span className="text-white/60 text-[10px] ml-0.5">✦</span>}{' '}
                       <span className="text-[#7a7268]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>{' '}
                       <span className="font-serif italic text-white/80">{item.books?.title}</span>
                     </p>
@@ -348,7 +348,11 @@ export default function CerclePage() {
                     </div>
                   </a>
                   <a href={`/profil/${p?.username}`} className="flex-1 min-w-0">
-                    {p?.full_name && <p className="font-medium text-white text-sm truncate">{p.full_name}</p>}
+                    {p?.full_name && (
+                      <p className="font-medium text-white text-sm truncate">
+                        {p.full_name}{p?.is_pro && <span className="text-white/60 text-[10px] ml-1">✦</span>}
+                      </p>
+                    )}
                     <p className="text-[#7a7268] text-xs truncate">@{p?.username}</p>
                   </a>
                   {member.role === 'owner' && (
