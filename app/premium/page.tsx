@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
 
 const FREE_FEATURES = [
@@ -27,20 +28,21 @@ export default function PremiumPage() {
     setLoading(plan)
     setError(null)
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        window.location.href = '/auth'
+        return
+      }
+
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, userId: user.id, userEmail: user.email }),
       })
 
       const data = await res.json()
-      console.log('[checkout] status:', res.status, 'body:', data)
 
       if (!res.ok) {
-        if (res.status === 401) {
-          window.location.href = '/auth'
-          return
-        }
         throw new Error(data.error || `Erreur ${res.status}`)
       }
 
@@ -50,7 +52,6 @@ export default function PremiumPage() {
 
       window.location.href = data.url
     } catch (err) {
-      console.error('[checkout] erreur:', err)
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
       setLoading(null)
     }
