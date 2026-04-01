@@ -192,8 +192,8 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center">
-        <div className="text-[#6b6560] text-sm">Chargement...</div>
+      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
+        <div className="text-[#7a7268] text-sm">Chargement...</div>
       </div>
     )
   }
@@ -204,7 +204,7 @@ export default function HomePage() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-[#1a1714] pb-28 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#1a1714] text-white pb-28 relative overflow-x-hidden">
 
       {/* ── Vignetting bords ── */}
       <div
@@ -218,28 +218,28 @@ export default function HomePage() {
 
         <div className="flex-1 min-w-0 pr-3">
           {/* Date */}
-          <p className="text-[#6b6560] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
+          <p className="text-[#7a7268] text-[11px] capitalize tracking-wide mb-0.5">{today}</p>
 
           {/* Salutation */}
-          <h1 className="font-serif text-[28px] leading-tight text-[#1a1714]">
+          <h1 className="font-serif text-[28px] leading-tight text-white">
             {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
 
           {/* Citation inline */}
-          <p className="text-[#1a1714]/30 text-[11px] italic font-serif leading-snug mt-1.5">
+          <p className="text-white/30 text-[11px] italic font-serif leading-snug mt-1.5">
             &ldquo;{quote.text.length > 80 ? quote.text.slice(0, 80) + '…' : quote.text}&rdquo; — {quote.author}
           </p>
         </div>
 
         {/* Cloche */}
         <a href="/notifications" className="relative p-1.5 shrink-0">
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           {unreadCount > 0 && (
             <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] bg-[#c9440e] rounded-full flex items-center justify-center px-0.5">
-              <span className="text-[#1a1714] text-[9px] font-bold leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              <span className="text-white text-[9px] font-bold leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
             </span>
           )}
         </a>
@@ -251,7 +251,7 @@ export default function HomePage() {
           width="80"
           height="60"
           fill="none"
-          stroke="#1a1714"
+          stroke="white"
           strokeOpacity="0.15"
           strokeWidth="0.9"
           strokeLinecap="round"
@@ -301,8 +301,8 @@ export default function HomePage() {
       {/* ── EN COURS + À LIRE ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase">Lecture</h2>
-          <a href="/bibliotheque" className="text-[#6b6560] text-[10px] hover:text-[#1a1714] transition">Bibliothèque →</a>
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Lecture</h2>
+          <a href="/bibliotheque" className="text-[#7a7268] text-[10px] hover:text-white transition">Bibliothèque →</a>
         </div>
 
         {enCours.length > 0 || nextBook ? (
@@ -312,22 +312,22 @@ export default function HomePage() {
               const reading = enCours[0]
               const progress = reading.progress ?? 0
               return (
-                <div className="bg-white border border-black/8 rounded-xl p-3 flex gap-2.5">
+                <div className="bg-[#242018] border border-white/8 rounded-xl p-3 flex gap-2.5">
                   <a href={`/fiche/${reading.id}`} className="shrink-0">
-                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#e8e4de] relative">
+                    <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#2a2520] relative">
                       {reading.books?.cover_url
                         ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt={reading.books.title} />
-                        : <div className="w-full h-full bg-gradient-to-b from-[#e8e4de] to-[#faf8f5]" />}
+                        : <div className="w-full h-full bg-gradient-to-b from-[#2a2520] to-[#1a1714]" />}
                       <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                     </div>
                   </a>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                     <div>
                       <p className="text-[9px] text-[#c9440e] font-medium uppercase tracking-wide mb-0.5">En cours</p>
-                      <p className="font-serif text-[13px] text-[#1a1714] leading-snug line-clamp-3">{reading.books?.title}</p>
+                      <p className="font-serif text-[13px] text-white leading-snug line-clamp-3">{reading.books?.title}</p>
                     </div>
                     <div>
-                      <div className="relative w-full h-0.5 bg-black/8 rounded-full overflow-hidden mb-1.5">
+                      <div className="relative w-full h-0.5 bg-white/8 rounded-full overflow-hidden mb-1.5">
                         <div className="h-full bg-[#c9440e] rounded-full" style={{ width: `${progress}%` }} />
                         <input type="range" min={0} max={100} value={progress}
                           onChange={e => updateProgress(reading.id, Number(e.target.value))}
@@ -341,9 +341,9 @@ export default function HomePage() {
                 </div>
               )
             })() : (
-              <a href="/bibliotheque" className="bg-white border border-black/8 rounded-xl p-3 flex items-center justify-center text-center">
+              <a href="/bibliotheque" className="bg-[#242018] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
                 <div>
-                  <p className="text-[#1a1714]/30 font-serif text-xs mb-1">Rien en cours</p>
+                  <p className="text-white/30 font-serif text-xs mb-1">Rien en cours</p>
                   <p className="text-[#c9440e] text-[10px]">Commencer →</p>
                 </div>
               </a>
@@ -351,51 +351,51 @@ export default function HomePage() {
 
             {/* Colonne droite : à lire */}
             {nextBook ? (
-              <a href={`/fiche/${nextBook.id}`} className="bg-white border border-black/8 rounded-xl p-3 flex gap-2.5">
+              <a href={`/fiche/${nextBook.id}`} className="bg-[#242018] border border-white/8 rounded-xl p-3 flex gap-2.5">
                 <div className="shrink-0">
-                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#e8e4de] relative">
+                  <div className="w-[56px] h-[82px] rounded-lg overflow-hidden bg-[#2a2520] relative">
                     {nextBook.books?.cover_url
                       ? <img src={nextBook.books.cover_url} className="w-full h-full object-cover" alt={nextBook.books.title} />
-                      : <div className="w-full h-full bg-gradient-to-b from-[#e8e4de] to-[#faf8f5]" />}
+                      : <div className="w-full h-full bg-gradient-to-b from-[#2a2520] to-[#1a1714]" />}
                     <div aria-hidden className="absolute inset-0 rounded-lg" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', opacity: 0.03, mixBlendMode: 'overlay' }} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                   <div>
-                    <p className="text-[9px] text-[#6b6560] font-medium uppercase tracking-wide mb-0.5">À lire</p>
-                    <p className="font-serif text-[13px] text-[#1a1714] leading-snug line-clamp-3">{nextBook.books?.title}</p>
+                    <p className="text-[9px] text-[#7a7268] font-medium uppercase tracking-wide mb-0.5">À lire</p>
+                    <p className="font-serif text-[13px] text-white leading-snug line-clamp-3">{nextBook.books?.title}</p>
                   </div>
-                  <p className="text-[#6b6560] text-[10px] truncate">{nextBook.books?.author?.split(' ').pop()}</p>
+                  <p className="text-[#7a7268] text-[10px] truncate">{nextBook.books?.author?.split(' ').pop()}</p>
                 </div>
               </a>
             ) : (
-              <a href="/bibliotheque" className="bg-white border border-black/8 rounded-xl p-3 flex items-center justify-center text-center">
+              <a href="/bibliotheque" className="bg-[#242018] border border-white/8 rounded-xl p-3 flex items-center justify-center text-center">
                 <div>
-                  <p className="text-[#1a1714]/30 font-serif text-xs mb-1">File vide</p>
+                  <p className="text-white/30 font-serif text-xs mb-1">File vide</p>
                   <p className="text-[#c9440e] text-[10px]">Ajouter →</p>
                 </div>
               </a>
             )}
           </div>
         ) : myRecentBooks.length > 0 ? (
-          <div className="bg-white border border-black/8 rounded-2xl overflow-hidden">
+          <div className="bg-[#242018] border border-white/8 rounded-2xl overflow-hidden">
             {myRecentBooks.map((reading, i) => (
               <a key={reading.id} href={`/fiche/${reading.id}`}
-                className={`flex items-center gap-3 px-4 py-2.5 hover:bg-black/3 transition ${i < myRecentBooks.length - 1 ? 'border-b border-black/5' : ''}`}
+                className={`flex items-center gap-3 px-4 py-2.5 hover:bg-white/3 transition ${i < myRecentBooks.length - 1 ? 'border-b border-white/5' : ''}`}
               >
-                <div className="w-7 h-10 rounded overflow-hidden bg-[#e8e4de] shrink-0">
+                <div className="w-7 h-10 rounded overflow-hidden bg-[#2a2520] shrink-0">
                   {reading.books?.cover_url
                     ? <img src={reading.books.cover_url} className="w-full h-full object-cover" alt="" />
-                    : <div className="w-full h-full bg-gradient-to-b from-[#e8e4de] to-[#faf8f5]" />}
+                    : <div className="w-full h-full bg-gradient-to-b from-[#2a2520] to-[#1a1714]" />}
                 </div>
-                <p className="flex-1 font-serif text-sm text-[#1a1714] leading-tight truncate">{reading.books?.title}</p>
-                <span className="text-[#6b6560] text-[10px] shrink-0">{reading.books?.author?.split(' ').pop()}</span>
+                <p className="flex-1 font-serif text-sm text-white leading-tight truncate">{reading.books?.title}</p>
+                <span className="text-[#7a7268] text-[10px] shrink-0">{reading.books?.author?.split(' ').pop()}</span>
               </a>
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-black/8 rounded-2xl px-5 py-6 text-center">
-            <p className="text-[#1a1714]/40 text-sm font-serif mb-3">Ta bibliothèque est vide</p>
+          <div className="bg-[#242018] border border-white/8 rounded-2xl px-5 py-6 text-center">
+            <p className="text-white/40 text-sm font-serif mb-3">Ta bibliothèque est vide</p>
             <a href="/bibliotheque" className="text-[#c9440e] text-xs font-medium">Ajouter un livre →</a>
           </div>
         )}
@@ -403,19 +403,19 @@ export default function HomePage() {
 
       {/* ── MA SEMAINE EN CHIFFRES ── */}
       <section className="px-5 mb-5">
-        <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
+        <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white border border-black/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-[#1a1714] text-2xl leading-none mb-0.5">{stats.booksThisMonth}</p>
-            <p className="text-[#6b6560] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
+          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.booksThisMonth}</p>
+            <p className="text-[#7a7268] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-white border border-black/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-[#1a1714] text-2xl leading-none mb-0.5">{stats.totalNotes}</p>
-            <p className="text-[#6b6560] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
+          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.totalNotes}</p>
+            <p className="text-[#7a7268] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
           </div>
-          <div className="bg-white border border-black/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-[#1a1714] text-2xl leading-none mb-0.5">{stats.streak}</p>
-            <p className="text-[#6b6560] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
+          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
+            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.streak}</p>
+            <p className="text-[#7a7268] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
           </div>
         </div>
       </section>
@@ -424,8 +424,8 @@ export default function HomePage() {
       {myCircles.length > 0 && (
         <section className="mb-6">
           <div className="flex items-center justify-between px-5 mb-2.5">
-            <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase">Mes cercles</h2>
-            <a href="/cercles" className="text-[#6b6560] text-[10px] hover:text-[#1a1714] transition">Voir tout →</a>
+            <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Mes cercles</h2>
+            <a href="/cercles" className="text-[#7a7268] text-[10px] hover:text-white transition">Voir tout →</a>
           </div>
 
           <div className="flex gap-2 px-5 overflow-x-auto pb-1 scrollbar-hide">
@@ -446,13 +446,13 @@ export default function HomePage() {
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="text-[#1a1714] text-xs font-medium whitespace-nowrap">{circle.name}</span>
+                  <span className="text-white text-xs font-medium whitespace-nowrap">{circle.name}</span>
                 </a>
               )
             })}
             <a
               href="/cercles"
-              className="shrink-0 flex items-center px-3 py-1.5 rounded-full border border-black/10 text-[#6b6560] text-xs hover:text-[#1a1714] transition"
+              className="shrink-0 flex items-center px-3 py-1.5 rounded-full border border-white/10 text-[#7a7268] text-xs hover:text-white transition"
             >
               + Nouveau
             </a>
@@ -463,20 +463,20 @@ export default function HomePage() {
       {/* ── OBJECTIFS ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase">Objectifs</h2>
-          <a href="/objectifs" className="text-[#6b6560] text-[10px] hover:text-[#1a1714] transition">Voir →</a>
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Objectifs</h2>
+          <a href="/objectifs" className="text-[#7a7268] text-[10px] hover:text-white transition">Voir →</a>
         </div>
-        <a href="/objectifs" className="flex items-center gap-3 bg-white border border-black/8 rounded-xl px-4 py-3 hover:bg-black/3 transition">
+        <a href="/objectifs" className="flex items-center gap-3 bg-[#242018] border border-white/8 rounded-xl px-4 py-3 hover:bg-white/3 transition">
           <div className="w-8 h-8 rounded-lg bg-[#c9440e]/10 border border-[#c9440e]/20 flex items-center justify-center shrink-0">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9440e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[#1a1714] text-xs font-medium">Définis tes objectifs de lecture</p>
-            <p className="text-[#6b6560] text-[10px] mt-0.5">Rythme quotidien, hebdomadaire...</p>
+            <p className="text-white text-xs font-medium">Définis tes objectifs de lecture</p>
+            <p className="text-[#7a7268] text-[10px] mt-0.5">Rythme quotidien, hebdomadaire...</p>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </a>
@@ -485,24 +485,24 @@ export default function HomePage() {
       {/* ── FEED ── */}
       <section className="px-5 mb-6">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase">Activité</h2>
-          <a href="/explorer" className="text-[#6b6560] text-[10px] hover:text-[#1a1714] transition">Explorer →</a>
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Activité</h2>
+          <a href="/explorer" className="text-[#7a7268] text-[10px] hover:text-white transition">Explorer →</a>
         </div>
 
         {feed.length === 0 ? (
-          <div className="bg-white border border-black/8 rounded-2xl px-5 py-6 text-center">
-            <p className="text-[#1a1714]/40 text-sm font-serif mb-3">Aucune activité</p>
+          <div className="bg-[#242018] border border-white/8 rounded-2xl px-5 py-6 text-center">
+            <p className="text-white/40 text-sm font-serif mb-3">Aucune activité</p>
             <a href="/explorer" className="text-[#c9440e] text-xs font-medium">Suivre des lecteurs →</a>
           </div>
         ) : (
-          <div className="bg-white border border-black/8 rounded-2xl overflow-hidden">
+          <div className="bg-[#242018] border border-white/8 rounded-2xl overflow-hidden">
             {feed.map((item, i) => {
               const username = item.profile?.username
               const avatarUrl = item.profile?.avatar_url
               return (
                 <div
                   key={item.id}
-                  className={`flex items-center gap-2.5 px-3.5 py-2.5 ${i < feed.length - 1 ? 'border-b border-black/5' : ''}`}
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 ${i < feed.length - 1 ? 'border-b border-white/5' : ''}`}
                 >
                   {/* Avatar 32px */}
                   <a href={`/profil/${username}`} className="shrink-0">
@@ -515,13 +515,13 @@ export default function HomePage() {
 
                   {/* Texte compact sur une ligne */}
                   <p className="flex-1 min-w-0 text-xs leading-none truncate">
-                    <a href={`/profil/${username}`} className="font-medium text-[#1a1714]">@{username}</a>{item.profile?.is_pro && <span className="text-[#1a1714]/60 text-[10px] ml-0.5">✦</span>}
+                    <a href={`/profil/${username}`} className="font-medium text-white">@{username}</a>{item.profile?.is_pro && <span className="text-white/60 text-[10px] ml-0.5">✦</span>}
                     {' '}
                     {item.type === 'reading' && (
                       <>
-                        <span className="text-[#6b6560]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>
+                        <span className="text-[#7a7268]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>
                         {' '}
-                        <span className="font-serif italic text-[#1a1714]/70">{item.book?.title}</span>
+                        <span className="font-serif italic text-white/70">{item.book?.title}</span>
                         {item.status === 'lu' && item.rating > 0 && (
                           <span className="text-[#c9440e] ml-0.5">{stars(item.rating)}</span>
                         )}
@@ -529,15 +529,15 @@ export default function HomePage() {
                     )}
                     {item.type === 'circle_join' && (
                       <>
-                        <span className="text-[#6b6560]">a rejoint</span>
+                        <span className="text-[#7a7268]">a rejoint</span>
                         {' '}
-                        <a href={`/cercles/${item.circle?.id}`} className="font-medium text-[#1a1714]">{item.circle?.name}</a>
+                        <a href={`/cercles/${item.circle?.id}`} className="font-medium text-white">{item.circle?.name}</a>
                       </>
                     )}
                   </p>
 
                   {/* Timestamp */}
-                  <span className="text-[#6b6560] text-[10px] shrink-0 ml-1">{timeAgo(item.date)}</span>
+                  <span className="text-[#7a7268] text-[10px] shrink-0 ml-1">{timeAgo(item.date)}</span>
                 </div>
               )
             })}
@@ -548,16 +548,16 @@ export default function HomePage() {
       {/* ── SUGGESTIONS ── */}
       {suggestions.length > 0 && (
         <section className="px-5 mb-6">
-          <h2 className="text-[#6b6560] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">À découvrir</h2>
-          <div className="bg-white border border-black/8 rounded-2xl overflow-hidden divide-y divide-white/5">
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">À découvrir</h2>
+          <div className="bg-[#242018] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
             {suggestions.map(book => (
               <div key={book.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-serif text-sm text-[#1a1714] leading-snug line-clamp-1">{book.title}</p>
+                  <p className="font-serif text-sm text-white leading-snug line-clamp-1">{book.title}</p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <p className="text-[#6b6560] text-xs truncate">{book.author}</p>
+                    <p className="text-[#7a7268] text-xs truncate">{book.author}</p>
                     {book.category && book.category !== 'Autre' && (
-                      <span className="text-[#1a1714]/70 text-[10px] border border-black/30 bg-black/5 rounded px-1.5 py-px leading-none shrink-0">
+                      <span className="text-white/70 text-[10px] border border-white/30 bg-white/5 rounded px-1.5 py-px leading-none shrink-0">
                         {book.category}
                       </span>
                     )}
@@ -568,7 +568,7 @@ export default function HomePage() {
                   className="shrink-0 w-7 h-7 bg-[#c9440e] rounded-lg flex items-center justify-center hover:opacity-90 transition"
                   aria-label={`Ajouter ${book.title}`}
                 >
-                  <span className="text-[#1a1714] text-base font-medium leading-none">+</span>
+                  <span className="text-white text-base font-medium leading-none">+</span>
                 </button>
               </div>
             ))}
