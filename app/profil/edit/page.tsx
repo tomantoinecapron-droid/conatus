@@ -237,6 +237,17 @@ export default function EditProfilPage() {
           </button>
         </div>
 
+        {/* Lien Pro */}
+        <div className="flex justify-center mt-4">
+          <a
+            href="/premium"
+            className="flex items-center gap-1.5 text-[#c9440e] text-xs font-medium hover:opacity-80 transition"
+          >
+            <span>Passer Pro</span>
+            <span className="text-[10px]">✦</span>
+          </a>
+        </div>
+
       </div>
 
       <BottomNav />
