@@ -549,25 +549,27 @@ export default function HomePage() {
       {suggestions.length > 0 && (
         <section className="px-5 mb-6">
           <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">À découvrir</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="bg-[#211e1a] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
             {suggestions.map(book => (
-              <div key={book.id}>
-                <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[#242018] mb-1.5 group">
-                  {book.cover_url
-                    ? <img src={book.cover_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={book.title} />
-                    : <div className="w-full h-full flex items-end p-2 bg-gradient-to-b from-[#2e2a24] to-[#1a1714]">
-                        <p className="font-serif text-[9px] text-white/50 leading-tight line-clamp-4">{book.title}</p>
-                      </div>}
-                  <button
-                    onClick={() => addToLibrary(book)}
-                    className="absolute bottom-1.5 right-1.5 w-6 h-6 bg-[#c9440e] rounded-full flex items-center justify-center hover:opacity-90 transition shadow-lg"
-                    aria-label={`Ajouter ${book.title}`}
-                  >
-                    <span className="text-white text-base font-medium leading-none">+</span>
-                  </button>
+              <div key={book.id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-serif text-sm text-white leading-snug line-clamp-1">{book.title}</p>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <p className="text-[#7a7268] text-xs truncate">{book.author}</p>
+                    {book.category && book.category !== 'Autre' && (
+                      <span className="text-white/70 text-[10px] border border-white/30 bg-white/5 rounded px-1.5 py-px leading-none shrink-0">
+                        {book.category}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="font-serif text-[10px] text-white leading-tight line-clamp-2">{book.title}</p>
-                <p className="text-[#7a7268] text-[10px] mt-0.5 truncate">{book.author}</p>
+                <button
+                  onClick={() => addToLibrary(book)}
+                  className="shrink-0 w-7 h-7 bg-[#c9440e] rounded-lg flex items-center justify-center hover:opacity-90 transition"
+                  aria-label={`Ajouter ${book.title}`}
+                >
+                  <span className="text-white text-base font-medium leading-none">+</span>
+                </button>
               </div>
             ))}
           </div>

@@ -321,7 +321,7 @@ export default function Bibliotheque() {
                     </p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <p className="text-[#7a7268] text-xs truncate">{book?.author}</p>
-                      <span className="text-[#7a7268]/40 text-[10px] border border-white/8 rounded px-1.5 py-px leading-none shrink-0">
+                      <span className="text-white/70 text-[10px] border border-white/30 bg-white/5 rounded px-1.5 py-px leading-none shrink-0">
                         {category}
                       </span>
                     </div>
