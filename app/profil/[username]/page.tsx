@@ -147,7 +147,7 @@ export default function ProfilPage() {
       {/* ── Header ── */}
       <div className="px-6 pt-14 pb-8">
 
-        {/* Avatar + crayon */}
+        {/* Avatar + actions */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-[#2a2520] shrink-0 border border-white/8">
             {profile.avatar_url
@@ -162,16 +162,28 @@ export default function ProfilPage() {
             }
           </div>
           {isOwnProfile && (
-            <a
-              href="/profil/edit"
-              className="mt-1 text-[#7a7268] hover:text-white/60 transition shrink-0"
-              aria-label="Modifier le profil"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </a>
+            <div className="flex items-center gap-3 mt-1">
+              <a
+                href="/profil/edit"
+                className="text-[#7a7268] hover:text-white/60 transition"
+                aria-label="Modifier le profil"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </a>
+              <a
+                href="/settings"
+                className="text-[#7a7268] hover:text-white/60 transition"
+                aria-label="Paramètres"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </a>
+            </div>
           )}
         </div>
 
@@ -234,59 +246,6 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {/* ── Encart Pro (profil perso uniquement) ── */}
-      {isOwnProfile && (
-        <div className="mx-6 mb-8">
-          {profile.is_pro ? (
-            /* — Déjà Pro — */
-            <div className="border border-[#c9440e]/20 rounded-2xl px-5 py-4 bg-[#c9440e]/5">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[#c9440e] text-[13px]">✦</span>
-                <p className="text-white text-[13px] font-medium">Conatus Pro</p>
-              </div>
-              <ul className="flex flex-col gap-1.5 mb-4">
-                {['Bibliothèque illimitée', 'Cercles sans limite', 'Statistiques avancées', 'Support prioritaire'].map(b => (
-                  <li key={b} className="flex items-center gap-2 text-[12px] text-[#7a7268]">
-                    <span className="text-[#c9440e]/60 text-[10px]">✓</span>
-                    {b}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="/premium"
-                className="inline-flex items-center gap-1.5 text-[12px] text-[#c9440e]/70 hover:text-[#c9440e] transition"
-              >
-                Gérer mon abonnement →
-              </a>
-            </div>
-          ) : (
-            /* — Non Pro — */
-            <div className="border border-white/8 rounded-2xl px-5 py-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-white/20 text-[13px]">✦</span>
-                <p className="text-white/60 text-[13px] font-medium">Conatus Pro</p>
-              </div>
-              <p className="text-[#7a7268] text-[12px] mb-3 leading-snug">
-                Débloques toutes les fonctionnalités pour aller plus loin dans ta pratique de lecture.
-              </p>
-              <ul className="flex flex-col gap-1.5 mb-4">
-                {['Bibliothèque illimitée', 'Cercles sans limite', 'Statistiques avancées', 'Support prioritaire'].map(b => (
-                  <li key={b} className="flex items-center gap-2 text-[12px] text-white/30">
-                    <span className="text-white/15 text-[10px]">○</span>
-                    {b}
-                  </li>
-                ))}
-              </ul>
-              <a
-                href="/premium"
-                className="inline-flex items-center gap-2 text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition"
-              >
-                Passer à Pro
-              </a>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Bibliothèque ── */}
       {readings.length > 0 && (
