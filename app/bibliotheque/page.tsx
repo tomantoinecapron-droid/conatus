@@ -24,15 +24,24 @@ type Category = typeof CATEGORY_LIST[number]
 function normalizeCategory(cats?: string[]): Category {
   if (!cats?.length) return 'Autre'
   const s = cats.join(' ').toLowerCase()
-  if (/philo/.test(s)) return 'Philosophie'
-  if (/litt.*fr|french lit|po[eé]sie/.test(s)) return 'Littérature française'
-  if (/fiction|novel|litt[eé]|roman/.test(s)) return 'Littérature étrangère'
-  if (/social|psycho|sociolog|anthropo|linguist|educat/.test(s)) return 'Sciences humaines'
-  if (/histor|biograph/.test(s)) return 'Histoire'
-  if (/\blaw\b|droit|polit/.test(s)) return 'Droit & Politique'
-  if (/science|technolog|math|physic|comput|biolog|nature/.test(s)) return 'Sciences & Tech'
-  if (/self.help|personal.develop|self develop|motivat|coaching/.test(s)) return 'Développement personnel'
-  if (/comic|manga|bande.dessin|graphic novel/.test(s)) return 'BD & Manga'
+  // BD & Manga — avant fiction pour éviter collision
+  if (/comic|manga|bande.?dessin|graphic.?novel/.test(s)) return 'BD & Manga'
+  // Philosophie & spiritualité
+  if (/philo|ethic|ontolog|metaphysic|religion|spiritual|theolog/.test(s)) return 'Philosophie'
+  // Histoire & biographie
+  if (/histor|biograph|memoir|autobiograph|ancient|medieval|\bwar\b|military/.test(s)) return 'Histoire'
+  // Développement personnel
+  if (/self.?help|personal.?develop|motivat|coaching|success|productiv|well.?being|happiness|mindset|leadership/.test(s)) return 'Développement personnel'
+  // Droit & Politique
+  if (/\blaw\b|legal|droit|polit|govern|international.?relation|criminolog/.test(s)) return 'Droit & Politique'
+  // Sciences humaines (dont éco, psycho, socio, business)
+  if (/psycholog|sociolog|anthropolog|linguist|educat|social.?science|cultur|gender|media|business|econom|finance|management|marketing/.test(s)) return 'Sciences humaines'
+  // Sciences & Tech
+  if (/\bscience\b|technolog|math|physic|comput|biolog|nature|environment|climat|astronom|medic|engineer|chemistry/.test(s)) return 'Sciences & Tech'
+  // Littérature française (priorité sur étrangère)
+  if (/français|french.?lit|littérature.?(française|fr)|poésie|po[eé]t|roman français/.test(s)) return 'Littérature française'
+  // Littérature étrangère — catch-all large pour toute fiction
+  if (/fiction|novel|litter|littér|roman|fantasy|thriller|mystery|horror|adventure|drama|classic|poetry|short.?stor|young.?adult|children|juvenile|romance|dystop|sci.?fi|science.?fiction|suspense|crime|detective|essay/.test(s)) return 'Littérature étrangère'
   return 'Autre'
 }
 
@@ -327,11 +336,17 @@ export default function Bibliotheque() {
                     </div>
                   </a>
 
-                  {/* Statut + suppression */}
-                  <div className="shrink-0 flex items-center gap-2">
+                  {/* Statut + flèche + suppression */}
+                  <div className="shrink-0 flex items-center gap-1.5">
                     <span className={`text-xs font-medium ${STATUS_COLOR[reading.status]}`}>
                       {STATUS_LABEL[reading.status]}
                     </span>
+                    <svg
+                      width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
                     <button
                       onClick={() => setConfirmDeleteId(reading.id === confirmDeleteId ? null : reading.id)}
                       className="p-1 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
