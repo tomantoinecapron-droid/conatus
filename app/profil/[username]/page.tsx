@@ -147,15 +147,24 @@ export default function ProfilPage() {
       {/* ── Header ── */}
       <div className="px-6 pt-14 pb-8">
 
-        {/* Nom */}
-        <div className="flex items-start justify-between gap-3 mb-1">
-          <h1 className="font-serif text-[36px] leading-[1.1] text-white tracking-tight">
-            {profile.full_name || `@${username}`}
-          </h1>
+        {/* Avatar + crayon */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-[#2a2520] shrink-0 border border-white/8">
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="font-serif text-[22px] text-white/30">
+                    {(profile.full_name || username || '?')[0].toUpperCase()}
+                  </span>
+                </div>
+              )
+            }
+          </div>
           {isOwnProfile && (
             <a
               href="/profil/edit"
-              className="mt-2 text-[#7a7268] hover:text-white/60 transition shrink-0"
+              className="mt-1 text-[#7a7268] hover:text-white/60 transition shrink-0"
               aria-label="Modifier le profil"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -165,6 +174,11 @@ export default function ProfilPage() {
             </a>
           )}
         </div>
+
+        {/* Nom */}
+        <h1 className="font-serif text-[36px] leading-[1.1] text-white tracking-tight mb-1">
+          {profile.full_name || `@${username}`}
+        </h1>
 
         {/* Handle + Pro */}
         <p className="text-[#7a7268] text-[13px] mb-4">
@@ -220,17 +234,57 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {/* ── Encart Pro (profil perso, non-Pro) ── */}
-      {isOwnProfile && !profile.is_pro && (
-        <div className="mx-6 mb-8 flex items-center gap-3">
-          <span className="text-[#c9440e]/50 text-[11px]">✦</span>
-          <p className="text-[#7a7268] text-[12px] leading-snug">
-            Passe à{' '}
-            <a href="/premium" className="text-[#c9440e]/70 hover:text-[#c9440e] transition underline underline-offset-2">
-              Conatus Pro
-            </a>{' '}
-            pour débloquer toutes les fonctionnalités.
-          </p>
+      {/* ── Encart Pro (profil perso uniquement) ── */}
+      {isOwnProfile && (
+        <div className="mx-6 mb-8">
+          {profile.is_pro ? (
+            /* — Déjà Pro — */
+            <div className="border border-[#c9440e]/20 rounded-2xl px-5 py-4 bg-[#c9440e]/5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[#c9440e] text-[13px]">✦</span>
+                <p className="text-white text-[13px] font-medium">Conatus Pro</p>
+              </div>
+              <ul className="flex flex-col gap-1.5 mb-4">
+                {['Bibliothèque illimitée', 'Cercles sans limite', 'Statistiques avancées', 'Support prioritaire'].map(b => (
+                  <li key={b} className="flex items-center gap-2 text-[12px] text-[#7a7268]">
+                    <span className="text-[#c9440e]/60 text-[10px]">✓</span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/premium"
+                className="inline-flex items-center gap-1.5 text-[12px] text-[#c9440e]/70 hover:text-[#c9440e] transition"
+              >
+                Gérer mon abonnement →
+              </a>
+            </div>
+          ) : (
+            /* — Non Pro — */
+            <div className="border border-white/8 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-white/20 text-[13px]">✦</span>
+                <p className="text-white/60 text-[13px] font-medium">Conatus Pro</p>
+              </div>
+              <p className="text-[#7a7268] text-[12px] mb-3 leading-snug">
+                Débloques toutes les fonctionnalités pour aller plus loin dans ta pratique de lecture.
+              </p>
+              <ul className="flex flex-col gap-1.5 mb-4">
+                {['Bibliothèque illimitée', 'Cercles sans limite', 'Statistiques avancées', 'Support prioritaire'].map(b => (
+                  <li key={b} className="flex items-center gap-2 text-[12px] text-white/30">
+                    <span className="text-white/15 text-[10px]">○</span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/premium"
+                className="inline-flex items-center gap-2 text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition"
+              >
+                Passer à Pro
+              </a>
+            </div>
+          )}
         </div>
       )}
 
@@ -338,8 +392,13 @@ export default function ProfilPage() {
         <div className="flex justify-center pt-4 pb-2">
           <button
             onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
-            className="text-[#7a7268]/50 text-[11px] hover:text-[#7a7268] transition"
+            className="flex items-center gap-2 text-[#7a7268] text-[12px] border border-white/10 rounded-full px-5 py-2 hover:border-white/20 hover:text-white/60 transition"
           >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
             Déconnexion
           </button>
         </div>
