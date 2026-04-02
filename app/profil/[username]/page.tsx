@@ -179,6 +179,22 @@ export default function ProfilPage() {
         )}
       </div>
 
+      {/* ── Encart Pro (non-Pro, profil perso) ── */}
+      {isOwnProfile && !profile.is_pro && (
+        <div className="mx-5 mt-5 border border-[#c9440e]/20 rounded-xl px-4 py-3 bg-[#c9440e]/5 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-medium">Conatus Pro <span className="text-[#c9440e]">✦</span></p>
+            <p className="text-[#7a7268] text-xs mt-0.5 leading-snug">Bibliothèque illimitée, cercles sans limite, statistiques avancées.</p>
+          </div>
+          <a
+            href="/premium"
+            className="shrink-0 text-xs font-medium text-[#c9440e] border border-[#c9440e]/40 rounded-lg px-3 py-1.5 hover:opacity-80 transition"
+          >
+            Voir →
+          </a>
+        </div>
+      )}
+
       {/* ── Liste des lectures ── */}
       {readings.length === 0 ? (
         <div className="py-16 flex flex-col items-center gap-2 text-[#7a7268]">

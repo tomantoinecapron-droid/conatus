@@ -22,17 +22,33 @@ const PRO_FEATURES = [
 
 export default function PremiumPage() {
   const [loading, setLoading] = useState<'monthly' | 'yearly' | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPro, setIsPro] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [renewalDate, setRenewalDate] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { window.location.href = '/auth'; return }
+      setUserEmail(data.user.email ?? null)
       const { data: profile } = await supabase
         .from('profiles').select('is_pro').eq('id', data.user.id).single()
       setIsPro(profile?.is_pro ?? false)
       setProfileLoading(false)
+
+      // Récupérer la date de renouvellement si Pro
+      if (profile?.is_pro && data.user.email) {
+        fetch('/api/create-portal-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: data.user.email }),
+        })
+          .then(r => r.json())
+          .then(d => { if (d.renewalDate) setRenewalDate(d.renewalDate) })
+          .catch(() => {})
+      }
     })
   }, [])
 
@@ -41,31 +57,40 @@ export default function PremiumPage() {
     setError(null)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        window.location.href = '/auth'
-        return
-      }
+      if (!user) { window.location.href = '/auth'; return }
 
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan, userId: user.id, userEmail: user.email }),
       })
-
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || `Erreur ${res.status}`)
-      }
-
-      if (!data.url) {
-        throw new Error('URL Stripe manquante dans la réponse')
-      }
-
+      if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`)
+      if (!data.url) throw new Error('URL Stripe manquante dans la réponse')
       window.location.href = data.url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
       setLoading(null)
+    }
+  }
+
+  const handlePortal = async () => {
+    if (!userEmail) return
+    setPortalLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userEmail }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`)
+      if (!data.url) throw new Error('URL du portail manquante')
+      window.location.href = data.url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      setPortalLoading(false)
     }
   }
 
@@ -74,12 +99,12 @@ export default function PremiumPage() {
 
       {/* Header */}
       <div className="px-4 pt-14 pb-4 flex items-center gap-3 border-b border-white/8">
-        <a href="/profil/edit" className="text-[#7a7268] hover:text-white transition">
+        <a href="/profil" className="text-[#7a7268] hover:text-white transition">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </a>
-        <h1 className="text-white font-semibold text-base">Passer Pro</h1>
+        <h1 className="text-white font-semibold text-base">Conatus Pro ✦</h1>
       </div>
 
       <div className="px-4 pt-8 pb-6 max-w-lg mx-auto">
@@ -134,12 +159,30 @@ export default function PremiumPage() {
             <div className="text-[#7a7268] text-sm">Chargement...</div>
           </div>
         ) : isPro ? (
-          <div className="border border-white/10 rounded-xl p-6 text-center">
-            <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-2 py-0.5">✦ Pro</span>
-            <p className="text-white font-semibold mt-3">Tu es abonné Pro</p>
-            <p className="text-[#7a7268] text-xs mt-1.5">
-              Ton abonnement est actif. Toutes les fonctionnalités Pro sont débloquées.
-            </p>
+          <div className="border border-[#c9440e]/25 rounded-xl p-6 bg-[#c9440e]/5">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-2 py-0.5">✦ Pro</span>
+            </div>
+            <p className="text-white font-semibold text-center">Tu es abonné Pro</p>
+            {renewalDate ? (
+              <p className="text-[#7a7268] text-xs text-center mt-1.5">
+                Prochain renouvellement : <span className="text-white/70">{renewalDate}</span>
+              </p>
+            ) : (
+              <p className="text-[#7a7268] text-xs text-center mt-1.5">
+                Toutes les fonctionnalités Pro sont débloquées.
+              </p>
+            )}
+            <button
+              onClick={handlePortal}
+              disabled={portalLoading}
+              className="mt-4 w-full py-2.5 rounded-full text-sm font-medium border border-white/20 text-[#7a7268] hover:text-white hover:border-white/40 transition disabled:opacity-50"
+            >
+              {portalLoading ? 'Redirection…' : 'Gérer mon abonnement →'}
+            </button>
+            {error && (
+              <p className="text-center text-[#c9440e] text-xs font-medium mt-3">{error}</p>
+            )}
           </div>
         ) : (
           <>
@@ -189,9 +232,7 @@ export default function PremiumPage() {
             </div>
 
             {error && (
-              <p className="text-center text-[#c9440e] text-xs font-medium mt-4">
-                {error}
-              </p>
+              <p className="text-center text-[#c9440e] text-xs font-medium mt-4">{error}</p>
             )}
 
             <p className="text-center text-[#7a7268]/50 text-[10px] mt-5">
