@@ -39,6 +39,36 @@ const STATUS_ACTION: Record<string, string> = {
   a_lire: 'a ajouté', en_cours: 'a commencé', lu: 'a terminé',
 }
 
+const SELECTION_DU_MOIS = [
+  {
+    category: 'ROMAN CONTEMPORAIN',
+    title: 'Normal People',
+    author: 'Sally Rooney',
+    comment: 'Une exploration sincère de l\'amour entre deux êtres que tout oppose. Rooney saisit avec précision quelque chose d\'essentiel sur la jeunesse et le désir.',
+    rating: 4,
+    bg: '#2a2420',
+    amazon: 'https://www.amazon.fr/s?k=Normal+People+Sally+Rooney',
+  },
+  {
+    category: 'CLASSIQUE',
+    title: 'Les Frères Karamazov',
+    author: 'Fiodor Dostoïevski',
+    comment: 'Le testament littéraire de Dostoïevski. Une fresque sur la foi, la liberté et la culpabilité sans équivalent dans la littérature mondiale.',
+    rating: 5,
+    bg: '#1e2228',
+    amazon: 'https://www.amazon.fr/s?k=Les+Frères+Karamazov',
+  },
+  {
+    category: 'SÉLECTION PRINTEMPS',
+    title: "L'Élégance du hérisson",
+    author: 'Muriel Barbery',
+    comment: 'Une gardienne d\'immeuble secrètement cultivée, une enfant désabusée. Barbery écrit avec grâce sur la beauté cachée du quotidien.',
+    rating: 4,
+    bg: '#1a2018',
+    amazon: "https://www.amazon.fr/s?k=Elegance+Herisson+Barbery",
+  },
+]
+
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [enCours, setEnCours] = useState<any[]>([])
@@ -483,6 +513,52 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── SÉLECTION DU MOIS ── */}
+      <section className="mb-6">
+        <div className="flex items-center justify-between px-5 mb-3">
+          <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Sélection du mois</h2>
+        </div>
+
+        <div className="flex gap-3 px-5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+          {SELECTION_DU_MOIS.map((book, i) => (
+            <div
+              key={i}
+              className="shrink-0 w-[72vw] max-w-[280px] snap-start rounded-2xl border border-white/8 p-4 flex flex-col justify-between gap-3"
+              style={{ backgroundColor: book.bg }}
+            >
+              {/* Haut */}
+              <div>
+                <p className="text-[#7a7268] text-[9px] uppercase tracking-[0.18em] font-medium mb-2">
+                  {book.category}
+                </p>
+                <p className="font-serif text-white text-[17px] leading-snug mb-1">
+                  {book.title}
+                </p>
+                <p className="text-[#7a7268] text-xs mb-3">{book.author}</p>
+                <p className="text-white/50 text-[11px] italic leading-relaxed line-clamp-3">
+                  {book.comment}
+                </p>
+              </div>
+
+              {/* Bas */}
+              <div className="flex items-center justify-between">
+                <span className="text-[#c9440e] text-sm tracking-tight leading-none">
+                  {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
+                </span>
+                <a
+                  href={book.amazon}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#7a7268] text-[10px] hover:text-white/70 transition"
+                >
+                  Amazon →
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── OBJECTIFS ── */}
       <section className="px-5 mb-5">
