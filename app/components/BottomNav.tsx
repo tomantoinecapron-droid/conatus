@@ -53,7 +53,7 @@ export default function BottomNav() {
       ),
     },
     {
-      href: '/profil/edit',
+      href: '/profil',
       label: 'Profil',
       active: pathname.startsWith('/profil'),
       icon: (active: boolean) => (

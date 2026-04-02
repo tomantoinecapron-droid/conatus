@@ -5,10 +5,11 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import BottomNav from '../../components/BottomNav'
 
-const STATUS_BADGE: Record<string, { label: string; dot: string; text: string }> = {
-  lu:       { label: 'Lu',       dot: 'bg-emerald-500',  text: 'text-emerald-500' },
-  en_cours: { label: 'En cours', dot: 'bg-[#c9440e]',    text: 'text-[#c9440e]' },
-  a_lire:   { label: 'À lire',   dot: 'bg-[#7a7268]',    text: 'text-[#7a7268]' },
+const STATUS_LABEL: Record<string, string> = {
+  lu: 'Lu', en_cours: 'En cours', a_lire: 'À lire',
+}
+const STATUS_COLOR: Record<string, string> = {
+  lu: 'text-emerald-400', en_cours: 'text-[#c9440e]', a_lire: 'text-[#7a7268]',
 }
 
 export default function ProfilPage() {
@@ -32,11 +33,9 @@ export default function ProfilPage() {
     if (username) loadProfile()
   }, [username])
 
-  // Charge l'état du follow une fois qu'on a le profil ET currentUser
   useEffect(() => {
     if (!profile || !currentUser) return
-    const isOwn = currentUser.user_metadata?.username === username
-    if (isOwn) return
+    if (currentUser.id === profile.id) return
 
     Promise.all([
       supabase
@@ -77,23 +76,16 @@ export default function ProfilPage() {
   const handleFollow = async () => {
     if (!currentUser || !profile || followLoading) return
     setFollowLoading(true)
-
     if (isFollowing) {
-      await supabase
-        .from('follows')
-        .delete()
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', profile.id)
+      await supabase.from('follows').delete()
+        .eq('follower_id', currentUser.id).eq('following_id', profile.id)
       setIsFollowing(false)
       setFollowersCount(c => Math.max(0, c - 1))
     } else {
-      await supabase
-        .from('follows')
-        .insert({ follower_id: currentUser.id, following_id: profile.id })
+      await supabase.from('follows').insert({ follower_id: currentUser.id, following_id: profile.id })
       setIsFollowing(true)
       setFollowersCount(c => c + 1)
     }
-
     setFollowLoading(false)
   }
 
@@ -109,94 +101,77 @@ export default function ProfilPage() {
     return (
       <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center pb-24">
         <p className="font-serif text-xl text-white">Utilisateur introuvable</p>
-        <a href="/explorer" className="text-[#c9440e] text-sm mt-3">← Explorateur</a>
+        <a href="/explorer" className="text-[#c9440e] text-sm mt-3">← Explorer</a>
         <BottomNav />
       </div>
     )
   }
 
-  const isOwnProfile = currentUser?.user_metadata?.username === username
+  const isOwnProfile = currentUser?.id === profile.id
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-20">
 
-      {/* ── Header ── */}
-      <div className="px-4 pt-14 pb-3 relative">
+      {/* ── En-tête éditorial ── */}
+      <div className="px-5 pt-14 pb-6 border-b border-white/8">
 
-        {/* Déconnexion — top right, only own profile */}
-        {isOwnProfile && (
-          <button
-            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
-            className="absolute top-3 right-0 text-[#7a7268] text-xs hover:text-white/60 transition"
-          >
-            Déconnexion
-          </button>
+        {/* Nom + crayon modifier */}
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <h1 className="font-serif text-[32px] leading-tight text-white">
+            {profile.full_name || `@${username}`}
+          </h1>
+          {isOwnProfile && (
+            <a
+              href="/profil/edit"
+              className="mt-2 text-[#7a7268] hover:text-white/70 transition shrink-0"
+              aria-label="Modifier le profil"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </a>
+          )}
+        </div>
+
+        {/* @username + badge pro */}
+        <p className="text-[#7a7268] text-sm mb-3">
+          @{username}
+          {profile.is_pro && (
+            <span className="ml-2 text-white/40 text-[10px] border border-white/15 rounded px-1.5 py-0.5 leading-none">✦ Pro</span>
+          )}
+        </p>
+
+        {/* Bio */}
+        {profile.bio && (
+          <p className="text-white/55 text-sm italic leading-relaxed mb-4 max-w-xs">{profile.bio}</p>
         )}
 
-        {/* Ligne 1 : avatar + stats */}
-        <div className="flex items-center gap-5 mb-3">
-          {/* Avatar */}
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c9440e]/15 flex items-center justify-center shrink-0">
-            {profile.avatar_url ? (
-              <img src={profile.avatar_url} className="w-full h-full object-cover" alt={username} />
-            ) : (
-              <span className="font-serif text-[#c9440e] text-2xl leading-none">
-                {username?.[0]?.toUpperCase()}
-              </span>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="flex flex-1 justify-around">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-white font-bold text-lg leading-tight">{readings.length}</span>
-              <span className="text-[#7a7268] text-[11px]">Livres</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-white font-bold text-lg leading-tight">{notesCount}</span>
-              <span className="text-[#7a7268] text-[11px]">Fiches</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-white font-bold text-lg leading-tight">{followersCount}</span>
-              <span className="text-[#7a7268] text-[11px]">Abonnés</span>
-            </div>
-          </div>
+        {/* Stats */}
+        <div className="flex items-center gap-5 text-xs text-[#7a7268]">
+          <span>
+            <span className="text-white font-medium">{readings.length}</span>
+            {' '}livre{readings.length !== 1 ? 's' : ''}
+          </span>
+          <span>
+            <span className="text-white font-medium">{notesCount}</span>
+            {' '}fiche{notesCount !== 1 ? 's' : ''}
+          </span>
+          <span>
+            <span className="text-white font-medium">{followersCount}</span>
+            {' '}abonné{followersCount !== 1 ? 's' : ''}
+          </span>
         </div>
 
-        {/* Ligne 2 : identité */}
-        <div className="mb-3">
-          {profile.full_name && (
-            <div className="flex items-center gap-2">
-              <p className="text-white font-semibold text-sm leading-tight">{profile.full_name}</p>
-              {profile.is_pro && (
-                <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-1.5 py-0.5 leading-none">
-                  ✦ Pro
-                </span>
-              )}
-            </div>
-          )}
-          <p className="text-[#7a7268] text-xs mt-0.5">@{username}</p>
-          {profile.bio && (
-            <p className="text-white/70 text-xs mt-1.5 leading-relaxed">{profile.bio}</p>
-          )}
-        </div>
-
-        {/* Bouton modifier / abonner */}
-        {isOwnProfile ? (
-          <a
-            href="/profil/edit"
-            className="block w-full text-center border border-white/20 text-white text-sm font-medium py-1.5 rounded-lg hover:border-white/40 transition"
-          >
-            Modifier le profil
-          </a>
-        ) : (
+        {/* Bouton s'abonner (autres profils) */}
+        {!isOwnProfile && (
           <button
             onClick={handleFollow}
             disabled={followLoading}
-            className={`w-full text-center border text-sm font-medium py-1.5 rounded-lg transition disabled:opacity-50 ${
+            className={`mt-4 text-xs font-medium px-4 py-1.5 rounded-lg border transition disabled:opacity-50 ${
               isFollowing
-                ? 'border-white/40 text-white bg-white/8 hover:bg-white/5'
-                : 'border-white/20 text-[#7a7268] hover:border-white/40 hover:text-white'
+                ? 'border-white/30 text-white bg-white/8 hover:bg-white/5'
+                : 'border-white/15 text-[#7a7268] hover:border-white/30 hover:text-white'
             }`}
           >
             {isFollowing ? 'Abonné' : "S'abonner"}
@@ -205,50 +180,48 @@ export default function ProfilPage() {
       </div>
 
       {/* ── Liste des lectures ── */}
-      <div className="border-t border-white/8">
-        {readings.length === 0 ? (
-          <div className="py-16 flex flex-col items-center gap-2">
-            <p className="font-serif text-base text-white/40">Aucun livre pour l'instant</p>
-            {isOwnProfile && (
-              <a href="/bibliotheque" className="text-[#c9440e] text-sm">Ajouter des livres →</a>
-            )}
-          </div>
-        ) : (
-          readings.map((reading, i) => {
-            const s = STATUS_BADGE[reading.status] ?? STATUS_BADGE['a_lire']
-            return (
-              <a
-                key={reading.id}
-                href={isOwnProfile ? `/fiche/${reading.id}` : '#'}
-                className={`flex items-center gap-3 px-4 py-3 ${i < readings.length - 1 ? 'border-b border-white/5' : ''} ${isOwnProfile ? 'hover:bg-white/3 transition' : 'pointer-events-none'}`}
-              >
-                {/* Badge statut */}
-                <span className={`shrink-0 flex items-center gap-1 text-[10px] font-medium ${s.text}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                  {s.label}
-                </span>
+      {readings.length === 0 ? (
+        <div className="py-16 flex flex-col items-center gap-2 text-[#7a7268]">
+          <p className="font-serif text-base">Aucun livre pour l'instant</p>
+          {isOwnProfile && (
+            <a href="/bibliotheque" className="text-[#c9440e] text-sm">Ajouter des livres →</a>
+          )}
+        </div>
+      ) : (
+        <div className="px-5 divide-y divide-white/5">
+          {readings.map((reading) => (
+            <a
+              key={reading.id}
+              href={isOwnProfile ? `/fiche/${reading.id}` : '#'}
+              className={`flex items-center gap-3 py-3.5 ${isOwnProfile ? 'hover:opacity-80 transition' : 'pointer-events-none'}`}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-serif text-[15px] text-white leading-snug line-clamp-1">
+                  {reading.books?.title}
+                </p>
+                <p className="text-[#7a7268] text-xs mt-0.5 truncate">
+                  {reading.books?.author}
+                </p>
+              </div>
+              <span className={`text-xs font-medium shrink-0 ${STATUS_COLOR[reading.status] ?? 'text-[#7a7268]'}`}>
+                {STATUS_LABEL[reading.status] ?? ''}
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
 
-                {/* Titre + auteur */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-serif text-sm text-white leading-tight truncate">
-                    {reading.books?.title}
-                  </p>
-                  <p className="text-[#7a7268] text-[11px] mt-0.5 truncate">
-                    {reading.books?.author}
-                  </p>
-                </div>
-
-                {isOwnProfile && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                )}
-              </a>
-            )
-          })
-        )}
-      </div>
-
+      {/* ── Déconnexion ── */}
+      {isOwnProfile && (
+        <div className="flex justify-center pt-8 pb-4">
+          <button
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
+            className="text-[#7a7268] text-xs hover:text-white/60 transition"
+          >
+            Déconnexion
+          </button>
+        </div>
+      )}
 
       <BottomNav />
     </div>

@@ -138,11 +138,19 @@ export default function EditProfilPage() {
           </a>
           <h1 className="text-white font-semibold text-base">Modifier le profil</h1>
         </div>
-        {username && (
-          <a href={`/profil/${username}`} className="text-[#7a7268] text-xs hover:text-white transition">
-            Voir mon profil →
-          </a>
-        )}
+        <div className="flex items-center gap-3">
+          {username && (
+            <a href={`/profil/${username}`} className="text-[#7a7268] text-xs hover:text-white transition">
+              Voir mon profil →
+            </a>
+          )}
+          <button
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
+            className="text-[#7a7268] text-xs hover:text-white/60 transition"
+          >
+            Déconnexion
+          </button>
+        </div>
       </div>
 
       <div className="px-4 pt-5 pb-6">
