@@ -5,17 +5,30 @@ import { supabase } from '../lib/supabase'
 
 export default function ProfilRedirect() {
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        window.location.href = '/auth'
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { window.location.href = '/auth'; return }
+
+      // Priorité 1 : user_metadata (mis à jour via profil/edit)
+      const metaUsername = data.user.user_metadata?.username
+      if (metaUsername) {
+        window.location.href = `/profil/${metaUsername}`
         return
       }
-      const username = data.user.user_metadata?.username
-      if (username) {
-        window.location.href = `/profil/${username}`
-      } else {
-        window.location.href = '/bibliotheque'
+
+      // Priorité 2 : table profiles (source de vérité)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile?.username) {
+        window.location.href = `/profil/${profile.username}`
+        return
       }
+
+      // Aucun username trouvé → page d'édition pour en choisir un
+      window.location.href = '/profil/edit'
     })
   }, [])
 
