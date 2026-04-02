@@ -26,52 +26,55 @@ export default function ProfilPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { window.location.href = '/auth'; return }
-      setCurrentUser(data.user)
-    })
-    if (username) loadProfile()
+    if (!username) return
+
+    const init = async () => {
+      // Auth + profil en parallèle — on n'affiche rien tant que les deux ne sont pas prêts
+      const [authRes, profileRes] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.from('profiles').select('*').eq('username', username).single(),
+      ])
+
+      if (!authRes.data.user) { window.location.href = '/auth'; return }
+      const user = authRes.data.user
+      setCurrentUser(user)
+
+      if (!profileRes.data) { setLoading(false); return }
+      const profileData = profileRes.data
+      setProfile(profileData)
+
+      const isOwn = user.id === profileData.id
+
+      // Données secondaires
+      const [readingsRes, notesRes] = await Promise.all([
+        supabase.from('readings').select('*, books(*)')
+          .eq('user_id', profileData.id).order('created_at', { ascending: false }),
+        supabase.from('notes').select('id', { count: 'exact' }).eq('user_id', profileData.id),
+      ])
+      setReadings(readingsRes.data || [])
+      setNotesCount(notesRes.count || 0)
+
+      // Follow state (seulement pour les profils tiers)
+      if (!isOwn) {
+        const [followRes, countRes] = await Promise.all([
+          supabase.from('follows').select('id', { count: 'exact', head: true })
+            .eq('follower_id', user.id).eq('following_id', profileData.id),
+          supabase.from('follows').select('id', { count: 'exact', head: true })
+            .eq('following_id', profileData.id),
+        ])
+        setIsFollowing((followRes.count ?? 0) > 0)
+        setFollowersCount(countRes.count ?? 0)
+      } else {
+        const { count } = await supabase.from('follows')
+          .select('id', { count: 'exact', head: true }).eq('following_id', profileData.id)
+        setFollowersCount(count ?? 0)
+      }
+
+      setLoading(false)
+    }
+
+    init()
   }, [username])
-
-  useEffect(() => {
-    if (!profile || !currentUser) return
-    if (currentUser.id === profile.id) return
-
-    Promise.all([
-      supabase
-        .from('follows')
-        .select('id', { count: 'exact', head: true })
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', profile.id),
-      supabase
-        .from('follows')
-        .select('id', { count: 'exact', head: true })
-        .eq('following_id', profile.id),
-    ]).then(([followRes, countRes]) => {
-      setIsFollowing((followRes.count ?? 0) > 0)
-      setFollowersCount(countRes.count ?? 0)
-    })
-  }, [profile, currentUser])
-
-  const loadProfile = async () => {
-    const { data: profileData } = await supabase
-      .from('profiles').select('*').eq('username', username).single()
-
-    if (!profileData) { setLoading(false); return }
-    setProfile(profileData)
-
-    const [readingsRes, notesRes, followersRes] = await Promise.all([
-      supabase.from('readings').select('*, books(*)')
-        .eq('user_id', profileData.id).order('created_at', { ascending: false }),
-      supabase.from('notes').select('id', { count: 'exact' }).eq('user_id', profileData.id),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', profileData.id),
-    ])
-
-    setReadings(readingsRes.data || [])
-    setNotesCount(notesRes.count || 0)
-    setFollowersCount(followersRes.count || 0)
-    setLoading(false)
-  }
 
   const handleFollow = async () => {
     if (!currentUser || !profile || followLoading) return
@@ -107,7 +110,8 @@ export default function ProfilPage() {
     )
   }
 
-  const isOwnProfile = currentUser?.id === profile.id
+  // currentUser est garanti disponible ici (sinon on est redirigé vers /auth)
+  const isOwnProfile = currentUser.id === profile.id
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-20">
