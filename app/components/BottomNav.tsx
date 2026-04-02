@@ -29,20 +29,9 @@ export default function BottomNav() {
       ),
     },
     {
-      href: '/explorer',
-      label: 'Explorer',
-      active: pathname.startsWith('/explorer'),
-      icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-      ),
-    },
-    {
-      href: '/cercles',
-      label: 'Cercles',
-      active: pathname.startsWith('/cercles'),
+      href: '/social',
+      label: 'Social',
+      active: pathname.startsWith('/social') || pathname.startsWith('/explorer') || pathname.startsWith('/cercles'),
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#c9440e' : '#7a7268'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
