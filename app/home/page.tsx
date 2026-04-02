@@ -49,6 +49,7 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [stats, setStats] = useState({ booksThisMonth: 0, totalNotes: 0, streak: 0 })
+  const [isPro, setIsPro] = useState(false)
   const [loading, setLoading] = useState(true)
   const [greeting, setGreeting] = useState('Bonjour')
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
@@ -77,7 +78,7 @@ export default function HomePage() {
     startOfMonth.setDate(1)
     startOfMonth.setHours(0, 0, 0, 0)
 
-    const [enCoursRes, nextBookRes, myRecentRes, followsRes, myCirclesRes, allMyBooksRes, booksMonthRes, notesCountRes] = await Promise.all([
+    const [enCoursRes, nextBookRes, myRecentRes, followsRes, myCirclesRes, allMyBooksRes, booksMonthRes, notesCountRes, profileRes] = await Promise.all([
       supabase.from('readings').select('*, books(*)')
         .eq('user_id', userId).eq('status', 'en_cours')
         .order('created_at', { ascending: false }).limit(1),
@@ -94,11 +95,13 @@ export default function HomePage() {
         .eq('user_id', userId).eq('status', 'lu').gte('updated_at', startOfMonth.toISOString()),
       supabase.from('notes').select('id', { count: 'exact', head: true })
         .eq('user_id', userId),
+      supabase.from('profiles').select('is_pro').eq('id', userId).single(),
     ])
 
     setEnCours(enCoursRes.data || [])
     setNextBook((nextBookRes.data || [])[0] ?? null)
     setMyRecentBooks(myRecentRes.data || [])
+    setIsPro(profileRes.data?.is_pro ?? false)
 
     // Streak: count consecutive days with notes activity (last 30 days)
     const { data: recentNotes } = await supabase
@@ -420,6 +423,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Upsell Pro (non-Pro uniquement) ── */}
+      {!isPro && (
+        <section className="px-5 mb-5">
+          <a
+            href="/premium"
+            className="flex items-center gap-3 border border-[#c9440e]/15 rounded-xl px-4 py-3 bg-[#c9440e]/5 hover:border-[#c9440e]/30 transition group"
+          >
+            <span className="text-[#c9440e] text-base leading-none shrink-0">✦</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-xs font-medium leading-tight">Passe à Conatus Pro</p>
+              <p className="text-[#7a7268] text-[11px] mt-0.5 leading-snug">
+                Bibliothèque illimitée · Cercles sans limite · Stats avancées
+              </p>
+            </div>
+            <span className="text-[#c9440e] text-xs font-medium shrink-0 group-hover:translate-x-0.5 transition-transform">
+              Voir →
+            </span>
+          </a>
+        </section>
+      )}
+
       {/* ── MES CERCLES — pills horizontal ── */}
       {myCircles.length > 0 && (
         <section className="mb-6">
@@ -486,13 +510,13 @@ export default function HomePage() {
       <section className="px-5 mb-6">
         <div className="flex items-center justify-between mb-2.5">
           <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase">Activité</h2>
-          <a href="/explorer" className="text-[#7a7268] text-[10px] hover:text-white transition">Explorer →</a>
+          <a href="/social" className="text-[#7a7268] text-[10px] hover:text-white transition">Explorer →</a>
         </div>
 
         {feed.length === 0 ? (
           <div className="bg-[#242018] border border-white/8 rounded-2xl px-5 py-6 text-center">
             <p className="text-white/40 text-sm font-serif mb-3">Aucune activité</p>
-            <a href="/explorer" className="text-[#c9440e] text-xs font-medium">Suivre des lecteurs →</a>
+            <a href="/social" className="text-[#c9440e] text-xs font-medium">Suivre des lecteurs →</a>
           </div>
         ) : (
           <div className="bg-[#242018] border border-white/8 rounded-2xl overflow-hidden">
