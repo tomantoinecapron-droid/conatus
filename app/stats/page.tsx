@@ -152,7 +152,7 @@ export default function StatsPage() {
       if (profileRes.error) console.error('[stats] profile error:', profileRes.error)
 
       const prof = profileRes.data
-      const goal = prof?.reading_goal ?? 0
+      const goal = prof?.yearly_goal ?? 0
       const pages = prof?.pages_weekly_goal ?? 0
       setIsPro(prof?.is_pro === true)
       setReadingGoal(goal)
@@ -193,7 +193,7 @@ export default function StatsPage() {
     setGoalSaving(true)
     setReadingGoal(n)
     setEditingGoal(false)
-    await supabase.from('profiles').update({ reading_goal: n }).eq('id', user.id)
+    await supabase.from('profiles').update({ yearly_goal: n }).eq('id', user.id)
     setGoalSaving(false)
   }
 
@@ -331,17 +331,17 @@ export default function StatsPage() {
 
       {/* ── Milestone ── */}
       {milestone && (
-        <div className="mx-6 mb-5 flex items-center justify-between gap-3 border-l-2 border-[#c9440e]/50 pl-4 py-1">
+        <div className="mx-6 mb-6 flex items-start justify-between gap-3 border-l-2 border-[#c9440e]/50 pl-4 py-1">
           <div>
             <p className="text-white/80 text-[13px] font-medium">{milestone.label}</p>
             <p className="text-[#7a7268] text-[12px] italic font-serif mt-0.5">{milestone.detail}</p>
           </div>
           <button
             onClick={dismissMilestone}
-            className="text-[#7a7268] hover:text-white transition shrink-0"
+            className="text-[#7a7268] hover:text-white transition shrink-0 mt-0.5"
             aria-label="Fermer"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
@@ -380,8 +380,13 @@ export default function StatsPage() {
                     )}
                   </p>
                   {booksLeft > 0 && daysLeft > 0 && (
-                    <p className="text-[#7a7268]/50 text-[11px] mt-0.5 italic">
-                      {booksLeft} livre{booksLeft !== 1 ? 's' : ''} à lire — il reste {daysLeft} jour{daysLeft !== 1 ? 's' : ''} en {cy}.
+                    <p className="text-[#7a7268]/45 text-[11px] mt-0.5 italic">
+                      Il te reste {daysLeft} jour{daysLeft !== 1 ? 's' : ''} pour lire {booksLeft} livre{booksLeft !== 1 ? 's' : ''} de plus.
+                    </p>
+                  )}
+                  {goalPct >= 100 && (
+                    <p className="text-emerald-400/50 text-[11px] mt-0.5 italic">
+                      Bravo — encore {daysLeft} jours pour aller plus loin.
                     </p>
                   )}
                 </div>
@@ -424,6 +429,36 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* ── Défi du mois ── */}
+      <section className="mb-10">
+        <SectionTitle>Défi du mois</SectionTitle>
+        <div className="px-6">
+          <div className={`border-l-2 pl-5 py-0.5 ${challengeDone ? 'border-emerald-400/35' : 'border-[#c9440e]/40'}`}>
+            <p className="text-[10px] uppercase tracking-[0.14em] text-[#7a7268] mb-2 capitalize">
+              {MONTHS_FR[cm]}
+            </p>
+            <h3 className={`font-serif text-[24px] leading-tight mb-2 ${challengeDone ? 'text-white/40' : 'text-white'}`}>
+              {challenge.title}
+            </h3>
+            <p className={`text-[14px] leading-relaxed mb-3 ${challengeDone ? 'text-[#7a7268]/40 italic' : 'text-[#7a7268]'}`}>
+              {challenge.desc}
+            </p>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {challenge.category && (
+                <span className="text-[10px] border border-white/10 rounded px-2 py-0.5 text-[#7a7268]/50 uppercase tracking-wide">
+                  {challenge.category}
+                </span>
+              )}
+              {challengeDone ? (
+                <span className="text-emerald-400/65 text-[12px] italic">Relevé ce mois ✓</span>
+              ) : (
+                <span className="text-[#7a7268]/35 text-[11px] italic">À relever avant fin {MONTHS_FR[cm]}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Objectif pages / semaine ── */}
       <section className="mb-10">
         <SectionTitle>Pages cette semaine</SectionTitle>
@@ -437,14 +472,14 @@ export default function StatsPage() {
 
               <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
                 <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all bg-white/30"
+                  className="absolute inset-y-0 left-0 rounded-full transition-all bg-white/25"
                   style={{ width: `${pagesPct}%` }}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <p className="text-[#7a7268]/50 text-[11px] italic">Estimation basée sur la progression des lectures en cours</p>
-                <button onClick={() => setEditingPages(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0 ml-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[#7a7268]/45 text-[11px] italic">Estimation via la progression des livres en cours</p>
+                <button onClick={() => setEditingPages(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0">
                   Modifier
                 </button>
               </div>
@@ -483,40 +518,6 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* ── Défi du mois ── */}
-      <section className="mb-10">
-        <SectionTitle>Défi de {MONTHS_FR[cm]}</SectionTitle>
-        <div className="px-6">
-          <div className="flex items-start gap-4">
-            <div
-              className={`mt-0.5 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors ${
-                challengeDone
-                  ? 'bg-emerald-400/20 border-emerald-400/50'
-                  : 'border-white/15'
-              }`}
-            >
-              {challengeDone && (
-                <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round">
-                  <polyline points="2 6 5 9 10 3" />
-                </svg>
-              )}
-            </div>
-            <div>
-              <p className={`text-[15px] font-serif leading-snug ${challengeDone ? 'text-white/50 line-through' : 'text-white/80'}`}>
-                {challenge.title}
-              </p>
-              <p className="text-[#7a7268] text-[13px] mt-1 leading-relaxed">{challenge.desc}</p>
-              {challenge.category && (
-                <p className="text-[#7a7268]/40 text-[10px] mt-1.5 uppercase tracking-wide">Genre : {challenge.category}</p>
-              )}
-              {challengeDone && (
-                <p className="text-emerald-400/60 text-[11px] italic mt-1.5">Relevé ce mois-ci ✓</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── Bilan mensuel ── */}
       <section className="mb-10">
         <SectionTitle>Ce mois-ci</SectionTitle>
@@ -529,7 +530,7 @@ export default function StatsPage() {
               </span>
               <span className="text-white/15">·</span>
               <span className="text-[#7a7268] text-[12px]">
-                <span className="text-white/70 font-medium">{prevMonth.length}</span> le mois dernier
+                <span className="text-white/70 font-medium">{prevMonth.length}</span> mois dernier
               </span>
               <span className="text-white/15">·</span>
               <span className="text-[#7a7268] text-[12px]">
