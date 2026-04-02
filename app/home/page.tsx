@@ -258,6 +258,21 @@ export default function HomePage() {
             {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
 
+          {/* Stats inline */}
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[#7a7268] text-[11px]">
+              <span className="text-white/70 font-medium">{stats.booksThisMonth}</span> lu{stats.booksThisMonth !== 1 ? 's' : ''}
+            </span>
+            <span className="text-white/15 text-[10px]">·</span>
+            <span className="text-[#7a7268] text-[11px]">
+              <span className="text-white/70 font-medium">{stats.totalNotes}</span> fiche{stats.totalNotes !== 1 ? 's' : ''}
+            </span>
+            <span className="text-white/15 text-[10px]">·</span>
+            <span className="text-[#7a7268] text-[11px]">
+              <span className="text-white/70 font-medium">{stats.streak}</span>j streak
+            </span>
+          </div>
+
           {/* Citation inline */}
           <p className="text-white/30 text-[11px] italic font-serif leading-snug mt-1.5">
             &ldquo;{quote.text.length > 80 ? quote.text.slice(0, 80) + '…' : quote.text}&rdquo; — {quote.author}
@@ -432,25 +447,6 @@ export default function HomePage() {
             <a href="/bibliotheque" className="text-[#c9440e] text-xs font-medium">Ajouter un livre →</a>
           </div>
         )}
-      </section>
-
-      {/* ── MA SEMAINE EN CHIFFRES ── */}
-      <section className="px-5 mb-5">
-        <h2 className="text-[#7a7268] text-[10px] font-medium tracking-[0.14em] uppercase mb-2.5">Ce mois-ci</h2>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.booksThisMonth}</p>
-            <p className="text-[#7a7268] text-[10px]">lu{stats.booksThisMonth !== 1 ? 's' : ''}</p>
-          </div>
-          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.totalNotes}</p>
-            <p className="text-[#7a7268] text-[10px]">fiche{stats.totalNotes !== 1 ? 's' : ''}</p>
-          </div>
-          <div className="bg-[#242018] border border-white/8 rounded-xl px-3 py-2.5 text-center">
-            <p className="font-serif text-white text-2xl leading-none mb-0.5">{stats.streak}</p>
-            <p className="text-[#7a7268] text-[10px]">j. consécutif{stats.streak !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
       </section>
 
       {/* ── Upsell Pro (non-Pro uniquement) ── */}
