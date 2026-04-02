@@ -121,7 +121,17 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-[#1a1714] text-white pb-20">
 
       {/* ── Header ── */}
-      <div className="px-4 pt-14 pb-3">
+      <div className="px-4 pt-14 pb-3 relative">
+
+        {/* Déconnexion — top right, only own profile */}
+        {isOwnProfile && (
+          <button
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
+            className="absolute top-3 right-0 text-[#7a7268] text-xs hover:text-white/60 transition"
+          >
+            Déconnexion
+          </button>
+        )}
 
         {/* Ligne 1 : avatar + stats */}
         <div className="flex items-center gap-5 mb-3">
@@ -239,19 +249,6 @@ export default function ProfilPage() {
         )}
       </div>
 
-      {isOwnProfile && (
-        <div className="flex justify-center py-8">
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut()
-              window.location.href = '/'
-            }}
-            className="text-red-500/70 text-sm hover:text-red-500 transition"
-          >
-            Se déconnecter
-          </button>
-        </div>
-      )}
 
       <BottomNav />
     </div>
