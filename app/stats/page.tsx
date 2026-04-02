@@ -1,13 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import BottomNav from '../components/BottomNav'
+
+// ── Constantes ─────────────────────────────────────────────────────────────
 
 const MONTHS_FR = [
   'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
 ]
+
+const MONTHLY_CHALLENGES: { title: string; desc: string; category: string | null }[] = [
+  { title: 'Livre oublié', desc: 'Lis un livre que tu remets depuis trop longtemps.', category: null },
+  { title: 'Voyage littéraire', desc: 'Un roman se déroulant dans un pays que tu n\'as jamais visité.', category: 'Littérature étrangère' },
+  { title: 'Printemps philosophique', desc: 'Un essai ou un texte de philosophie.', category: 'Philosophie' },
+  { title: 'Classique', desc: 'Un titre de la littérature mondiale considéré comme classique.', category: 'Littérature étrangère' },
+  { title: 'Comprendre le monde', desc: 'Un livre de sciences humaines ou sociales.', category: 'Sciences humaines' },
+  { title: 'Récit de vie', desc: 'Une biographie, un journal, des mémoires.', category: 'Histoire' },
+  { title: 'Évasion estivale', desc: 'Un roman d\'aventure ou de dépaysement total.', category: 'Littérature étrangère' },
+  { title: 'Rentrée littéraire', desc: 'Un auteur français contemporain.', category: 'Littérature française' },
+  { title: 'Regard intérieur', desc: 'Un livre qui change ta façon de voir les choses.', category: 'Développement personnel' },
+  { title: 'Voix française', desc: 'Un titre d\'un auteur français, classique ou moderne.', category: 'Littérature française' },
+  { title: 'Grand roman', desc: 'Un roman dense, de plus de 400 pages.', category: null },
+  { title: 'Bilan de l\'année', desc: 'Relis ou achève un livre commencé cette année.', category: null },
+]
+
+const MILESTONES: { count: number; label: string; detail: string }[] = [
+  { count: 1, label: 'Premier livre', detail: 'Tu as terminé ton premier livre — le reste s\'écrit.' },
+  { count: 5, label: '5 livres lus', detail: 'Une belle cadence s\'installe.' },
+  { count: 10, label: '10 livres lus', detail: 'Double chiffre. Tu lis, vraiment.' },
+  { count: 25, label: '25 livres lus', detail: 'Un quart de centaine. Impressionnant.' },
+  { count: 50, label: '50 livres lus', detail: 'Cinquante livres. Une bibliothèque en toi.' },
+  { count: 100, label: '100 livres lus', detail: 'Centenaire. Un lecteur accompli.' },
+]
+
+const LS_KEY = 'conatus_milestones_seen'
+
+// ── Composants utilitaires ─────────────────────────────────────────────────
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -20,66 +50,50 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 // ── Aperçu non-Pro ─────────────────────────────────────────────────────────
 
-function FakeBar({ w }: { w: number }) {
-  return <div className="h-1.5 rounded-full bg-white/15" style={{ width: `${w}%` }} />
-}
-
 function NonProView() {
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-28 relative overflow-hidden">
-
-      {/* ── Contenu flou ── */}
       <div className="px-6 pt-12 pb-6 select-none pointer-events-none blur-[3px] opacity-40">
         <h1 className="font-serif text-[30px] text-white mb-1">Statistiques</h1>
-        <p className="text-[#7a7268] text-sm">Année 2025</p>
-
+        <p className="text-[#7a7268] text-sm">Année 2026</p>
         <div className="mt-6 mb-8">
-          <p className="text-[#7a7268] text-xs uppercase tracking-widest mb-2">Objectif annuel</p>
           <div className="flex items-baseline gap-2 mb-3">
-            <span className="font-serif text-[40px] text-white leading-none">12</span>
+            <span className="font-serif text-[44px] text-white leading-none">12</span>
             <span className="text-[#7a7268] text-sm">/ 24 livres</span>
           </div>
-          <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
-            <div className="h-full bg-[#c9440e] rounded-full" style={{ width: '50%' }} />
+          <div className="h-1 rounded-full bg-white/8 overflow-hidden mb-1">
+            <div className="h-full rounded-full" style={{ width: '50%', background: 'linear-gradient(90deg, #c9440e, #e05a1c)' }} />
           </div>
         </div>
-
         <div className="mb-8">
-          <p className="font-serif italic text-white/50 text-[15px] leading-relaxed">
-            En avril, tu as lu 3 livres — 1 de plus qu'en mars.
-          </p>
+          <p className="font-serif italic text-white/50 text-[15px]">En avril, tu as lu 3 livres — 1 de plus qu'en mars.</p>
         </div>
-
-        <div className="mb-8">
-          <p className="text-[10px] uppercase tracking-widest text-[#7a7268] mb-4">Genres les plus lus</p>
-          <div className="flex flex-col gap-3">
-            {[['Littérature étrangère', 85], ['Philosophie', 55], ['Sciences humaines', 35], ['Histoire', 20]].map(([g, w]) => (
-              <div key={g as string}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-[13px] text-white/60">{g}</span>
-                  <span className="text-[12px] text-[#7a7268]">5</span>
-                </div>
-                <FakeBar w={w as number} />
+        <div className="mb-6">
+          <p className="text-[10px] uppercase tracking-widest text-[#7a7268] mb-3">Défi du mois</p>
+          <p className="text-white/60 text-[14px]">Classique — Lis un titre de la littérature mondiale.</p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-[#7a7268] mb-3">Genres</p>
+          {[['Littérature étrangère', 85], ['Philosophie', 55], ['Sciences humaines', 35]].map(([g, w]) => (
+            <div key={g as string} className="mb-3">
+              <div className="flex justify-between mb-1">
+                <span className="text-[13px] text-white/60">{g}</span>
+                <span className="text-[12px] text-[#7a7268]">5</span>
               </div>
-            ))}
-          </div>
+              <div className="h-px bg-white/15" style={{ width: `${w}%` }} />
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ── Overlay upsell ── */}
       <div className="absolute inset-0 flex flex-col items-center justify-center px-8 pb-20">
         <div className="text-center max-w-xs">
           <p className="text-[#c9440e] text-[13px] mb-3">✦</p>
-          <h2 className="font-serif text-[24px] text-white mb-3 leading-tight">
-            Tes statistiques t'attendent
-          </h2>
+          <h2 className="font-serif text-[24px] text-white mb-3 leading-tight">Tes statistiques t'attendent</h2>
           <p className="text-[#7a7268] text-[14px] leading-relaxed mb-6">
-            Objectifs annuels, bilan mensuel, timeline de lecture, genres favoris — une vue complète de ta vie de lecteur.
+            Objectifs annuels, défis mensuels, journal de lecture, milestones — une vue complète de ta vie de lecteur.
           </p>
-          <a
-            href="/premium"
-            className="inline-flex items-center gap-2 bg-[#c9440e] text-white text-[13px] font-medium px-6 py-3 rounded-full hover:opacity-90 transition"
-          >
+          <a href="/premium" className="inline-flex items-center gap-2 bg-[#c9440e] text-white text-[13px] font-medium px-6 py-3 rounded-full hover:opacity-90 transition">
             Passer à Pro ✦
           </a>
           <p className="text-[#7a7268]/50 text-[11px] mt-3">
@@ -94,43 +108,85 @@ function NonProView() {
   )
 }
 
-// ── Page Pro ───────────────────────────────────────────────────────────────
+// ── Page principale ────────────────────────────────────────────────────────
 
 export default function StatsPage() {
   const [user, setUser] = useState<any>(null)
   const [isPro, setIsPro] = useState(false)
   const [luBooks, setLuBooks] = useState<any[]>([])
+  const [enCoursBooks, setEnCoursBooks] = useState<any[]>([])
+
+  // Objectif annuel
   const [readingGoal, setReadingGoal] = useState(0)
   const [goalInput, setGoalInput] = useState('')
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalSaving, setGoalSaving] = useState(false)
+
+  // Objectif pages / semaine
+  const [pagesGoal, setPagesGoal] = useState(0)
+  const [pagesInput, setPagesInput] = useState('')
+  const [editingPages, setEditingPages] = useState(false)
+  const [pagesSaving, setPagesSaving] = useState(false)
+
+  // Milestones
+  const [milestone, setMilestone] = useState<{ label: string; detail: string } | null>(null)
+
   const [loading, setLoading] = useState(true)
+
+  // ── Chargement ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { window.location.href = '/auth'; return }
       setUser(data.user)
 
-      const [profileRes, booksRes] = await Promise.all([
+      const [profileRes, luRes, enCoursRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', data.user.id).single(),
         supabase.from('readings').select('*, books(*)')
           .eq('user_id', data.user.id).eq('status', 'lu')
           .order('updated_at', { ascending: false }),
+        supabase.from('readings').select('id, progress, updated_at')
+          .eq('user_id', data.user.id).eq('status', 'en_cours'),
       ])
 
-      if (profileRes.error) {
-        console.error('[stats] profile fetch error:', profileRes.error)
-      }
+      if (profileRes.error) console.error('[stats] profile error:', profileRes.error)
 
       const prof = profileRes.data
       const goal = prof?.reading_goal ?? 0
+      const pages = prof?.pages_weekly_goal ?? 0
       setIsPro(prof?.is_pro === true)
       setReadingGoal(goal)
       setGoalInput(String(goal || 12))
-      setLuBooks(booksRes.data || [])
+      setPagesGoal(pages)
+      setPagesInput(String(pages || 50))
+      setLuBooks(luRes.data || [])
+      setEnCoursBooks(enCoursRes.data || [])
       setLoading(false)
     })
   }, [])
+
+  // ── Milestones (post-load) ─────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!luBooks.length) return
+    try {
+      const seen: string[] = JSON.parse(localStorage.getItem(LS_KEY) || '[]')
+      // On cherche le milestone le plus élevé atteint et pas encore vu
+      const newOnes = MILESTONES.filter(m => luBooks.length >= m.count && !seen.includes(m.label))
+      if (newOnes.length > 0) setMilestone(newOnes[newOnes.length - 1])
+    } catch { /* localStorage indisponible */ }
+  }, [luBooks])
+
+  const dismissMilestone = useCallback(() => {
+    if (!milestone) return
+    try {
+      const seen: string[] = JSON.parse(localStorage.getItem(LS_KEY) || '[]')
+      localStorage.setItem(LS_KEY, JSON.stringify([...seen, milestone.label]))
+    } catch { /* */ }
+    setMilestone(null)
+  }, [milestone])
+
+  // ── Sauvegarde objectif annuel ─────────────────────────────────────────────
 
   const saveGoal = async () => {
     const n = Math.max(0, parseInt(goalInput) || 0)
@@ -140,6 +196,19 @@ export default function StatsPage() {
     await supabase.from('profiles').update({ reading_goal: n }).eq('id', user.id)
     setGoalSaving(false)
   }
+
+  // ── Sauvegarde objectif pages ──────────────────────────────────────────────
+
+  const savePages = async () => {
+    const n = Math.max(0, parseInt(pagesInput) || 0)
+    setPagesSaving(true)
+    setPagesGoal(n)
+    setEditingPages(false)
+    await supabase.from('profiles').update({ pages_weekly_goal: n }).eq('id', user.id)
+    setPagesSaving(false)
+  }
+
+  // ── États de chargement / gate ─────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -157,7 +226,20 @@ export default function StatsPage() {
   const cy = now.getFullYear()
   const cm = now.getMonth()
 
+  // Objectif annuel
   const thisYear = luBooks.filter(r => new Date(r.updated_at).getFullYear() === cy)
+  const yearCount = thisYear.length
+  const goalPct = readingGoal > 0 ? Math.min(100, Math.round((yearCount / readingGoal) * 100)) : 0
+
+  const endOfYear = new Date(cy + 1, 0, 1)
+  const daysLeft = Math.ceil((endOfYear.getTime() - now.getTime()) / 86400000)
+  const booksLeft = readingGoal > 0 ? Math.max(0, readingGoal - yearCount) : 0
+
+  const dayOfYear = Math.floor((now.getTime() - new Date(cy, 0, 1).getTime()) / 86400000)
+  const expectedPace = readingGoal > 0 ? Math.round(readingGoal * dayOfYear / 365) : null
+  const aheadBehind = expectedPace !== null ? yearCount - expectedPace : null
+
+  // Bilan mensuel
   const thisMonth = thisYear.filter(r => new Date(r.updated_at).getMonth() === cm)
   const prevMonthIdx = cm === 0 ? 11 : cm - 1
   const prevMonthYear = cm === 0 ? cy - 1 : cy
@@ -166,11 +248,6 @@ export default function StatsPage() {
     return d.getMonth() === prevMonthIdx && d.getFullYear() === prevMonthYear
   })
 
-  // Objectif annuel
-  const yearCount = thisYear.length
-  const goalPct = readingGoal > 0 ? Math.min(100, Math.round((yearCount / readingGoal) * 100)) : 0
-
-  // Bilan mensuel
   const bilanPhrase = (() => {
     const curr = thisMonth.length
     const prev = prevMonth.length
@@ -184,6 +261,21 @@ export default function StatsPage() {
     if (diff < 0) return `${base} — ${Math.abs(diff)} de moins qu'en ${prevName}.`
     return `${base}, autant qu'en ${prevName}.`
   })()
+
+  // Défi du mois
+  const challenge = MONTHLY_CHALLENGES[cm]
+  const challengeDone = challenge.category
+    ? thisMonth.some(r => r.books?.category === challenge.category)
+    : thisMonth.length > 0
+
+  // Pages cette semaine (estimation depuis progress des livres en cours)
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - now.getDay())
+  startOfWeek.setHours(0, 0, 0, 0)
+  const pagesEstimate = enCoursBooks
+    .filter(r => new Date(r.updated_at) >= startOfWeek && r.progress > 0)
+    .reduce((sum, r) => sum + Math.round((r.progress / 100) * 300), 0)
+  const pagesPct = pagesGoal > 0 ? Math.min(100, Math.round((pagesEstimate / pagesGoal) * 100)) : 0
 
   // Timeline par mois
   const byMonth: { key: string; label: string; books: any[] }[] = []
@@ -209,7 +301,6 @@ export default function StatsPage() {
     authorCounts[author] = (authorCounts[author] || 0) + 1
     if (r.rating > 0) { ratingSum += r.rating; ratingCount++ }
   }
-
   const topGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
   const topAuthors = Object.entries(authorCounts).sort((a, b) => b[1] - a[1]).slice(0, 4)
   const maxGenreCount = topGenres[0]?.[1] ?? 1
@@ -225,85 +316,101 @@ export default function StatsPage() {
       : `1 livre tous les ${Math.round(1 / perMonth)} mois`
   }
 
-  const dayOfYear = Math.floor((now.getTime() - new Date(cy, 0, 1).getTime()) / 86400000)
-  const expectedPace = readingGoal > 0 ? Math.round(readingGoal * dayOfYear / 365) : null
-  const aheadBehind = expectedPace !== null
-    ? yearCount - expectedPace
-    : null
+  // ── Rendu ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-28">
 
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-6">
+      <div className="px-6 pt-12 pb-5">
         <h1 className="font-serif text-[30px] text-white mb-0.5">Statistiques</h1>
-        <p className="text-[#7a7268] text-[12px]">{luBooks.length} livre{luBooks.length !== 1 ? 's' : ''} lu{luBooks.length !== 1 ? 's' : ''} au total</p>
+        <p className="text-[#7a7268] text-[12px]">
+          {luBooks.length} livre{luBooks.length !== 1 ? 's' : ''} lu{luBooks.length !== 1 ? 's' : ''} au total
+        </p>
       </div>
+
+      {/* ── Milestone ── */}
+      {milestone && (
+        <div className="mx-6 mb-5 flex items-center justify-between gap-3 border-l-2 border-[#c9440e]/50 pl-4 py-1">
+          <div>
+            <p className="text-white/80 text-[13px] font-medium">{milestone.label}</p>
+            <p className="text-[#7a7268] text-[12px] italic font-serif mt-0.5">{milestone.detail}</p>
+          </div>
+          <button
+            onClick={dismissMilestone}
+            className="text-[#7a7268] hover:text-white transition shrink-0"
+            aria-label="Fermer"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* ── Objectif annuel ── */}
       <section className="mb-10">
         <SectionTitle>Objectif {cy}</SectionTitle>
-
         <div className="px-6">
           {readingGoal > 0 ? (
             <>
-              <div className="flex items-baseline gap-2 mb-1">
+              <div className="flex items-baseline gap-2 mb-2">
                 <span className="font-serif text-[44px] text-white leading-none">{yearCount}</span>
                 <span className="text-[#7a7268] text-[15px]">/ {readingGoal} livre{readingGoal !== 1 ? 's' : ''}</span>
               </div>
 
-              {/* Barre de progression */}
               <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
                 <div
                   className="absolute inset-y-0 left-0 rounded-full transition-all"
                   style={{
                     width: `${goalPct}%`,
-                    background: goalPct >= 100
-                      ? '#4ade80'
-                      : `linear-gradient(90deg, #c9440e, #e05a1c)`,
+                    background: goalPct >= 100 ? '#4ade80' : 'linear-gradient(90deg, #c9440e, #e05a1c)',
                   }}
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <p className="text-[#7a7268] text-[11px]">
-                  {goalPct >= 100 ? 'Objectif atteint ✓' : `${goalPct}% de l'objectif`}
-                  {aheadBehind !== null && aheadBehind !== 0 && (
-                    <span className={`ml-2 ${aheadBehind > 0 ? 'text-emerald-400/70' : 'text-[#c9440e]/60'}`}>
-                      {aheadBehind > 0 ? `+${aheadBehind} d'avance` : `${Math.abs(aheadBehind)} de retard`}
-                    </span>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-[#7a7268] text-[11px]">
+                    {goalPct >= 100 ? 'Objectif atteint ✓' : `${goalPct}%`}
+                    {aheadBehind !== null && aheadBehind !== 0 && (
+                      <span className={`ml-2 ${aheadBehind > 0 ? 'text-emerald-400/70' : 'text-[#c9440e]/60'}`}>
+                        {aheadBehind > 0 ? `+${aheadBehind} d'avance` : `${Math.abs(aheadBehind)} de retard`}
+                      </span>
+                    )}
+                  </p>
+                  {booksLeft > 0 && daysLeft > 0 && (
+                    <p className="text-[#7a7268]/50 text-[11px] mt-0.5 italic">
+                      {booksLeft} livre{booksLeft !== 1 ? 's' : ''} à lire — il reste {daysLeft} jour{daysLeft !== 1 ? 's' : ''} en {cy}.
+                    </p>
                   )}
-                </p>
-                <button
-                  onClick={() => setEditingGoal(true)}
-                  className="text-[#7a7268] text-[11px] hover:text-white transition"
-                >
+                </div>
+                <button onClick={() => setEditingGoal(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0">
                   Modifier
                 </button>
               </div>
             </>
           ) : (
             <p className="text-[#7a7268] text-[14px] mb-2 font-serif italic">
-              Définis ton objectif de lecture pour cette année.
+              Définis ton objectif de lecture pour {cy}.
             </p>
           )}
 
           {(editingGoal || readingGoal === 0) && (
-            <div className="flex items-center gap-2 mt-3">
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
               <input
                 type="number"
                 value={goalInput}
                 onChange={e => setGoalInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && saveGoal()}
-                min="1"
-                max="365"
+                min="1" max="365"
                 className="w-20 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
               />
               <span className="text-[#7a7268] text-sm">livres cette année</span>
               <button
                 onClick={saveGoal}
                 disabled={goalSaving}
-                className="text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50 ml-1"
+                className="text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
               >
                 {goalSaving ? '…' : 'Valider'}
               </button>
@@ -317,15 +424,106 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* ── Objectif pages / semaine ── */}
+      <section className="mb-10">
+        <SectionTitle>Pages cette semaine</SectionTitle>
+        <div className="px-6">
+          {pagesGoal > 0 ? (
+            <>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="font-serif text-[36px] text-white leading-none">~{pagesEstimate}</span>
+                <span className="text-[#7a7268] text-[14px]">/ {pagesGoal} pages</span>
+              </div>
+
+              <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full transition-all bg-white/30"
+                  style={{ width: `${pagesPct}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-[#7a7268]/50 text-[11px] italic">Estimation basée sur la progression des lectures en cours</p>
+                <button onClick={() => setEditingPages(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0 ml-2">
+                  Modifier
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-[#7a7268] text-[14px] mb-2 font-serif italic">
+              Définis un objectif de pages par semaine.
+            </p>
+          )}
+
+          {(editingPages || pagesGoal === 0) && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <input
+                type="number"
+                value={pagesInput}
+                onChange={e => setPagesInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && savePages()}
+                min="1" max="2000"
+                className="w-24 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
+              />
+              <span className="text-[#7a7268] text-sm">pages par semaine</span>
+              <button
+                onClick={savePages}
+                disabled={pagesSaving}
+                className="text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
+              >
+                {pagesSaving ? '…' : 'Valider'}
+              </button>
+              {editingPages && (
+                <button onClick={() => setEditingPages(false)} className="text-[#7a7268] text-[12px] hover:text-white transition">
+                  Annuler
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Défi du mois ── */}
+      <section className="mb-10">
+        <SectionTitle>Défi de {MONTHS_FR[cm]}</SectionTitle>
+        <div className="px-6">
+          <div className="flex items-start gap-4">
+            <div
+              className={`mt-0.5 w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors ${
+                challengeDone
+                  ? 'bg-emerald-400/20 border-emerald-400/50'
+                  : 'border-white/15'
+              }`}
+            >
+              {challengeDone && (
+                <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="2 6 5 9 10 3" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className={`text-[15px] font-serif leading-snug ${challengeDone ? 'text-white/50 line-through' : 'text-white/80'}`}>
+                {challenge.title}
+              </p>
+              <p className="text-[#7a7268] text-[13px] mt-1 leading-relaxed">{challenge.desc}</p>
+              {challenge.category && (
+                <p className="text-[#7a7268]/40 text-[10px] mt-1.5 uppercase tracking-wide">Genre : {challenge.category}</p>
+              )}
+              {challengeDone && (
+                <p className="text-emerald-400/60 text-[11px] italic mt-1.5">Relevé ce mois-ci ✓</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Bilan mensuel ── */}
       <section className="mb-10">
         <SectionTitle>Ce mois-ci</SectionTitle>
         <div className="px-6">
-          <p className="font-serif italic text-[16px] text-white/60 leading-relaxed">
-            {bilanPhrase}
-          </p>
+          <p className="font-serif italic text-[16px] text-white/60 leading-relaxed">{bilanPhrase}</p>
           {thisMonth.length > 0 && (
-            <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
               <span className="text-[#7a7268] text-[12px]">
                 <span className="text-white/70 font-medium">{thisMonth.length}</span> ce mois
               </span>
@@ -342,15 +540,14 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* ── Stats avancées ── */}
+      {/* ── Vue d'ensemble ── */}
       {luBooks.length > 0 && (
         <section className="mb-10">
           <SectionTitle>Vue d'ensemble</SectionTitle>
+          <div className="px-6 flex flex-col gap-6">
 
-          <div className="px-6 flex flex-col gap-5">
-
-            {/* Chiffres clés inline */}
-            <div className="flex items-center gap-4 flex-wrap">
+            {/* Chiffres clés */}
+            <div className="flex items-center gap-5 flex-wrap">
               {avgRating && (
                 <div>
                   <p className="font-serif text-[28px] text-white leading-none">{avgRating}</p>
@@ -366,18 +563,18 @@ export default function StatsPage() {
                   </div>
                 </>
               )}
-              {topAuthors.length > 0 && (
+              {topAuthors[0] && (
                 <>
                   <div className="w-px h-8 bg-white/8" />
                   <div>
-                    <p className="font-serif text-[28px] text-white leading-none">{topAuthors.length > 0 ? topAuthors[0][1] : '—'}</p>
-                    <p className="text-[#7a7268] text-[11px] mt-0.5">par {topAuthors[0]?.[0]?.split(' ').pop()}</p>
+                    <p className="font-serif text-[28px] text-white leading-none">{topAuthors[0][1]}</p>
+                    <p className="text-[#7a7268] text-[11px] mt-0.5">par {topAuthors[0][0].split(' ').pop()}</p>
                   </div>
                 </>
               )}
             </div>
 
-            {/* Top genres */}
+            {/* Genres */}
             {topGenres.length > 0 && (
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-[#7a7268] mb-3">Genres</p>
@@ -388,9 +585,9 @@ export default function StatsPage() {
                         <span className="text-[13px] text-white/70">{genre}</span>
                         <span className="text-[12px] text-[#7a7268]">{count}</span>
                       </div>
-                      <div className="h-px bg-white/6 relative overflow-hidden rounded-full">
+                      <div className="h-px bg-white/6 relative overflow-hidden">
                         <div
-                          className="absolute inset-y-0 left-0 bg-[#c9440e]/50 transition-all"
+                          className="absolute inset-y-0 left-0 bg-[#c9440e]/40"
                           style={{ width: `${Math.round((count / maxGenreCount) * 100)}%` }}
                         />
                       </div>
@@ -400,7 +597,7 @@ export default function StatsPage() {
               </div>
             )}
 
-            {/* Top auteurs */}
+            {/* Auteurs */}
             {topAuthors.length > 0 && (
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-[#7a7268] mb-3">Auteurs</p>
@@ -418,11 +615,10 @@ export default function StatsPage() {
         </section>
       )}
 
-      {/* ── Timeline ── */}
+      {/* ── Journal de lecture ── */}
       {luBooks.length > 0 ? (
         <section className="mb-10">
           <SectionTitle>Journal de lecture</SectionTitle>
-
           <div className="px-6 flex flex-col gap-7">
             {byMonth.map(({ label, books }) => (
               <div key={label}>
@@ -432,11 +628,7 @@ export default function StatsPage() {
                     const d = new Date(r.updated_at)
                     const dayLabel = `${d.getDate()} ${MONTHS_FR[d.getMonth()].slice(0, 3)}.`
                     return (
-                      <a
-                        key={r.id}
-                        href={`/fiche/${r.id}`}
-                        className="flex items-baseline gap-3 group"
-                      >
+                      <a key={r.id} href={`/fiche/${r.id}`} className="flex items-baseline gap-3 group">
                         <span className="text-[#7a7268]/50 text-[11px] shrink-0 w-12 text-right">{dayLabel}</span>
                         <div className="flex-1 min-w-0 border-l border-white/6 pl-3">
                           <p className="font-serif text-[14px] text-white/80 leading-snug group-hover:text-white transition line-clamp-1">
@@ -445,9 +637,7 @@ export default function StatsPage() {
                           <p className="text-[#7a7268] text-[11px] mt-0.5 truncate">
                             {r.books?.author}
                             {r.rating > 0 && (
-                              <span className="ml-2 text-[#c9440e]/50">
-                                {'★'.repeat(Math.round(r.rating))}
-                              </span>
+                              <span className="ml-2 text-[#c9440e]/50">{'★'.repeat(Math.round(r.rating))}</span>
                             )}
                           </p>
                         </div>
