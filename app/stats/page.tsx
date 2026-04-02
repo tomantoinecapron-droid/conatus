@@ -112,14 +112,19 @@ export default function StatsPage() {
       setUser(data.user)
 
       const [profileRes, booksRes] = await Promise.all([
-        supabase.from('profiles').select('is_pro, reading_goal').eq('id', data.user.id).single(),
+        supabase.from('profiles').select('*').eq('id', data.user.id).single(),
         supabase.from('readings').select('*, books(*)')
           .eq('user_id', data.user.id).eq('status', 'lu')
           .order('updated_at', { ascending: false }),
       ])
 
-      const goal = profileRes.data?.reading_goal ?? 0
-      setIsPro(profileRes.data?.is_pro ?? false)
+      if (profileRes.error) {
+        console.error('[stats] profile fetch error:', profileRes.error)
+      }
+
+      const prof = profileRes.data
+      const goal = prof?.reading_goal ?? 0
+      setIsPro(prof?.is_pro === true)
       setReadingGoal(goal)
       setGoalInput(String(goal || 12))
       setLuBooks(booksRes.data || [])
