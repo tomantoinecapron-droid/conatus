@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import BottomNav from '../../components/BottomNav'
 
+// ── Utilitaires ────────────────────────────────────────────────────────────
+
 function getBio(bio: any): string {
   if (!bio) return ''
   if (typeof bio === 'string') return bio
@@ -28,18 +30,97 @@ function cleanMarkdown(text: string): string {
     .trim()
 }
 
-
-const SUSPICIOUS_TITLE_RE = /^(letter[s]? (to|from|of)|speech(es)?|discourse|about |a study (of|on)|selected works? (by|of|from)|collected works? (by|of|from)|works? of |writings? of |à propos|lettres? (à|de)|discours |étude (sur|de)|essais? sur|notes? on|comments? on|introduction to|preface to|introduction à|préface|tributes? to|in memoriam|memorial|by [a-z]+ [a-z]+:)/i
-
 function isLatinTitle(title: string): boolean {
   if (!title) return false
-  // Allow Latin + extended Latin (accented chars) + common punctuation
   return /^[\u0020-\u007E\u00C0-\u024F\u1E00-\u1EFF0-9\s\-'',.!?:;()&"«»–—\[\]\/]+$/.test(title.trim())
 }
+
+const SUSPICIOUS_TITLE_RE = /^(letter[s]? (to|from|of)|speech(es)?|discourse|about |a study (of|on)|selected works? (by|of|from)|collected works? (by|of|from)|works? of |writings? of |à propos|lettres? (à|de)|discours |étude (sur|de)|essais? sur|notes? on|comments? on|introduction to|preface to|introduction à|préface|tributes? to|in memoriam|memorial)/i
 
 function isSuspiciousWork(title: string): boolean {
   return SUSPICIOUS_TITLE_RE.test(title.trim())
 }
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+type Work = { title: string; year: string; id: string }
+
+// ── Sources de données ─────────────────────────────────────────────────────
+
+async function fetchWorksFromWikidata(authorName: string): Promise<Work[]> {
+  // 1. Trouver l'ID Wikidata de l'auteur
+  const searchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(authorName)}&language=fr&format=json&origin=*&limit=5`
+  const searchRes = await fetch(searchUrl)
+  const searchData = await searchRes.json()
+
+  const entity = searchData.search?.find((e: any) =>
+    e.description?.toLowerCase().includes('écrivain') ||
+    e.description?.toLowerCase().includes('auteur') ||
+    e.description?.toLowerCase().includes('romancier') ||
+    e.description?.toLowerCase().includes('poète') ||
+    e.description?.toLowerCase().includes('philosophe') ||
+    e.description?.toLowerCase().includes('writer') ||
+    e.description?.toLowerCase().includes('novelist') ||
+    e.description?.toLowerCase().includes('poet') ||
+    e.description?.toLowerCase().includes('author')
+  ) || searchData.search?.[0]
+
+  if (!entity?.id) return []
+
+  const wikidataId = entity.id // ex: "Q535"
+
+  // 2. SPARQL pour récupérer les œuvres littéraires
+  const sparql = `
+SELECT ?work ?workLabel ?date WHERE {
+  ?work wdt:P50 wd:${wikidataId}.
+  ?work wdt:P31 wd:Q7725634.
+  OPTIONAL { ?work wdt:P577 ?date. }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "fr,en". }
+}
+ORDER BY ?date
+LIMIT 20
+`.trim()
+
+  const sparqlUrl = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparql)}&format=json`
+  const sparqlRes = await fetch(sparqlUrl, {
+    headers: { Accept: 'application/sparql-results+json' },
+  })
+  if (!sparqlRes.ok) return []
+
+  const sparqlData = await sparqlRes.json()
+  const bindings: any[] = sparqlData.results?.bindings || []
+
+  // Dédupliquer par label (parfois plusieurs dates pour la même œuvre)
+  const seen = new Set<string>()
+  const works: Work[] = []
+  for (const b of bindings) {
+    const title = b.workLabel?.value || ''
+    const id = b.work?.value?.split('/').pop() || ''
+    const year = getYear(b.date?.value)
+    if (!title || title.startsWith('Q') || seen.has(title.toLowerCase())) continue
+    if (!isLatinTitle(title) || isSuspiciousWork(title)) continue
+    seen.add(title.toLowerCase())
+    works.push({ title, year, id })
+  }
+
+  return works.slice(0, 15)
+}
+
+async function fetchWorksFromOL(olId: string): Promise<Work[]> {
+  const res = await fetch(`https://openlibrary.org/authors/${olId}/works.json?limit=50`)
+  const data = await res.json()
+  return (data.entries || [])
+    .filter((w: any) => isLatinTitle(w.title || '') && !isSuspiciousWork(w.title || ''))
+    .sort((a: any, b: any) => (b.edition_count || 0) - (a.edition_count || 0))
+    .slice(0, 10)
+    .map((w: any) => ({
+      title: w.title || '',
+      year: getYear(w.first_publish_date),
+      id: w.key || '',
+    }))
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 export default function AuteurPage() {
   const params = useParams()
@@ -47,7 +128,8 @@ export default function AuteurPage() {
 
   const [olId, setOlId] = useState<string | null>(null)
   const [author, setAuthor] = useState<any>(null)
-  const [works, setWorks] = useState<any[]>([])
+  const [works, setWorks] = useState<Work[]>([])
+  const [worksSource, setWorksSource] = useState<'wikidata' | 'ol' | null>(null)
   const [userBookTitles, setUserBookTitles] = useState<Set<string>>(new Set())
   const [userReadCount, setUserReadCount] = useState(0)
   const [bioExpanded, setBioExpanded] = useState(false)
@@ -63,7 +145,7 @@ export default function AuteurPage() {
 
   const loadAll = async () => {
     try {
-      // 1. Résoudre le nom → OL ID
+      // 1. Résoudre le nom → OL ID (pour photo + données auteur)
       const searchRes = await fetch(
         `https://openlibrary.org/search/authors.json?q=${encodeURIComponent(authorName)}&limit=3`
       )
@@ -83,74 +165,58 @@ export default function AuteurPage() {
       setOlId(id)
 
       // 2. Données OL + Supabase en parallèle
-      // Try to fetch author data with French language preference
-      const [authorRes, worksRes, authRes] = await Promise.all([
+      const [authorRes, authRes] = await Promise.all([
         fetch(`https://openlibrary.org/authors/${id}.json`).then(r => r.json()),
-        fetch(`https://openlibrary.org/authors/${id}/works.json?limit=50`).then(r => r.json()),
         supabase.auth.getUser(),
       ])
 
       setAuthor(authorRes)
-
-      // 3. Bio: essayer Wikipedia FR, sinon OL brute
-      // authorRes.name est disponible ici (pas le state React qui n'est pas encore mis à jour)
       const resolvedName = authorRes.name || authorName
+
+      // 3. Bio Wikipedia FR
       let resolvedBio = ''
       try {
-        // Tentative 1 : nom avec underscores (format Wikipedia)
         const wikiNameUnderscore = resolvedName.replace(/ /g, '_')
-        console.log('[auteur] Wikipedia fetch:', `https://fr.wikipedia.org/api/rest_v1/page/summary/${wikiNameUnderscore}`)
         let wikiRes = await fetch(
           `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiNameUnderscore)}`
         )
-        console.log('[auteur] Wikipedia status (underscore):', wikiRes.status)
         if (wikiRes.ok) {
           const wikiData = await wikiRes.json()
-          console.log('[auteur] Wikipedia extract:', wikiData.extract?.slice(0, 80))
           resolvedBio = wikiData.extract || ''
         }
-
-        // Tentative 2 : nom tel quel si la première a échoué
         if (!resolvedBio) {
           wikiRes = await fetch(
             `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(resolvedName)}`
           )
-          console.log('[auteur] Wikipedia status (raw name):', wikiRes.status)
           if (wikiRes.ok) {
             const wikiData = await wikiRes.json()
-            console.log('[auteur] Wikipedia extract (raw):', wikiData.extract?.slice(0, 80))
             resolvedBio = wikiData.extract || ''
           }
         }
       } catch (e) {
         console.error('[auteur] Wikipedia error:', e)
       }
+      setBio(resolvedBio || cleanMarkdown(getBio(authorRes.bio)))
 
-      if (!resolvedBio) {
-        console.log('[auteur] Fallback OL bio')
-        resolvedBio = cleanMarkdown(getBio(authorRes.bio))
+      // 4. Œuvres : Wikidata en priorité, OL en fallback
+      try {
+        const wikidataWorks = await fetchWorksFromWikidata(resolvedName)
+        if (wikidataWorks.length > 0) {
+          setWorks(wikidataWorks)
+          setWorksSource('wikidata')
+        } else {
+          const olWorks = await fetchWorksFromOL(id)
+          setWorks(olWorks)
+          setWorksSource('ol')
+        }
+      } catch (e) {
+        console.error('[auteur] Wikidata error:', e)
+        const olWorks = await fetchWorksFromOL(id)
+        setWorks(olWorks)
+        setWorksSource('ol')
       }
-      setBio(resolvedBio)
 
-      // 4. Filtrer et trier les œuvres
-      const entries = (worksRes.entries || [])
-        .filter((w: any) => {
-          const title = w.title || ''
-          return isLatinTitle(title) && !isSuspiciousWork(title)
-        })
-        .sort((a: any, b: any) => {
-          // Sort by edition count desc (more editions = more important work), then by date
-          const ea = a.edition_count || 0
-          const eb = b.edition_count || 0
-          if (eb !== ea) return eb - ea
-          const ya = parseInt(getYear(a.first_publish_date)) || 9999
-          const yb = parseInt(getYear(b.first_publish_date)) || 9999
-          return ya - yb
-        })
-
-      setWorks(entries)
-
-      // 5. Données personnalisées
+      // 5. Données personnalisées utilisateur
       if (authRes.data?.user) {
         const { data: readings } = await supabase
           .from('readings')
@@ -162,11 +228,9 @@ export default function AuteurPage() {
           r.books?.author?.toLowerCase().includes(lastName)
         )
         setUserReadCount(byAuthor.filter((r: any) => r.status === 'lu').length)
-
-        const titles = new Set<string>(
+        setUserBookTitles(new Set(
           (readings || []).map((r: any) => r.books?.title?.toLowerCase().trim()).filter(Boolean)
-        )
-        setUserBookTitles(titles)
+        ))
       }
     } catch (e) {
       console.error('[auteur]', e)
@@ -187,7 +251,7 @@ export default function AuteurPage() {
     return (
       <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center gap-3 pb-24 px-6 text-center">
         <p className="font-serif text-[20px] text-white">Auteur introuvable</p>
-        <p className="text-[#7a7268] text-sm">Aucun résultat sur Open Library pour « {authorName} ».</p>
+        <p className="text-[#7a7268] text-sm">Aucun résultat pour « {authorName} ».</p>
         <button onClick={() => window.history.back()} className="text-[#c9440e] text-sm mt-1">← Retour</button>
         <BottomNav />
       </div>
@@ -288,19 +352,16 @@ export default function AuteurPage() {
           </div>
 
           <div className="px-6 divide-y divide-white/5">
-            {works.map((work: any, i: number) => {
-              const title = work.title || ''
-              const year = getYear(work.first_publish_date)
-              const inLibrary = userBookTitles.has(title.toLowerCase().trim())
-
+            {works.map((work, i) => {
+              const inLibrary = userBookTitles.has(work.title.toLowerCase().trim())
               return (
-                <div key={work.key || i} className="flex items-baseline justify-between gap-3 py-3.5">
+                <div key={work.id || i} className="flex items-baseline justify-between gap-3 py-3.5">
                   <div className="flex-1 min-w-0">
                     <p className={`font-serif text-[15px] leading-snug line-clamp-1 ${inLibrary ? 'text-white/50' : 'text-white/80'}`}>
-                      {title}
+                      {work.title}
                     </p>
-                    {year && (
-                      <p className="text-[#7a7268] text-[11px] mt-0.5">{year}</p>
+                    {work.year && (
+                      <p className="text-[#7a7268] text-[11px] mt-0.5">{work.year}</p>
                     )}
                   </div>
                   {inLibrary && (
@@ -320,14 +381,11 @@ export default function AuteurPage() {
       <div className="px-6 pt-4 pb-2">
         <p className="text-[#7a7268]/30 text-[10px]">
           Données :{' '}
-          <a
-            href={`https://openlibrary.org/authors/${olId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-[#7a7268] transition"
-          >
-            Open Library
-          </a>
+          {worksSource === 'wikidata' ? (
+            <a href="https://www.wikidata.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a7268] transition">Wikidata</a>
+          ) : (
+            <a href={`https://openlibrary.org/authors/${olId}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a7268] transition">Open Library</a>
+          )}
         </p>
       </div>
 
