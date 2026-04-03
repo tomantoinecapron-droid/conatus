@@ -145,7 +145,11 @@ export default function StatsPage() {
           .eq('user_id', data.user.id).eq('status', 'en_cours'),
       ])
 
-      if (profileRes.error) console.error('[stats] profile error:', profileRes.error)
+      console.log('[stats] profileRes.error:', profileRes.error)
+      console.log('[stats] profile row:', profileRes.data)
+      console.log('[stats] yearly_goal:', profileRes.data?.yearly_goal)
+      console.log('[stats] weekly_pages_goal:', profileRes.data?.weekly_pages_goal)
+      console.log('[stats] goals_validated:', profileRes.data?.goals_validated)
 
       const prof = profileRes.data
       const goal = prof?.yearly_goal ?? 0
@@ -189,26 +193,31 @@ export default function StatsPage() {
   const saveGoals = async () => {
     const g = Math.max(1, parseInt(goalInput) || 12)
     const p = Math.max(1, parseInt(pagesInput) || 50)
+    console.log('[stats] saveGoals → envoi:', { id: user.id, yearly_goal: g, weekly_pages_goal: p, goals_validated: true })
     setSaving(true)
     setReadingGoal(g)
     setPagesGoal(p)
     setGoalsValidated(true)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
-      .upsert(
-        { id: user.id, yearly_goal: g, weekly_pages_goal: p, goals_validated: true },
-        { onConflict: 'id' }
-      )
-    if (error) console.error('[stats] saveGoals error:', error)
+      .update({ yearly_goal: g, weekly_pages_goal: p, goals_validated: true })
+      .eq('id', user.id)
+      .select()
+    console.log('[stats] saveGoals ← data:', data)
+    console.log('[stats] saveGoals ← error:', error)
     setSaving(false)
   }
 
   const startModify = async () => {
     setGoalsValidated(false)
-    const { error } = await supabase
+    console.log('[stats] startModify → goals_validated: false pour', user.id)
+    const { data, error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, goals_validated: false }, { onConflict: 'id' })
-    if (error) console.error('[stats] startModify error:', error)
+      .update({ goals_validated: false })
+      .eq('id', user.id)
+      .select()
+    console.log('[stats] startModify ← data:', data)
+    console.log('[stats] startModify ← error:', error)
   }
 
   // ── États de chargement / gate ─────────────────────────────────────────────
