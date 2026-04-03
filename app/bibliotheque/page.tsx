@@ -32,7 +32,7 @@ function normalizeCategory(cats?: string[]): Category {
 
 type Status = 'tous' | 'en_cours' | 'lu' | 'a_lire'
 type SortBy = 'date' | 'rating' | 'title' | 'author'
-type Tab = 'biblio' | 'listes'
+type Tab = 'biblio' | 'auteurs' | 'listes'
 
 const STATUS_FILTERS: { key: Status; label: string }[] = [
   { key: 'tous', label: 'Tous' },
@@ -82,6 +82,7 @@ export default function Bibliotheque() {
   const [addingToList, setAddingToList] = useState<string | null>(null) // reading id
   const [bookListMemberships, setBookListMemberships] = useState<Record<string, string[]>>({}) // readingId -> listIds[]
   const listPickerRef = useRef<HTMLDivElement>(null)
+  const [authorSearch, setAuthorSearch] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -227,6 +228,23 @@ export default function Bibliotheque() {
 
   // ── Dérivés ───────────────────────────────────────────────────────────────
 
+  // ── Auteurs ───────────────────────────────────────────────────────────────
+
+  const authorsMap = myBooks.reduce((acc: Record<string, number>, r) => {
+    const name = r.books?.author
+    if (!name) return acc
+    acc[name] = (acc[name] || 0) + 1
+    return acc
+  }, {})
+
+  const authors = Object.entries(authorsMap)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'fr'))
+
+  const filteredAuthors = authorSearch.trim()
+    ? authors.filter(a => a.name.toLowerCase().includes(authorSearch.trim().toLowerCase()))
+    : authors
+
   const luCount = myBooks.filter(r => r.status === 'lu').length
   const enCoursCount = myBooks.filter(r => r.status === 'en_cours').length
   const aLireCount = myBooks.filter(r => r.status === 'a_lire').length
@@ -293,7 +311,11 @@ export default function Bibliotheque() {
 
       {/* ── Tabs ── */}
       <div className="flex px-6 mb-5 gap-6 border-b border-white/6">
-        {([{ key: 'biblio', label: 'Bibliothèque' }, { key: 'listes', label: 'Mes listes' }] as { key: Tab; label: string }[]).map(t => (
+        {([
+          { key: 'biblio', label: 'Bibliothèque' },
+          { key: 'auteurs', label: 'Auteurs' },
+          { key: 'listes', label: 'Mes listes' },
+        ] as { key: Tab; label: string }[]).map(t => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
@@ -304,6 +326,9 @@ export default function Bibliotheque() {
             }`}
           >
             {t.label}
+            {t.key === 'auteurs' && authors.length > 0 && (
+              <span className="ml-1.5 text-[10px] text-[#7a7268]/60">{authors.length}</span>
+            )}
             {t.key === 'listes' && lists.length > 0 && (
               <span className="ml-1.5 text-[10px] text-[#7a7268]/60">{lists.length}</span>
             )}
@@ -560,6 +585,44 @@ export default function Bibliotheque() {
             </div>
           )}
         </>
+      ) : activeTab === 'auteurs' ? (
+        /* ══ TAB AUTEURS ═════════════════════════════════════════════════════ */
+        <div className="px-5">
+
+          {/* Recherche */}
+          <div className="mb-5">
+            <input
+              type="text"
+              placeholder="Rechercher un auteur..."
+              value={authorSearch}
+              onChange={e => setAuthorSearch(e.target.value)}
+              className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e]/50 transition"
+            />
+          </div>
+
+          {filteredAuthors.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="font-serif text-white/30 text-base">Aucun auteur trouvé</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {filteredAuthors.map(({ name, count }) => (
+                <a
+                  key={name}
+                  href={`/auteur/${encodeURIComponent(name)}`}
+                  className="flex items-center justify-between py-3.5 group"
+                >
+                  <p className="font-serif text-[15px] text-white/80 group-hover:text-white transition leading-snug line-clamp-1">
+                    {name}
+                  </p>
+                  <span className="text-[#7a7268] text-[12px] shrink-0 ml-3">
+                    {count} livre{count > 1 ? 's' : ''}
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
         /* ══ TAB LISTES ══════════════════════════════════════════════════════ */
         <div className="px-5">
