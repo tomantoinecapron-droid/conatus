@@ -116,17 +116,13 @@ export default function StatsPage() {
   const [luBooks, setLuBooks] = useState<any[]>([])
   const [enCoursBooks, setEnCoursBooks] = useState<any[]>([])
 
-  // Objectif annuel
+  // Objectifs
   const [readingGoal, setReadingGoal] = useState(0)
-  const [goalInput, setGoalInput] = useState('')
-  const [editingGoal, setEditingGoal] = useState(false)
-  const [goalSaving, setGoalSaving] = useState(false)
-
-  // Objectif pages / semaine
+  const [goalInput, setGoalInput] = useState('12')
   const [pagesGoal, setPagesGoal] = useState(0)
-  const [pagesInput, setPagesInput] = useState('')
-  const [editingPages, setEditingPages] = useState(false)
-  const [pagesSaving, setPagesSaving] = useState(false)
+  const [pagesInput, setPagesInput] = useState('50')
+  const [goalsValidated, setGoalsValidated] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   // Milestones
   const [milestone, setMilestone] = useState<{ label: string; detail: string } | null>(null)
@@ -154,11 +150,13 @@ export default function StatsPage() {
       const prof = profileRes.data
       const goal = prof?.yearly_goal ?? 0
       const pages = prof?.weekly_pages_goal ?? 0
+      const validated = prof?.goals_validated === true
       setIsPro(prof?.is_pro === true)
       setReadingGoal(goal)
       setGoalInput(String(goal || 12))
       setPagesGoal(pages)
       setPagesInput(String(pages || 50))
+      setGoalsValidated(validated)
       setLuBooks(luRes.data || [])
       setEnCoursBooks(enCoursRes.data || [])
       setLoading(false)
@@ -186,32 +184,31 @@ export default function StatsPage() {
     setMilestone(null)
   }, [milestone])
 
-  // ── Sauvegarde objectif annuel ─────────────────────────────────────────────
+  // ── Sauvegarde unifiée des objectifs ──────────────────────────────────────
 
-  const saveGoal = async () => {
-    const n = Math.max(0, parseInt(goalInput) || 0)
-    setGoalSaving(true)
-    setReadingGoal(n)
-    setEditingGoal(false)
+  const saveGoals = async () => {
+    const g = Math.max(1, parseInt(goalInput) || 12)
+    const p = Math.max(1, parseInt(pagesInput) || 50)
+    setSaving(true)
+    setReadingGoal(g)
+    setPagesGoal(p)
+    setGoalsValidated(true)
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, yearly_goal: n }, { onConflict: 'id' })
-    if (error) console.error('[stats] saveGoal error:', error)
-    setGoalSaving(false)
+      .upsert(
+        { id: user.id, yearly_goal: g, weekly_pages_goal: p, goals_validated: true },
+        { onConflict: 'id' }
+      )
+    if (error) console.error('[stats] saveGoals error:', error)
+    setSaving(false)
   }
 
-  // ── Sauvegarde objectif pages ──────────────────────────────────────────────
-
-  const savePages = async () => {
-    const n = Math.max(0, parseInt(pagesInput) || 0)
-    setPagesSaving(true)
-    setPagesGoal(n)
-    setEditingPages(false)
+  const startModify = async () => {
+    setGoalsValidated(false)
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, weekly_pages_goal: n }, { onConflict: 'id' })
-    if (error) console.error('[stats] savePages error:', error)
-    setPagesSaving(false)
+      .upsert({ id: user.id, goals_validated: false }, { onConflict: 'id' })
+    if (error) console.error('[stats] startModify error:', error)
   }
 
   // ── États de chargement / gate ─────────────────────────────────────────────
@@ -354,82 +351,100 @@ export default function StatsPage() {
         </div>
       )}
 
-      {/* ── Objectif annuel ── */}
+      {/* ── Objectifs ── */}
       <section className="mb-10">
-        <SectionTitle>Objectif {cy}</SectionTitle>
+        <div className="flex items-center gap-4 px-6 mb-4">
+          <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-[#7a7268] shrink-0">Objectif {cy}</p>
+          <div className="flex-1 h-px bg-white/6" />
+          {goalsValidated && (
+            <button onClick={startModify} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0">
+              Modifier
+            </button>
+          )}
+        </div>
+
         <div className="px-6">
-          {readingGoal > 0 ? (
+          {goalsValidated ? (
+            /* ── Mode validé ── */
             <>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-serif text-[44px] text-white leading-none">{yearCount}</span>
-                <span className="text-[#7a7268] text-[15px]">/ {readingGoal} livre{readingGoal !== 1 ? 's' : ''}</span>
-              </div>
-
-              <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all"
-                  style={{
-                    width: `${goalPct}%`,
-                    background: goalPct >= 100 ? '#4ade80' : 'linear-gradient(90deg, #c9440e, #e05a1c)',
-                  }}
-                />
-              </div>
-
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[#7a7268] text-[11px]">
-                    {goalPct >= 100 ? 'Objectif atteint ✓' : `${goalPct}%`}
-                    {aheadBehind !== null && aheadBehind !== 0 && (
-                      <span className={`ml-2 ${aheadBehind > 0 ? 'text-emerald-400/70' : 'text-[#c9440e]/60'}`}>
-                        {aheadBehind > 0 ? `+${aheadBehind} d'avance` : `${Math.abs(aheadBehind)} de retard`}
-                      </span>
-                    )}
-                  </p>
-                  {booksLeft > 0 && daysLeft > 0 && (
-                    <p className="text-[#7a7268]/45 text-[11px] mt-0.5 italic">
-                      Il te reste {daysLeft} jour{daysLeft !== 1 ? 's' : ''} pour lire {booksLeft} livre{booksLeft !== 1 ? 's' : ''} de plus.
-                    </p>
-                  )}
-                  {goalPct >= 100 && (
-                    <p className="text-emerald-400/50 text-[11px] mt-0.5 italic">
-                      Bravo — encore {daysLeft} jours pour aller plus loin.
-                    </p>
-                  )}
+              {/* Livres */}
+              <div className="mb-6">
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="font-serif text-[44px] text-white leading-none">{yearCount}</span>
+                  <span className="text-[#7a7268] text-[15px]">/ {readingGoal} livre{readingGoal !== 1 ? 's' : ''}</span>
                 </div>
-                <button onClick={() => setEditingGoal(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0">
-                  Modifier
-                </button>
+                <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full transition-all"
+                    style={{
+                      width: `${goalPct}%`,
+                      background: goalPct >= 100 ? '#4ade80' : 'linear-gradient(90deg, #c9440e, #e05a1c)',
+                    }}
+                  />
+                </div>
+                <p className="text-[#7a7268] text-[11px]">
+                  {goalPct >= 100 ? 'Objectif atteint ✓' : `${goalPct}%`}
+                  {aheadBehind !== null && aheadBehind !== 0 && (
+                    <span className={`ml-2 ${aheadBehind > 0 ? 'text-emerald-400/70' : 'text-[#c9440e]/60'}`}>
+                      {aheadBehind > 0 ? `+${aheadBehind} d'avance` : `${Math.abs(aheadBehind)} de retard`}
+                    </span>
+                  )}
+                </p>
+                {booksLeft > 0 && daysLeft > 0 && (
+                  <p className="text-[#7a7268]/45 text-[11px] mt-0.5 italic">
+                    Il te reste {daysLeft} jour{daysLeft !== 1 ? 's' : ''} pour lire {booksLeft} livre{booksLeft !== 1 ? 's' : ''} de plus.
+                  </p>
+                )}
+                {goalPct >= 100 && (
+                  <p className="text-emerald-400/50 text-[11px] mt-0.5 italic">
+                    Bravo — encore {daysLeft} jours pour aller plus loin.
+                  </p>
+                )}
+              </div>
+
+              {/* Pages */}
+              <div>
+                <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-[#7a7268] mb-3">Pages cette semaine</p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="font-serif text-[36px] text-white leading-none">~{pagesEstimate}</span>
+                  <span className="text-[#7a7268] text-[14px]">/ {pagesGoal} pages</span>
+                </div>
+                <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
+                  <div className="absolute inset-y-0 left-0 rounded-full bg-white/25 transition-all" style={{ width: `${pagesPct}%` }} />
+                </div>
+                <p className="text-[#7a7268]/45 text-[11px] italic">Estimation via la progression des livres en cours</p>
               </div>
             </>
           ) : (
-            <p className="text-[#7a7268] text-[14px] mb-2 font-serif italic">
-              Définis ton objectif de lecture pour {cy}.
-            </p>
-          )}
-
-          {(editingGoal || readingGoal === 0) && (
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <input
-                type="number"
-                value={goalInput}
-                onChange={e => setGoalInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && saveGoal()}
-                min="1" max="365"
-                className="w-20 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
-              />
-              <span className="text-[#7a7268] text-sm">livres cette année</span>
+            /* ── Mode formulaire ── */
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <input
+                  type="number"
+                  value={goalInput}
+                  onChange={e => setGoalInput(e.target.value)}
+                  min="1" max="365"
+                  className="w-20 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
+                />
+                <span className="text-[#7a7268] text-sm">livres cette année</span>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <input
+                  type="number"
+                  value={pagesInput}
+                  onChange={e => setPagesInput(e.target.value)}
+                  min="1" max="2000"
+                  className="w-24 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
+                />
+                <span className="text-[#7a7268] text-sm">pages par semaine</span>
+              </div>
               <button
-                onClick={saveGoal}
-                disabled={goalSaving}
-                className="text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
+                onClick={saveGoals}
+                disabled={saving}
+                className="self-start text-[12px] font-medium text-white bg-[#c9440e] px-5 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
               >
-                {goalSaving ? '…' : 'Valider'}
+                {saving ? '…' : 'Valider'}
               </button>
-              {editingGoal && (
-                <button onClick={() => setEditingGoal(false)} className="text-[#7a7268] text-[12px] hover:text-white transition">
-                  Annuler
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -465,64 +480,6 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* ── Objectif pages / semaine ── */}
-      <section className="mb-10">
-        <SectionTitle>Pages cette semaine</SectionTitle>
-        <div className="px-6">
-          {pagesGoal > 0 ? (
-            <>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="font-serif text-[36px] text-white leading-none">~{pagesEstimate}</span>
-                <span className="text-[#7a7268] text-[14px]">/ {pagesGoal} pages</span>
-              </div>
-
-              <div className="relative h-1 bg-white/8 rounded-full overflow-hidden mb-2">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all bg-white/25"
-                  style={{ width: `${pagesPct}%` }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[#7a7268]/45 text-[11px] italic">Estimation via la progression des livres en cours</p>
-                <button onClick={() => setEditingPages(true)} className="text-[#7a7268] text-[11px] hover:text-white transition shrink-0">
-                  Modifier
-                </button>
-              </div>
-            </>
-          ) : (
-            <p className="text-[#7a7268] text-[14px] mb-2 font-serif italic">
-              Définis un objectif de pages par semaine.
-            </p>
-          )}
-
-          {(editingPages || pagesGoal === 0) && (
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <input
-                type="number"
-                value={pagesInput}
-                onChange={e => setPagesInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && savePages()}
-                min="1" max="2000"
-                className="w-24 bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition text-center"
-              />
-              <span className="text-[#7a7268] text-sm">pages par semaine</span>
-              <button
-                onClick={savePages}
-                disabled={pagesSaving}
-                className="text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
-              >
-                {pagesSaving ? '…' : 'Valider'}
-              </button>
-              {editingPages && (
-                <button onClick={() => setEditingPages(false)} className="text-[#7a7268] text-[12px] hover:text-white transition">
-                  Annuler
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* ── Bilan mensuel ── */}
       <section className="mb-10">
