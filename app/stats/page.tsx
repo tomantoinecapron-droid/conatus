@@ -153,7 +153,7 @@ export default function StatsPage() {
 
       const prof = profileRes.data
       const goal = prof?.yearly_goal ?? 0
-      const pages = prof?.pages_weekly_goal ?? 0
+      const pages = prof?.weekly_pages_goal ?? 0
       setIsPro(prof?.is_pro === true)
       setReadingGoal(goal)
       setGoalInput(String(goal || 12))
@@ -193,7 +193,10 @@ export default function StatsPage() {
     setGoalSaving(true)
     setReadingGoal(n)
     setEditingGoal(false)
-    await supabase.from('profiles').update({ yearly_goal: n }).eq('id', user.id)
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id, yearly_goal: n }, { onConflict: 'id' })
+    if (error) console.error('[stats] saveGoal error:', error)
     setGoalSaving(false)
   }
 
@@ -204,7 +207,10 @@ export default function StatsPage() {
     setPagesSaving(true)
     setPagesGoal(n)
     setEditingPages(false)
-    await supabase.from('profiles').update({ pages_weekly_goal: n }).eq('id', user.id)
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id, weekly_pages_goal: n }, { onConflict: 'id' })
+    if (error) console.error('[stats] savePages error:', error)
     setPagesSaving(false)
   }
 
