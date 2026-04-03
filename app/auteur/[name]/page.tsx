@@ -18,6 +18,38 @@ function getYear(dateStr: string | undefined): string {
   return m ? m[0] : dateStr
 }
 
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    .replace(/#{1,6}\s+/g, '')
+    .trim()
+}
+
+// Heuristic: detect if text is likely English (not French)
+function likelyEnglish(text: string): boolean {
+  if (!text || text.length < 40) return false
+  const frenchWords = /\b(le|la|les|un|une|des|et|est|en|au|aux|il|elle|ils|elles|dans|sur|avec|pour|par|qui|que|son|sa|ses|leur|leurs|né|née|mort|morte|écrivain|auteur|romancier|poète|philosophe|siècle|époque|œuvre|roman|dont|mais|plus|aussi|très|tout|cette|cet|comme)\b/i
+  const englishWords = /\b(the|and|was|born|died|his|her|he|she|they|their|who|which|with|from|that|had|has|have|been|were|are|wrote|author|writer|known|also|such|one|two|three|year|years|century|published|became|novel|poem|poetry|work|works)\b/i
+  const frCount = (text.match(frenchWords) || []).length
+  const enCount = (text.match(englishWords) || []).length
+  return enCount > frCount
+}
+
+const SUSPICIOUS_TITLE_RE = /^(letter[s]? (to|from|of)|speech(es)?|discourse|about |a study (of|on)|selected works? (by|of|from)|collected works? (by|of|from)|works? of |writings? of |à propos|lettres? (à|de)|discours |étude (sur|de)|essais? sur|notes? on|comments? on|introduction to|preface to|introduction à|préface|tributes? to|in memoriam|memorial|by [a-z]+ [a-z]+:)/i
+
+function isLatinTitle(title: string): boolean {
+  if (!title) return false
+  // Allow Latin + extended Latin (accented chars) + common punctuation
+  return /^[\u0020-\u007E\u00C0-\u024F\u1E00-\u1EFF0-9\s\-'',.!?:;()&"«»–—\[\]\/]+$/.test(title.trim())
+}
+
+function isSuspiciousWork(title: string): boolean {
+  return SUSPICIOUS_TITLE_RE.test(title.trim())
+}
+
 export default function AuteurPage() {
   const params = useParams()
   const authorName = decodeURIComponent(params.name as string)
@@ -31,6 +63,7 @@ export default function AuteurPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [photoError, setPhotoError] = useState(false)
+  const [bio, setBio] = useState('')
 
   useEffect(() => {
     if (!authorName) return
@@ -51,32 +84,61 @@ export default function AuteurPage() {
         return
       }
 
-      // Prendre le premier résultat dont le nom correspond le mieux
       const match = searchData.docs.find((d: any) =>
         d.name?.toLowerCase().includes(authorName.split(' ').pop()?.toLowerCase() || '')
       ) || searchData.docs[0]
 
-      const id = match.key // ex: "OL9388A"
+      const id = match.key
       setOlId(id)
 
       // 2. Données OL + Supabase en parallèle
+      // Try to fetch author data with French language preference
       const [authorRes, worksRes, authRes] = await Promise.all([
-        fetch(`https://openlibrary.org/authors/${id}.json`).then(r => r.json()),
-        fetch(`https://openlibrary.org/authors/${id}/works.json?limit=24`).then(r => r.json()),
+        fetch(`https://openlibrary.org/authors/${id}.json`, {
+          headers: { 'Accept-Language': 'fr' },
+        }).then(r => r.json()),
+        fetch(`https://openlibrary.org/authors/${id}/works.json?limit=50`).then(r => r.json()),
         supabase.auth.getUser(),
       ])
 
       setAuthor(authorRes)
 
-      // Trier les œuvres par date de publication
-      const entries = (worksRes.entries || []).sort((a: any, b: any) => {
-        const ya = parseInt(getYear(a.first_publish_date)) || 9999
-        const yb = parseInt(getYear(b.first_publish_date)) || 9999
-        return ya - yb
-      })
+      // 3. Bio: clean markdown, translate if English
+      const rawBio = cleanMarkdown(getBio(authorRes.bio))
+      if (rawBio && likelyEnglish(rawBio)) {
+        // Translate in background, show raw while waiting
+        setBio(rawBio)
+        fetch('/api/translate-bio', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ text: rawBio }),
+        })
+          .then(r => r.json())
+          .then(d => { if (d.translated) setBio(d.translated) })
+          .catch(() => {/* keep raw */})
+      } else {
+        setBio(rawBio)
+      }
+
+      // 4. Filtrer et trier les œuvres
+      const entries = (worksRes.entries || [])
+        .filter((w: any) => {
+          const title = w.title || ''
+          return isLatinTitle(title) && !isSuspiciousWork(title)
+        })
+        .sort((a: any, b: any) => {
+          // Sort by edition count desc (more editions = more important work), then by date
+          const ea = a.edition_count || 0
+          const eb = b.edition_count || 0
+          if (eb !== ea) return eb - ea
+          const ya = parseInt(getYear(a.first_publish_date)) || 9999
+          const yb = parseInt(getYear(b.first_publish_date)) || 9999
+          return ya - yb
+        })
+
       setWorks(entries)
 
-      // 3. Données personnalisées (livres de l'utilisateur par cet auteur)
+      // 5. Données personnalisées
       if (authRes.data?.user) {
         const { data: readings } = await supabase
           .from('readings')
@@ -121,7 +183,6 @@ export default function AuteurPage() {
   }
 
   const name = author.name || authorName
-  const bio = getBio(author.bio)
   const birthYear = getYear(author.birth_date)
   const deathYear = getYear(author.death_date)
   const photoUrl = olId && !photoError
