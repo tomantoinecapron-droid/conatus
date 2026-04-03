@@ -18,10 +18,18 @@ export default function Fiche() {
   const [rating, setRating] = useState(0)
   const [citations, setCitations] = useState<any[]>([])
   const [newCitation, setNewCitation] = useState('')
+  const [newCitationPage, setNewCitationPage] = useState('')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'pending' | 'saved'>('idle')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  // Nouveaux champs
+  const [startedAt, setStartedAt] = useState('')
+  const [finishedAt, setFinishedAt] = useState('')
+  const [recommendedBy, setRecommendedBy] = useState('')
+  const [isPublic, setIsPublic] = useState(false)
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle')
 
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -37,8 +45,13 @@ export default function Fiche() {
       supabase.from('citations').select('*').eq('reading_id', id).order('created_at'),
     ])
     if (readingRes.data) {
-      setReading(readingRes.data)
-      setRating(readingRes.data.rating || 0)
+      const r = readingRes.data
+      setReading(r)
+      setRating(r.rating || 0)
+      setStartedAt(r.started_at ? r.started_at.slice(0, 10) : '')
+      setFinishedAt(r.finished_at ? r.finished_at.slice(0, 10) : '')
+      setRecommendedBy(r.recommended_by || '')
+      setIsPublic(r.is_public || false)
     }
     if (noteRes.data) {
       setNote(noteRes.data.content || '')
@@ -47,6 +60,8 @@ export default function Fiche() {
     setCitations(citationsRes.data || [])
     setLoading(false)
   }
+
+  // ── Sauvegarde note + rating (debounced) ──────────────────────────────────
 
   const doSave = async (currentNote: string, currentRating: number) => {
     if (!reading) return
@@ -81,18 +96,28 @@ export default function Fiche() {
     doSave(note, next)
   }
 
+  // ── Champs annexes (save on blur) ─────────────────────────────────────────
+
+  const saveField = async (field: string, value: string) => {
+    await supabase.from('readings').update({ [field]: value || null }).eq('id', id)
+  }
+
   const updateStatus = async (status: string) => {
     await supabase.from('readings').update({ status }).eq('id', id)
     setReading((r: any) => ({ ...r, status }))
   }
 
+  // ── Citations ─────────────────────────────────────────────────────────────
+
   const addCitation = async () => {
     if (!newCitation.trim() || !reading) return
-    const { data } = await supabase.from('citations')
-      .insert({ reading_id: id, user_id: reading.user_id, content: newCitation.trim() })
-      .select().single()
+    const payload: any = { reading_id: id, user_id: reading.user_id, content: newCitation.trim() }
+    const pageNum = parseInt(newCitationPage)
+    if (!isNaN(pageNum) && pageNum > 0) payload.page = pageNum
+    const { data } = await supabase.from('citations').insert(payload).select().single()
     if (data) setCitations(prev => [...prev, data])
     setNewCitation('')
+    setNewCitationPage('')
   }
 
   const deleteCitation = async (citId: string) => {
@@ -100,11 +125,32 @@ export default function Fiche() {
     setCitations(prev => prev.filter(c => c.id !== citId))
   }
 
+  // ── Partage ───────────────────────────────────────────────────────────────
+
+  const handleShare = async () => {
+    if (!isPublic) {
+      await supabase.from('readings').update({ is_public: true }).eq('id', id)
+      setIsPublic(true)
+    }
+    const url = `${window.location.origin}/fiche/public/${id}`
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      // fallback silencieux
+    }
+    setCopyStatus('copied')
+    setTimeout(() => setCopyStatus('idle'), 2500)
+  }
+
+  // ── Suppression ───────────────────────────────────────────────────────────
+
   const deleteReading = async () => {
     setDeleting(true)
     await supabase.from('readings').delete().eq('id', id)
     window.location.href = '/bibliotheque'
   }
+
+  // ── Rendu ─────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -125,29 +171,47 @@ export default function Fiche() {
   }
 
   const book = reading.books
+  const showStartedAt = reading.status === 'en_cours' || reading.status === 'lu'
+  const showFinishedAt = reading.status === 'lu'
 
   return (
     <div className="min-h-screen bg-[#1a1714] text-white pb-28">
 
-      {/* ── Retour ── */}
-      <div className="px-5 pt-12 pb-2 flex items-center gap-2">
+      {/* ── Navigation ── */}
+      <div className="px-5 pt-12 pb-2 flex items-center justify-between">
         <a href="/bibliotheque" className="text-[#7a7268] hover:text-white transition flex items-center gap-1.5">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
-          <span className="text-xs">Ma bibliothèque</span>
+          <span className="text-xs">Bibliothèque</span>
         </a>
+
+        {/* Bouton partager */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 text-[#7a7268] hover:text-white transition text-xs"
+        >
+          {copyStatus === 'copied' ? (
+            <span className="text-emerald-400 text-[11px]">Lien copié ✓</span>
+          ) : (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              <span>{isPublic ? 'Partager' : 'Rendre public'}</span>
+            </>
+          )}
+        </button>
       </div>
 
-      {/* ── Header livre ── */}
+      {/* ── En-tête livre ── */}
       <div className="px-5 pt-3 pb-6 border-b border-white/8">
-        <h1 className="font-serif text-[26px] leading-tight text-white mb-1.5">
-          {book?.title}
-        </h1>
+        <h1 className="font-serif text-[26px] leading-tight text-white mb-1.5">{book?.title}</h1>
         <p className="text-[#7a7268] text-sm mb-3">{book?.author}</p>
         <div className="flex items-center gap-2 flex-wrap">
           {book?.category && (
-            <span className="text-white/60 text-[10px] border border-white/20 bg-white/5 rounded px-2 py-0.5 leading-none">
+            <span className="text-white/50 text-[10px] border border-white/15 rounded px-2 py-0.5 leading-none">
               {book.category}
             </span>
           )}
@@ -177,6 +241,50 @@ export default function Fiche() {
         </div>
       </div>
 
+      {/* ── Dates + recommandé par ── */}
+      {(showStartedAt || recommendedBy !== undefined) && (
+        <div className="px-5 py-5 border-b border-white/8 flex flex-col gap-4">
+
+          {showStartedAt && (
+            <div className="flex items-center gap-4">
+              <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Commencé le</label>
+              <input
+                type="date"
+                value={startedAt}
+                onChange={e => setStartedAt(e.target.value)}
+                onBlur={e => saveField('started_at', e.target.value)}
+                className="bg-transparent text-white/70 text-[13px] outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1 max-w-[160px]"
+              />
+            </div>
+          )}
+
+          {showFinishedAt && (
+            <div className="flex items-center gap-4">
+              <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Terminé le</label>
+              <input
+                type="date"
+                value={finishedAt}
+                onChange={e => setFinishedAt(e.target.value)}
+                onBlur={e => saveField('finished_at', e.target.value)}
+                className="bg-transparent text-white/70 text-[13px] outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1 max-w-[160px]"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-4">
+            <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Recommandé</label>
+            <input
+              type="text"
+              placeholder="Par qui ou quoi..."
+              value={recommendedBy}
+              onChange={e => setRecommendedBy(e.target.value)}
+              onBlur={e => saveField('recommended_by', e.target.value)}
+              className="bg-transparent text-white/70 text-[13px] placeholder-[#7a7268]/30 outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1"
+            />
+          </div>
+        </div>
+      )}
+
       {/* ── Note étoiles ── */}
       <div className="px-5 py-5 border-b border-white/8">
         <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-3">Ma note</p>
@@ -199,7 +307,7 @@ export default function Fiche() {
       {/* ── Fiche de lecture ── */}
       <div className="px-5 py-5 border-b border-white/8">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[9px] text-[#7a7268] uppercase tracking-widest">Ma fiche de lecture</p>
+          <p className="text-[9px] text-[#7a7268] uppercase tracking-widest">Ma fiche</p>
           <span className={`text-[10px] transition ${
             saveStatus === 'saved' ? 'text-emerald-400' :
             saveStatus === 'pending' ? 'text-[#7a7268]' : 'opacity-0'
@@ -212,27 +320,32 @@ export default function Fiche() {
           onChange={e => handleNoteChange(e.target.value)}
           placeholder="Tes impressions, ce qui t'a marqué, les idées à retenir..."
           rows={8}
-          className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-3.5 text-white placeholder-[#7a7268]/50 text-sm outline-none focus:border-[#c9440e]/50 transition resize-none leading-relaxed"
+          className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-3.5 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition resize-none leading-relaxed"
         />
       </div>
 
       {/* ── Citations ── */}
       <div className="px-5 py-5 border-b border-white/8">
-        <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-4">Mes citations</p>
+        <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-4">Citations</p>
 
         {citations.length > 0 && (
-          <div className="flex flex-col gap-2.5 mb-4">
+          <div className="flex flex-col gap-3 mb-5">
             {citations.map(c => (
               <div key={c.id} className="flex items-start gap-3 group">
-                <div className="flex-1 bg-[#242018] border-l-2 border-[#c9440e]/50 px-3.5 py-2.5 rounded-r-xl">
-                  <p className="font-serif italic text-sm leading-relaxed text-white/75">« {c.content} »</p>
+                <div className="flex-1 border-l-2 border-[#c9440e]/30 pl-3.5 py-1">
+                  <p className="font-serif italic text-[14px] leading-relaxed text-white/70">
+                    « {c.content} »
+                  </p>
+                  {c.page && (
+                    <p className="text-[#7a7268]/50 text-[10px] mt-1">p. {c.page}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => deleteCitation(c.id)}
-                  className="mt-2 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all shrink-0"
-                  aria-label="Supprimer la citation"
+                  className="mt-1.5 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all shrink-0"
+                  aria-label="Supprimer"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
@@ -241,21 +354,33 @@ export default function Fiche() {
           </div>
         )}
 
-        <div className="flex gap-2">
+        {/* Ajouter une citation */}
+        <div className="flex flex-col gap-2">
           <input
             type="text"
             placeholder="Ajouter une citation..."
             value={newCitation}
             onChange={e => setNewCitation(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addCitation()}
-            className="flex-1 bg-[#242018] border border-white/8 rounded-xl px-4 py-2.5 text-white placeholder-[#7a7268]/50 text-sm outline-none focus:border-[#c9440e]/50 transition"
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && addCitation()}
+            className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-2.5 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition"
           />
-          <button
-            onClick={addCitation}
-            className="bg-[#c9440e] text-white w-11 rounded-xl text-xl hover:opacity-90 transition flex items-center justify-center font-medium leading-none"
-          >
-            +
-          </button>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Page (optionnel)"
+              value={newCitationPage}
+              onChange={e => setNewCitationPage(e.target.value)}
+              min="1"
+              className="w-36 bg-[#242018] border border-white/8 rounded-xl px-4 py-2 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition"
+            />
+            <button
+              onClick={addCitation}
+              disabled={!newCitation.trim()}
+              className="flex-1 bg-[#c9440e] text-white rounded-xl text-sm hover:opacity-90 transition disabled:opacity-30 py-2 font-medium"
+            >
+              Ajouter
+            </button>
+          </div>
         </div>
       </div>
 
@@ -264,23 +389,23 @@ export default function Fiche() {
         {!confirmDelete ? (
           <button
             onClick={() => setConfirmDelete(true)}
-            className="text-red-500/50 text-xs hover:text-red-500/80 transition"
+            className="text-red-500/40 text-xs hover:text-red-500/70 transition"
           >
             Supprimer ce livre de ma bibliothèque
           </button>
         ) : (
-          <div className="flex items-center gap-3">
-            <p className="text-white/60 text-xs">Confirmer la suppression ?</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="text-white/50 text-xs">Confirmer la suppression ?</p>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-[#7a7268] text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:text-white transition"
+              className="text-[#7a7268] text-xs px-3 py-1.5 rounded-full border border-white/10 hover:text-white transition"
             >
               Annuler
             </button>
             <button
               onClick={deleteReading}
               disabled={deleting}
-              className="text-white text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 transition disabled:opacity-50"
+              className="text-white text-xs px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 transition disabled:opacity-50"
             >
               {deleting ? '…' : 'Supprimer'}
             </button>
