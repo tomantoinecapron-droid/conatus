@@ -208,7 +208,14 @@ export default function Fiche() {
       {/* ── En-tête livre ── */}
       <div className="px-5 pt-3 pb-6 border-b border-white/8">
         <h1 className="font-serif text-[26px] leading-tight text-white mb-1.5">{book?.title}</h1>
-        <p className="text-[#7a7268] text-sm mb-3">{book?.author}</p>
+        {book?.author && (
+          <a
+            href={`/auteur/${encodeURIComponent(book.author)}`}
+            className="text-[#7a7268] text-sm mb-3 hover:text-white transition inline-block"
+          >
+            {book.author}
+          </a>
+        )}
         <div className="flex items-center gap-2 flex-wrap">
           {book?.category && (
             <span className="text-white/50 text-[10px] border border-white/15 rounded px-2 py-0.5 leading-none">

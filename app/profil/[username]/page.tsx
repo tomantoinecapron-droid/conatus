@@ -271,9 +271,15 @@ export default function ProfilPage() {
                         {reading.books?.title}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-[#7a7268] text-[12px] truncate">
-                          {reading.books?.author}
-                        </p>
+                        {reading.books?.author ? (
+                          <a
+                            href={`/auteur/${encodeURIComponent(reading.books.author)}`}
+                            onClick={e => e.stopPropagation()}
+                            className="text-[#7a7268] text-[12px] truncate hover:text-white transition"
+                          >
+                            {reading.books.author}
+                          </a>
+                        ) : null}
                         {reading.rating > 0 && (
                           <>
                             <span className="text-white/15 text-[10px]">·</span>
