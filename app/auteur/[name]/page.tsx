@@ -28,15 +28,6 @@ function cleanMarkdown(text: string): string {
     .trim()
 }
 
-// Heuristic: detect if text is likely English (not French)
-function likelyEnglish(text: string): boolean {
-  if (!text || text.length < 40) return false
-  const frenchWords = /\b(le|la|les|un|une|des|et|est|en|au|aux|il|elle|ils|elles|dans|sur|avec|pour|par|qui|que|son|sa|ses|leur|leurs|né|née|mort|morte|écrivain|auteur|romancier|poète|philosophe|siècle|époque|œuvre|roman|dont|mais|plus|aussi|très|tout|cette|cet|comme)\b/i
-  const englishWords = /\b(the|and|was|born|died|his|her|he|she|they|their|who|which|with|from|that|had|has|have|been|were|are|wrote|author|writer|known|also|such|one|two|three|year|years|century|published|became|novel|poem|poetry|work|works)\b/i
-  const frCount = (text.match(frenchWords) || []).length
-  const enCount = (text.match(englishWords) || []).length
-  return enCount > frCount
-}
 
 const SUSPICIOUS_TITLE_RE = /^(letter[s]? (to|from|of)|speech(es)?|discourse|about |a study (of|on)|selected works? (by|of|from)|collected works? (by|of|from)|works? of |writings? of |à propos|lettres? (à|de)|discours |étude (sur|de)|essais? sur|notes? on|comments? on|introduction to|preface to|introduction à|préface|tributes? to|in memoriam|memorial|by [a-z]+ [a-z]+:)/i
 
@@ -94,31 +85,30 @@ export default function AuteurPage() {
       // 2. Données OL + Supabase en parallèle
       // Try to fetch author data with French language preference
       const [authorRes, worksRes, authRes] = await Promise.all([
-        fetch(`https://openlibrary.org/authors/${id}.json`, {
-          headers: { 'Accept-Language': 'fr' },
-        }).then(r => r.json()),
+        fetch(`https://openlibrary.org/authors/${id}.json`).then(r => r.json()),
         fetch(`https://openlibrary.org/authors/${id}/works.json?limit=50`).then(r => r.json()),
         supabase.auth.getUser(),
       ])
 
       setAuthor(authorRes)
 
-      // 3. Bio: clean markdown, translate if English
-      const rawBio = cleanMarkdown(getBio(authorRes.bio))
-      if (rawBio && likelyEnglish(rawBio)) {
-        // Translate in background, show raw while waiting
-        setBio(rawBio)
-        fetch('/api/translate-bio', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ text: rawBio }),
-        })
-          .then(r => r.json())
-          .then(d => { if (d.translated) setBio(d.translated) })
-          .catch(() => {/* keep raw */})
-      } else {
-        setBio(rawBio)
+      // 3. Bio: essayer Wikipedia FR, sinon OL brute
+      let resolvedBio = ''
+      try {
+        const wikiName = encodeURIComponent(name.replace(/ /g, '_'))
+        const wikiRes = await fetch(
+          `https://fr.wikipedia.org/api/rest_v1/page/summary/${wikiName}`
+        )
+        if (wikiRes.ok) {
+          const wikiData = await wikiRes.json()
+          resolvedBio = wikiData.extract || ''
+        }
+      } catch {/* ignore */}
+
+      if (!resolvedBio) {
+        resolvedBio = cleanMarkdown(getBio(authorRes.bio))
       }
+      setBio(resolvedBio)
 
       // 4. Filtrer et trier les œuvres
       const entries = (worksRes.entries || [])
