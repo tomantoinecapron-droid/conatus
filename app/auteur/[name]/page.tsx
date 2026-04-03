@@ -93,19 +93,41 @@ export default function AuteurPage() {
       setAuthor(authorRes)
 
       // 3. Bio: essayer Wikipedia FR, sinon OL brute
+      // authorRes.name est disponible ici (pas le state React qui n'est pas encore mis à jour)
+      const resolvedName = authorRes.name || authorName
       let resolvedBio = ''
       try {
-        const wikiName = encodeURIComponent(name.replace(/ /g, '_'))
-        const wikiRes = await fetch(
-          `https://fr.wikipedia.org/api/rest_v1/page/summary/${wikiName}`
+        // Tentative 1 : nom avec underscores (format Wikipedia)
+        const wikiNameUnderscore = resolvedName.replace(/ /g, '_')
+        console.log('[auteur] Wikipedia fetch:', `https://fr.wikipedia.org/api/rest_v1/page/summary/${wikiNameUnderscore}`)
+        let wikiRes = await fetch(
+          `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiNameUnderscore)}`
         )
+        console.log('[auteur] Wikipedia status (underscore):', wikiRes.status)
         if (wikiRes.ok) {
           const wikiData = await wikiRes.json()
+          console.log('[auteur] Wikipedia extract:', wikiData.extract?.slice(0, 80))
           resolvedBio = wikiData.extract || ''
         }
-      } catch {/* ignore */}
+
+        // Tentative 2 : nom tel quel si la première a échoué
+        if (!resolvedBio) {
+          wikiRes = await fetch(
+            `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(resolvedName)}`
+          )
+          console.log('[auteur] Wikipedia status (raw name):', wikiRes.status)
+          if (wikiRes.ok) {
+            const wikiData = await wikiRes.json()
+            console.log('[auteur] Wikipedia extract (raw):', wikiData.extract?.slice(0, 80))
+            resolvedBio = wikiData.extract || ''
+          }
+        }
+      } catch (e) {
+        console.error('[auteur] Wikipedia error:', e)
+      }
 
       if (!resolvedBio) {
+        console.log('[auteur] Fallback OL bio')
         resolvedBio = cleanMarkdown(getBio(authorRes.bio))
       }
       setBio(resolvedBio)
