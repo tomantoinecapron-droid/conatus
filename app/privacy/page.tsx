@@ -46,7 +46,7 @@ export default function PrivacyPage() {
               {[
                 'Afficher ta bibliothèque, tes fiches et tes statistiques de lecture',
                 'Permettre le partage social avec les lecteurs que tu choisis de suivre',
-                'T'envoyer des notifications si tu les actives',
+                "T\u2019envoyer des notifications si tu les actives",
                 'Améliorer le service (données anonymisées et agrégées uniquement)',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
