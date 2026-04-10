@@ -88,10 +88,10 @@ export default function PrivacyPage() {
             <p className="mt-4">
               Pour exercer ces droits, écris-nous à{' '}
               <a
-                href="mailto:tom.antoine73@gmail.com"
+                href="mailto:tomantoinecapron@gmail.com"
                 className="text-white hover:text-[#c9440e] transition underline underline-offset-2"
               >
-                tom.antoine73@gmail.com
+                tomantoinecapron@gmail.com
               </a>
               . Nous répondons sous 30 jours.
             </p>
@@ -111,10 +111,10 @@ export default function PrivacyPage() {
             <p>
               Pour toute question relative à cette politique, contacte-nous à{' '}
               <a
-                href="mailto:tom.antoine73@gmail.com"
+                href="mailto:tomantoinecapron@gmail.com"
                 className="text-white hover:text-[#c9440e] transition underline underline-offset-2"
               >
-                tom.antoine73@gmail.com
+                tomantoinecapron@gmail.com
               </a>
               .
             </p>
