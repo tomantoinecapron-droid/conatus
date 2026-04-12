@@ -83,6 +83,7 @@ export default function Bibliotheque() {
   const [bookListMemberships, setBookListMemberships] = useState<Record<string, string[]>>({}) // readingId -> listIds[]
   const listPickerRef = useRef<HTMLDivElement>(null)
   const [authorSearch, setAuthorSearch] = useState('')
+  const [searchMode, setSearchMode] = useState<'title' | 'author'>('title')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -137,25 +138,69 @@ export default function Bibliotheque() {
   const searchBooks = async () => {
     if (!search.trim()) return
     setLoadingSearch(true)
-    const q = encodeURIComponent(search.trim())
     const key = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY
+    const raw = search.trim()
+
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&key=${key}&maxResults=20`)
-      const data = await res.json()
-      const items = (data.items || [])
-        .map((item: any) => ({
-          _id: item.id,
-          title: item.volumeInfo.title,
-          author: item.volumeInfo.authors?.[0],
-          cover: item.volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://'),
-          isbn: item.volumeInfo.industryIdentifiers?.[0]?.identifier,
-          published_year: item.volumeInfo.publishedDate?.slice(0, 4),
-          rawCategories: item.volumeInfo.categories,
-        }))
-        .filter((b: any) => b.title?.trim() && b.author?.trim() && b.published_year)
-      setResults(items)
-    } catch { setResults([]) }
-    finally { setLoadingSearch(false) }
+      let items: any[] = []
+
+      if (searchMode === 'author') {
+        const q = encodeURIComponent(`inauthor:"${raw}"`)
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&key=${key}&maxResults=40&langRestrict=fr`)
+        const data = await res.json()
+        items = data.items || []
+      } else {
+        const [titleItems, generalItems] = await Promise.all([
+          fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(`intitle:"${raw}"`)}&key=${key}&maxResults=20&langRestrict=fr`)
+            .then(r => r.json()).then(d => d.items || []).catch(() => []),
+          fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(raw)}&key=${key}&maxResults=20&langRestrict=fr`)
+            .then(r => r.json()).then(d => d.items || []).catch(() => []),
+        ])
+        const seen = new Set<string>()
+        for (const item of [...titleItems, ...generalItems]) {
+          if (!seen.has(item.id)) {
+            seen.add(item.id)
+            items.push(item)
+          }
+        }
+      }
+
+      const normalized = items.map((item: any) => ({
+        _id: item.id,
+        title: item.volumeInfo.title,
+        author: item.volumeInfo.authors?.[0],
+        cover: item.volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://'),
+        isbn: item.volumeInfo.industryIdentifiers?.[0]?.identifier,
+        published_year: item.volumeInfo.publishedDate?.slice(0, 4),
+        rawCategories: item.volumeInfo.categories,
+      }))
+
+      const filtered = normalized.filter((b: any) => b.title?.trim() && b.author?.trim() && b.published_year)
+
+      if (searchMode === 'title') {
+        const searchWords = raw.toLowerCase().split(/\s+/).filter(w => w.length > 1)
+        const scored = filtered.map((b: any) => {
+          let score = 0
+          const titleLower = b.title.toLowerCase()
+          if (titleLower.includes(raw.toLowerCase())) score += 500
+          const allWordsInTitle = searchWords.every(w => titleLower.includes(w))
+          if (allWordsInTitle) score += 300
+          for (const w of searchWords) {
+            if (titleLower.includes(w)) score += 50
+          }
+          if (titleLower.startsWith(raw.toLowerCase())) score += 200
+          return { ...b, _score: score }
+        })
+        scored.sort((a: any, b: any) => b._score - a._score)
+        setResults(scored.map(({ _score, ...rest }: any) => rest))
+      } else {
+        setResults(filtered)
+      }
+    } catch {
+      setResults([])
+    } finally {
+      setLoadingSearch(false)
+    }
   }
 
   const addBook = async (book: any) => {
@@ -340,27 +385,54 @@ export default function Bibliotheque() {
         <>
           {/* ── Recherche / ajout ── */}
           <div className="px-5 mb-5">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Ajouter ou chercher un livre..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (results.length === 0 && searchBooks())}
-                className="flex-1 bg-[#242018] border border-white/8 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e]/50 transition"
-              />
-              <button
-                onClick={searchBooks}
-                className="bg-[#c9440e] text-white px-4 py-3 rounded-xl hover:opacity-90 transition shrink-0 w-12 flex items-center justify-center"
-              >
-                {loadingSearch ? (
-                  <span className="text-base leading-none">…</span>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                )}
-              </button>
+            <div className="flex flex-col gap-2">
+              {/* Toggle titre / auteur */}
+              <div className="flex gap-1 w-fit">
+                <button
+                  onClick={() => { setSearchMode('title'); setResults([]) }}
+                  className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                    searchMode === 'title'
+                      ? 'bg-white text-black font-medium'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  Titre
+                </button>
+                <button
+                  onClick={() => { setSearchMode('author'); setResults([]) }}
+                  className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                    searchMode === 'author'
+                      ? 'bg-white text-black font-medium'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  Auteur
+                </button>
+              </div>
+
+              {/* Barre de recherche */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Ajouter ou chercher un livre..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (results.length === 0 && searchBooks())}
+                  className="flex-1 bg-[#242018] border border-white/8 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e]/50 transition"
+                />
+                <button
+                  onClick={searchBooks}
+                  className="bg-[#c9440e] text-white px-4 py-3 rounded-xl hover:opacity-90 transition shrink-0 w-12 flex items-center justify-center"
+                >
+                  {loadingSearch ? (
+                    <span className="text-base leading-none">…</span>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
