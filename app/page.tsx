@@ -1,72 +1,30 @@
 import Link from 'next/link'
 
-const books = [
-  {
-    title: 'Les Misérables',
-    author: 'Victor Hugo',
-    status: 'Lu' as const,
-    stars: 5,
-    bg: '#EDE6D6',
-    rotate: '2deg',
-  },
-  {
-    title: "L'Étranger",
-    author: 'Albert Camus',
-    status: 'En cours' as const,
-    stars: 4,
-    bg: '#D4CEBF',
-    rotate: '-1.5deg',
-  },
-  {
-    title: 'Bonjour Tristesse',
-    author: 'Françoise Sagan',
-    status: 'À lire' as const,
-    stars: 0,
-    bg: '#EDE6D6',
-    rotate: '1deg',
-  },
-]
-
-function StatusBadge({ status }: { status: 'Lu' | 'En cours' | 'À lire' }) {
-  const styles: Record<string, { bg: string; color: string }> = {
-    'À lire':   { bg: '#C4D4B8', color: '#3D5C38' },
-    'En cours': { bg: '#E8D5A8', color: '#7A5010' },
-    'Lu':       { bg: '#D8E8D0', color: '#3D5C38' },
-  }
-  const { bg, color } = styles[status]
-  return (
-    <span
-      style={{ background: bg, color, borderRadius: '999px' }}
-      className="text-[10px] px-2 py-0.5 font-medium inline-block"
-    >
-      {status}
-    </span>
-  )
-}
-
-function Stars({ count }: { count: number }) {
-  if (count === 0) return null
-  return (
-    <div className="flex gap-0.5 mt-2">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} style={{ color: i < count ? '#C8A96E' : '#D4CEBF' }} className="text-sm leading-none">
-          ★
-        </span>
-      ))}
-    </div>
-  )
-}
-
 export default function Home() {
   return (
-    <div style={{ background: 'var(--cream)', color: 'var(--text-dark)' }} className="min-h-screen flex flex-col">
+    <div
+      style={{
+        background: 'var(--cream)',
+        color: 'var(--text-dark)',
+        backgroundImage: 'radial-gradient(circle, rgba(90,80,50,0.06) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+      className="min-h-screen flex flex-col"
+    >
 
       {/* Nav */}
       <header
         style={{ background: 'var(--cream)', borderBottom: '1px solid rgba(90, 80, 50, 0.12)' }}
         className="flex items-center justify-between px-6 py-5"
       >
-        <span className="font-serif text-[22px] tracking-tight" style={{ color: 'var(--text-dark)' }}>
+        <span style={{
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: '28px',
+          fontWeight: '400',
+          color: '#2A2A1E',
+          letterSpacing: '0.02em',
+          lineHeight: '1',
+        }}>
           conatus
         </span>
         <div className="flex items-center gap-3">
@@ -94,17 +52,24 @@ export default function Home() {
           {/* Text column */}
           <div className="flex flex-col items-center text-center md:items-start md:text-left md:flex-1">
             <span
-              style={{ color: 'var(--sage-dark)', letterSpacing: '0.18em' }}
-              className="text-xs font-medium uppercase mb-6"
+              style={{ fontSize: '11px', fontWeight: 500, color: '#5E7A52', letterSpacing: '0.14em', textTransform: 'uppercase' }}
+              className="mb-6 block"
             >
-              POUR LES LECTEURS QUI PENSENT
+              TA BIBLIOTHÈQUE, ENFIN VIVANTE.
             </span>
+            <div style={{ width: '32px', height: '1px', background: '#8A9E7A', marginBottom: '16px' }} />
             <h1
-              className="font-serif text-[52px] font-normal leading-[1.1] mb-6 max-w-sm"
-              style={{ color: 'var(--text-dark)' }}
+              className="mb-6 max-w-sm"
+              style={{
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontSize: '48px',
+                fontWeight: '400',
+                lineHeight: '1.1',
+                color: '#2A2A1E',
+              }}
             >
               Tes lectures méritent mieux qu&apos;une{' '}
-              <em style={{ color: 'var(--moss)', fontStyle: 'italic' }}>liste.</em>
+              <em style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic', color: '#3D5C38' }}>liste.</em>
             </h1>
             <p
               style={{ color: 'var(--text-mid)' }}
@@ -135,101 +100,82 @@ export default function Home() {
           </div>
 
           {/* Book cards column */}
-          <div className="mt-20 md:mt-0 md:flex-shrink-0 flex justify-center">
-            <div className="relative" style={{ width: '220px', height: '280px' }}>
-              {books.map((book, i) => (
-                <div
-                  key={book.title}
-                  style={{
-                    position: 'absolute',
-                    background: book.bg,
-                    border: '1px solid rgba(90, 80, 50, 0.18)',
-                    borderRadius: '10px',
-                    transform: `rotate(${book.rotate})`,
-                    width: '200px',
-                    padding: '16px',
-                    top: `${i * 14}px`,
-                    left: '10px',
-                    zIndex: books.length - i,
-                    boxShadow: '0 2px 8px rgba(60, 50, 30, 0.08)',
-                  }}
-                >
-                  <p className="font-serif text-[15px] leading-tight mb-0.5" style={{ color: 'var(--text-dark)' }}>
-                    {book.title}
-                  </p>
-                  <p className="text-[11px] mb-2" style={{ color: 'var(--text-muted)' }}>
-                    {book.author}
-                  </p>
-                  <StatusBadge status={book.status} />
-                  <Stars count={book.stars} />
-                </div>
-              ))}
+          <div className="mt-20 md:mt-0 md:flex-shrink-0 flex justify-center" style={{ paddingTop: '40px' }}>
+            <div style={{ position: 'relative', width: '280px', height: '340px' }}>
+              {/* Carte 1 */}
+              <div style={{
+                position: 'absolute', top: 0, right: '20px',
+                width: '200px', padding: '18px 16px',
+                background: '#E8DFC8', borderRadius: '6px',
+                border: '1px solid rgba(90,80,50,0.18)',
+                boxShadow: '3px 3px 0 rgba(90,80,50,0.06)',
+                transform: 'rotate(2deg)'
+              }}>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#2A2A1E', marginBottom: '4px' }}>Les Misérables</div>
+                <div style={{ fontSize: '11px', color: '#7A7A68', marginBottom: '10px' }}>Victor Hugo</div>
+                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: '10px', background: '#D8E8D0', color: '#3D5C38' }}>Lu</span>
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#C8A96E', letterSpacing: '2px' }}>★★★★★</div>
+              </div>
+
+              {/* Carte 2 */}
+              <div style={{
+                position: 'absolute', top: '90px', right: 0,
+                width: '200px', padding: '18px 16px',
+                background: '#D4CEBF', borderRadius: '6px',
+                border: '1px solid rgba(90,80,50,0.18)',
+                boxShadow: '3px 3px 0 rgba(90,80,50,0.06)',
+                transform: 'rotate(-1.5deg)'
+              }}>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#2A2A1E', marginBottom: '4px' }}>L&apos;Étranger</div>
+                <div style={{ fontSize: '11px', color: '#7A7A68', marginBottom: '10px' }}>Albert Camus</div>
+                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: '10px', background: '#E8D5A8', color: '#7A5010' }}>En cours</span>
+                <div style={{ marginTop: '8px', fontSize: '13px', color: '#C8A96E', letterSpacing: '2px' }}>★★★★</div>
+              </div>
+
+              {/* Carte 3 */}
+              <div style={{
+                position: 'absolute', top: '180px', right: '14px',
+                width: '200px', padding: '18px 16px',
+                background: '#EDE6D6', borderRadius: '6px',
+                border: '1px solid rgba(90,80,50,0.18)',
+                boxShadow: '3px 3px 0 rgba(90,80,50,0.06)',
+                transform: 'rotate(1deg)'
+              }}>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#2A2A1E', marginBottom: '4px' }}>Bonjour Tristesse</div>
+                <div style={{ fontSize: '11px', color: '#7A7A68', marginBottom: '10px' }}>Françoise Sagan</div>
+                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: '10px', background: '#C4D4B8', color: '#3D5C38' }}>À lire</span>
+              </div>
             </div>
           </div>
 
         </div>
       </section>
 
+      {/* Séparateur dégradé */}
+      <div style={{ margin: '0 48px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(90,80,50,0.2), transparent)' }} />
+
       {/* Features */}
-      <section
-        style={{ background: 'var(--cream)', borderTop: '1px solid rgba(90, 80, 50, 0.1)' }}
-        className="px-6 py-16"
-      >
-        <div className="md:grid md:grid-cols-3 md:max-w-4xl md:mx-auto flex flex-col gap-10 md:gap-0">
-          {[
-            {
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3D5C38" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                </svg>
-              ),
-              title: 'Bibliothèque',
-              desc: 'Cherche parmi des millions de livres, ajoute-les en un tap. Filtre par statut de lecture.',
-            },
-            {
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3D5C38" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
-                  <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
-                </svg>
-              ),
-              title: 'Citations',
-              desc: "Note les passages qui t'ont marqué. Retrouve-les en un instant, des années plus tard.",
-            },
-            {
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3D5C38" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
-              ),
-              title: 'Statistiques',
-              desc: 'Suis ta progression. Visualise tes habitudes de lecture au fil des mois et des années.',
-            },
-          ].map(({ icon, title, desc }, i) => (
-            <div
-              key={title}
-              style={i > 0 ? { borderLeft: '1px solid rgba(90, 80, 50, 0.1)' } : {}}
-              className="flex flex-col items-center text-center px-8 gap-3"
-            >
-              <div
-                style={{ background: 'rgba(61, 92, 56, 0.08)', borderRadius: '10px' }}
-                className="w-10 h-10 flex items-center justify-center mb-1"
-              >
-                {icon}
-              </div>
-              <h3 className="font-serif text-base" style={{ color: 'var(--text-dark)' }}>
-                {title}
-              </h3>
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                {desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        margin: '40px 48px', gap: '1px',
+        background: 'rgba(90,80,50,0.1)',
+        border: '1px solid rgba(90,80,50,0.1)',
+        borderRadius: '10px', overflow: 'hidden',
+      }}>
+        {[
+          { titre: 'Bibliothèque', desc: 'Tous tes livres, statuts, et notes dans un seul espace.' },
+          { titre: 'Citations', desc: 'Capture les passages qui comptent, retrouve-les facilement.' },
+          { titre: 'Statistiques', desc: 'Visualise tes habitudes de lecture au fil du temps.' },
+        ].map((f) => (
+          <div key={f.titre} style={{ background: '#F5F0E8', padding: '28px 24px' }}>
+            <div style={{
+              fontFamily: 'Georgia, serif', fontSize: '16px',
+              color: '#2A2A1E', marginBottom: '8px', fontWeight: '400',
+            }}>{f.titre}</div>
+            <div style={{ fontSize: '13px', color: '#7A7A68', lineHeight: '1.6' }}>{f.desc}</div>
+          </div>
+        ))}
+      </div>
 
     </div>
   )

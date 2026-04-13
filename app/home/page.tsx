@@ -240,19 +240,29 @@ export default function HomePage() {
     <div className="min-h-screen pb-28 relative overflow-x-hidden" style={{ background: '#F5F0E8', color: '#2A2A1E' }}>
 
       {/* ── Header ── */}
-      <div className="px-5 pt-12 pb-5 flex items-center justify-between relative overflow-hidden" style={{ background: '#F5F0E8' }}>
+      <div
+        className="flex items-center justify-between relative overflow-hidden"
+        style={{
+          background: '#F5F0E8',
+          backgroundImage: 'radial-gradient(circle, rgba(90,80,50,0.05) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          padding: '32px 20px 24px',
+          borderBottom: '1px solid rgba(90,80,50,0.1)',
+        }}
+      >
 
         <div className="flex-1 min-w-0 pr-3">
           {/* Date */}
-          <p className="text-[11px] capitalize tracking-wide mb-0.5" style={{ color: '#7A7A68', letterSpacing: '0.12em' }}>{today}</p>
+          <p style={{ fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8A9E7A', marginBottom: '10px' }}>{today}</p>
 
-          {/* Salutation */}
-          <h1 className="font-serif text-[40px] font-normal leading-tight" style={{ color: '#2A2A1E' }}>
+          {/* Ornement + Salutation */}
+          <div style={{ width: '40px', height: '2px', background: '#8A9E7A', marginBottom: '12px' }} />
+          <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '42px', fontWeight: '400', lineHeight: '1.1', color: '#2A2A1E', marginBottom: '0' }}>
             {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
 
           {/* Stats inline */}
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-2" style={{ marginTop: '8px', letterSpacing: '0.02em' }}>
             <span className="text-[11px]" style={{ color: '#7A7A68' }}>
               <span className="font-medium" style={{ color: '#4A4A38' }}>{stats.booksThisMonth}</span> lu{stats.booksThisMonth !== 1 ? 's' : ''}
             </span>
@@ -267,8 +277,9 @@ export default function HomePage() {
           </div>
 
           {/* Citation inline */}
-          <p className="text-[11px] italic font-serif leading-snug mt-1.5" style={{ color: '#7A7A68' }}>
-            &ldquo;{quote.text.length > 80 ? quote.text.slice(0, 80) + '…' : quote.text}&rdquo; — {quote.author}
+          <p className="text-[11px] italic font-serif leading-snug" style={{ color: '#7A7A68', marginTop: '8px' }}>
+            <span style={{ fontSize: '48px', color: 'rgba(90,80,50,0.12)', lineHeight: '0', verticalAlign: '-12px', fontFamily: 'Georgia,serif' }}>&ldquo;</span>
+            {quote.text.length > 80 ? quote.text.slice(0, 80) + '…' : quote.text} — {quote.author}
           </p>
         </div>
 
@@ -342,7 +353,10 @@ export default function HomePage() {
       {/* ── EN COURS + À LIRE ── */}
       <section className="px-5 mb-5">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase" style={{ color: '#7A7A68' }}>Lecture</h2>
+          <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase flex items-center" style={{ color: '#7A7A68' }}>
+            <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#8A9E7A', marginRight: '8px', verticalAlign: 'middle' }} />
+            Lecture
+          </h2>
           <a href="/bibliotheque" className="text-[10px] transition" style={{ color: '#5E7A52' }}>Bibliothèque →</a>
         </div>
 
@@ -381,7 +395,7 @@ export default function HomePage() {
                 </div>
               )
             })() : (
-              <a href="/bibliotheque" className="rounded-xl p-3 flex items-center justify-center text-center" style={{ background: '#EDE6D6', border: '1px solid rgba(90,80,50,0.15)' }}>
+              <a href="/bibliotheque" className="rounded-xl flex items-center justify-center text-center" style={{ background: '#EDE6D6', border: '1px dashed rgba(90,80,50,0.25)', padding: '40px 24px' }}>
                 <div>
                   <p className="font-serif text-xs mb-1" style={{ color: '#7A7A68' }}>Rien en cours</p>
                   <p className="text-[10px]" style={{ color: '#3D5C38' }}>Commencer →</p>
@@ -402,7 +416,7 @@ export default function HomePage() {
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                   <div>
                     <span className="text-[9px] font-medium uppercase tracking-wide mb-1.5 inline-block px-1.5 py-0.5 rounded-full" style={{ background: '#C4D4B8', color: '#3D5C38' }}>À lire</span>
-                    <p className="font-serif text-[13px] leading-snug line-clamp-3" style={{ color: '#2A2A1E' }}>{nextBook.books?.title}</p>
+                    <p className="line-clamp-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '17px', fontWeight: '400', color: '#2A2A1E', lineHeight: '1.2', marginTop: '4px' }}>{nextBook.books?.title}</p>
                   </div>
                   <p className="text-[10px] truncate" style={{ color: '#7A7A68' }}>{nextBook.books?.author?.split(' ').pop()}</p>
                 </div>
@@ -467,7 +481,10 @@ export default function HomePage() {
       {myCircles.length > 0 && (
         <section className="mb-6">
           <div className="flex items-center justify-between px-5 mb-2.5">
-            <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase" style={{ color: '#7A7A68' }}>Mes cercles</h2>
+            <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase flex items-center" style={{ color: '#7A7A68' }}>
+              <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#8A9E7A', marginRight: '8px', verticalAlign: 'middle' }} />
+              Mes cercles
+            </h2>
             <a href="/cercles" className="text-[10px] transition" style={{ color: '#5E7A52' }}>Voir tout →</a>
           </div>
 
@@ -483,6 +500,7 @@ export default function HomePage() {
                   style={{
                     backgroundColor: `${color}18`,
                     borderColor: `${color}40`,
+                    boxShadow: '0 1px 3px rgba(90,80,50,0.1)',
                   }}
                 >
                   <span
@@ -507,7 +525,10 @@ export default function HomePage() {
       {/* ── SÉLECTION DU MOIS ── */}
       <section className="mb-6">
         <div className="flex items-center justify-between px-5 mb-3">
-          <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase" style={{ color: '#7A7A68' }}>Sélection du mois</h2>
+          <h2 className="text-[10px] font-medium tracking-[0.14em] uppercase flex items-center" style={{ color: '#7A7A68' }}>
+            <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#8A9E7A', marginRight: '8px', verticalAlign: 'middle' }} />
+            Sélection du mois
+          </h2>
         </div>
 
         <div className="flex gap-3 px-5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
@@ -515,14 +536,14 @@ export default function HomePage() {
             <div
               key={i}
               className="shrink-0 w-[72vw] max-w-[280px] snap-start rounded-2xl p-4 flex flex-col justify-between gap-3"
-              style={{ backgroundColor: book.bg, border: '1px solid rgba(90,80,50,0.12)', borderRadius: '8px' }}
+              style={{ backgroundColor: book.bg, border: '1px solid rgba(90,80,50,0.12)', borderRadius: '10px', boxShadow: '0 2px 8px rgba(90,80,50,0.08)' }}
             >
               {/* Haut */}
               <div>
-                <p className="text-[9px] uppercase font-medium mb-2" style={{ color: '#8A9E7A', letterSpacing: '0.18em' }}>
+                <p className="mb-2" style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: 'rgba(90,80,50,0.06)', color: '#5E7A52', padding: '3px 8px', borderRadius: '4px', display: 'inline-block' }}>
                   {book.category}
                 </p>
-                <p className="font-serif text-[20px] font-normal leading-snug mb-1" style={{ color: '#2A2A1E' }}>
+                <p className="leading-snug mb-1" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: '400', color: '#2A2A1E' }}>
                   {book.title}
                 </p>
                 <p className="text-xs mb-3" style={{ color: '#7A7A68' }}>{book.author}</p>
@@ -675,7 +696,7 @@ export default function HomePage() {
       <a
         href="/bibliotheque"
         className="fixed bottom-20 right-5 z-40 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition-transform"
-        style={{ background: '#3D5C38', boxShadow: '0 4px 16px rgba(61,92,56,0.35)' }}
+        style={{ background: '#3D5C38', boxShadow: '0 4px 12px rgba(61,92,56,0.3)' }}
         aria-label="Ajouter un livre"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" stroke="#F5F0E8">
