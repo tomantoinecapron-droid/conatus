@@ -36,12 +36,10 @@ export default function CerclePage() {
   const [loading, setLoading] = useState(true)
   const [pageError, setPageError] = useState('')
 
-  // Confirmation leave/delete
   const [confirmAction, setConfirmAction] = useState<'leave' | 'delete' | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState('')
 
-  // Invite
   const [inviteQuery, setInviteQuery] = useState('')
   const [inviteResults, setInviteResults] = useState<any[]>([])
   const [inviteLoading, setInviteLoading] = useState(false)
@@ -198,32 +196,32 @@ export default function CerclePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-        <p className="text-[#7a7268] text-sm">Chargement...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F4EE' }}>
+        <p className="text-sm" style={{ color: '#9A9690' }}>Chargement...</p>
       </div>
     )
   }
 
   if (pageError) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center gap-4 px-5 pb-24">
-        <p className="font-serif text-white text-lg text-center">{pageError}</p>
-        <a href="/cercles" className="text-[#c9440e] text-sm">← Mes cercles</a>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-5 pb-24" style={{ background: '#F7F4EE' }}>
+        <p className="font-serif text-lg text-center" style={{ color: '#1A1A2E' }}>{pageError}</p>
+        <a href="/cercles" className="text-sm" style={{ color: '#9A9690' }}>← Mes cercles</a>
         <BottomNav />
       </div>
     )
   }
 
-  const color = circle?.cover_color || '#c9440e'
+  const color = circle?.cover_color || '#9A9690'
   const canDelete = isOwner || isAdmin
   const canLeave = isMemberOnly
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-24">
+    <div className="min-h-screen pb-24" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* ── Header ── */}
       <div className="px-5 pt-12 pb-5">
-        <a href="/cercles" className="flex items-center gap-1 text-[#7a7268] text-sm mb-5 hover:text-white transition w-fit">
+        <a href="/cercles" className="flex items-center gap-1 text-sm mb-5 transition w-fit" style={{ color: '#9A9690' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -233,7 +231,7 @@ export default function CerclePage() {
         <div className="flex items-center gap-4">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${color}20`, border: `1px solid ${color}40` }}
+            style={{ background: '#E3E0D8', border: '1px solid #D5D0C8' }}
           >
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -244,21 +242,21 @@ export default function CerclePage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="font-serif text-2xl text-white leading-tight">{circle.name}</h1>
+              <h1 className="font-serif text-2xl leading-tight" style={{ color: '#1A1A2E' }}>{circle.name}</h1>
               {circle.is_private && (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7a7268" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9690" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               )}
               {isAdmin && !isOwner && (
-                <span className="text-[10px] text-[#9A9690] border border-white/20 px-2 py-0.5 rounded-full">admin</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: '#9A9690', border: '1px solid #D5D0C8' }}>admin</span>
               )}
             </div>
             {circle.description && (
-              <p className="text-[#7a7268] text-sm mt-0.5 leading-snug">{circle.description}</p>
+              <p className="text-sm mt-0.5 leading-snug" style={{ color: '#9A9690' }}>{circle.description}</p>
             )}
-            <p className="text-[#7a7268] text-xs mt-1">
+            <p className="text-xs mt-1" style={{ color: '#9A9690' }}>
               {members.length} membre{members.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -266,14 +264,16 @@ export default function CerclePage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex border-b border-white/8 px-5">
+      <div className="flex px-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
         {(['activite', 'membres'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`pb-3 mr-6 text-sm font-medium border-b-2 -mb-px transition ${
-              tab === t ? 'text-white border-[#c9440e]' : 'text-[#7a7268] border-transparent'
-            }`}
+            className="pb-3 mr-6 text-sm font-medium border-b-2 -mb-px transition"
+            style={{
+              color: tab === t ? '#1A1A2E' : '#9A9690',
+              borderColor: tab === t ? '#1A1A2E' : 'transparent',
+            }}
           >
             {t === 'activite' ? 'Activité' : 'Membres'}
           </button>
@@ -285,19 +285,19 @@ export default function CerclePage() {
         <div className="px-5 pt-4">
           {feed.length === 0 ? (
             <div className="text-center py-16">
-              <p className="font-serif text-base text-white/40">Aucune activité pour l&apos;instant</p>
-              <p className="text-[#7a7268] text-sm mt-2">Les lectures des membres apparaîtront ici</p>
+              <p className="font-serif text-base" style={{ color: '#9A9690' }}>Aucune activité pour l&apos;instant</p>
+              <p className="text-sm mt-2" style={{ color: '#9A9690' }}>Les lectures des membres apparaîtront ici</p>
             </div>
           ) : (
-            <div className="bg-[#242018] border border-white/8 rounded-2xl overflow-hidden">
+            <div className="rounded-2xl overflow-hidden" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
               {feed.map((item, i) => (
-                <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${i < feed.length - 1 ? 'border-b border-white/5' : ''}`}>
+                <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={i < feed.length - 1 ? { borderBottom: '1px solid #D5D0C8' } : {}}>
                   <a href={`/profil/${item.profile?.username}`} className="shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-[#c9440e]/15 flex items-center justify-center overflow-hidden">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
                       {item.profile?.avatar_url ? (
                         <img src={item.profile.avatar_url} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <span className="font-serif text-[#c9440e] text-sm leading-none">
+                        <span className="font-serif text-sm leading-none" style={{ color: '#1A1A2E' }}>
                           {item.profile?.username?.[0]?.toUpperCase() ?? '?'}
                         </span>
                       )}
@@ -305,18 +305,18 @@ export default function CerclePage() {
                   </a>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs leading-snug">
-                      <a href={`/profil/${item.profile?.username}`} className="font-medium text-white hover:text-[#c9440e] transition">
+                      <a href={`/profil/${item.profile?.username}`} className="font-medium transition" style={{ color: '#1A1A2E' }}>
                         @{item.profile?.username}
-                      </a>{item.profile?.is_pro && <span className="text-white/60 text-[10px] ml-0.5">✦</span>}{' '}
-                      <span className="text-[#7a7268]">{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>{' '}
-                      <span className="font-serif italic text-white/80">{item.books?.title}</span>
+                      </a>{item.profile?.is_pro && <span className="text-[10px] ml-0.5" style={{ color: '#9A9690' }}>✦</span>}{' '}
+                      <span style={{ color: '#9A9690' }}>{STATUS_ACTION[item.status] ?? 'a ajouté'}</span>{' '}
+                      <span className="font-serif italic" style={{ color: '#1A1A2E' }}>{item.books?.title}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {item.books?.cover_url && (
                       <img src={item.books.cover_url} className="w-5 h-7 rounded object-cover opacity-60" alt="" />
                     )}
-                    <span className="text-[#7a7268] text-[10px] w-8 text-right">{timeAgo(item.created_at)}</span>
+                    <span className="text-[10px] w-8 text-right" style={{ color: '#9A9690' }}>{timeAgo(item.created_at)}</span>
                   </div>
                 </div>
               ))}
@@ -335,13 +335,13 @@ export default function CerclePage() {
               const p = member.profile
               const canRemove = (isOwner && member.role !== 'owner') || (isAdmin && member.user_id !== currentUser?.id)
               return (
-                <div key={member.user_id} className="flex items-center gap-3 bg-[#242018] border border-white/8 rounded-xl px-4 py-3">
+                <div key={member.user_id} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
                   <a href={`/profil/${p?.username}`} className="shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-[#c9440e]/15 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
                       {p?.avatar_url ? (
                         <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.username} />
                       ) : (
-                        <span className="font-serif text-[#c9440e] text-base leading-none">
+                        <span className="font-serif text-base leading-none" style={{ color: '#1A1A2E' }}>
                           {p?.username?.[0]?.toUpperCase() ?? '?'}
                         </span>
                       )}
@@ -349,11 +349,11 @@ export default function CerclePage() {
                   </a>
                   <a href={`/profil/${p?.username}`} className="flex-1 min-w-0">
                     {p?.full_name && (
-                      <p className="font-medium text-white text-sm truncate">
-                        {p.full_name}{p?.is_pro && <span className="text-white/60 text-[10px] ml-1">✦</span>}
+                      <p className="font-medium text-sm truncate" style={{ color: '#1A1A2E' }}>
+                        {p.full_name}{p?.is_pro && <span className="text-[10px] ml-1" style={{ color: '#9A9690' }}>✦</span>}
                       </p>
                     )}
-                    <p className="text-[#7a7268] text-xs truncate">@{p?.username}</p>
+                    <p className="text-xs truncate" style={{ color: '#9A9690' }}>@{p?.username}</p>
                   </a>
                   {member.role === 'owner' && (
                     <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0" style={{ color, borderColor: `${color}50` }}>
@@ -363,7 +363,8 @@ export default function CerclePage() {
                   {canRemove && (
                     <button
                       onClick={() => handleRemoveMember(member.user_id)}
-                      className="text-[#7a7268] hover:text-red-400 transition p-1 shrink-0"
+                      className="hover:text-red-400 transition p-1 shrink-0"
+                      style={{ color: '#9A9690' }}
                       aria-label="Retirer"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -376,12 +377,12 @@ export default function CerclePage() {
             })}
           </div>
 
-          {/* Invitation (owner ou admin) */}
+          {/* Invitation */}
           {(isOwner || isAdmin) && (
-            <div className="bg-[#242018] border border-white/8 rounded-2xl p-4">
-              <p className="text-white text-sm font-medium mb-3">Inviter un membre</p>
+            <div className="rounded-2xl p-4" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
+              <p className="text-sm font-medium mb-3" style={{ color: '#1A1A2E' }}>Inviter un membre</p>
               <div className="relative">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7a7268]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9690" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 <input
@@ -389,31 +390,36 @@ export default function CerclePage() {
                   value={inviteQuery}
                   onChange={e => handleInviteSearch(e.target.value)}
                   placeholder="Chercher par @username ou nom…"
-                  className="w-full bg-[#1a1714] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm placeholder-[#7a7268] outline-none focus:border-[#c9440e] transition"
+                  className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none transition"
+                  style={{ background: '#F7F4EE', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
                 />
               </div>
               {inviteError && <p className="text-red-400 text-xs mt-2">{inviteError}</p>}
-              {inviteSuccess && <p className="text-white/70 text-xs mt-2">{inviteSuccess}</p>}
-              {inviteLoading && <p className="text-[#7a7268] text-xs mt-3 text-center">Recherche...</p>}
+              {inviteSuccess && <p className="text-xs mt-2" style={{ color: '#1A1A2E' }}>{inviteSuccess}</p>}
+              {inviteLoading && <p className="text-xs mt-3 text-center" style={{ color: '#9A9690' }}>Recherche...</p>}
               {!inviteLoading && inviteQuery.trim() && inviteResults.length === 0 && (
-                <p className="text-[#7a7268] text-xs mt-3 text-center">Aucun résultat</p>
+                <p className="text-xs mt-3 text-center" style={{ color: '#9A9690' }}>Aucun résultat</p>
               )}
               {inviteResults.length > 0 && (
                 <div className="flex flex-col gap-2 mt-3">
                   {inviteResults.map(profile => (
-                    <div key={profile.id} className="flex items-center gap-3 bg-[#1a1714] border border-white/8 rounded-xl px-3 py-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#c9440e]/15 flex items-center justify-center overflow-hidden shrink-0">
+                    <div key={profile.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: '#F7F4EE', border: '1px solid #D5D0C8' }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden shrink-0" style={{ background: '#E3E0D8' }}>
                         {profile.avatar_url ? (
                           <img src={profile.avatar_url} className="w-full h-full object-cover" alt={profile.username} />
                         ) : (
-                          <span className="font-serif text-[#c9440e] text-sm leading-none">{profile.username?.[0]?.toUpperCase()}</span>
+                          <span className="font-serif text-sm leading-none" style={{ color: '#1A1A2E' }}>{profile.username?.[0]?.toUpperCase()}</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        {profile.full_name && <p className="text-white text-xs font-medium truncate">{profile.full_name}</p>}
-                        <p className="text-[#7a7268] text-xs truncate">@{profile.username}</p>
+                        {profile.full_name && <p className="text-xs font-medium truncate" style={{ color: '#1A1A2E' }}>{profile.full_name}</p>}
+                        <p className="text-xs truncate" style={{ color: '#9A9690' }}>@{profile.username}</p>
                       </div>
-                      <button onClick={() => handleAddMember(profile)} className="text-[#c9440e] text-xs font-medium hover:opacity-80 transition shrink-0">
+                      <button
+                        onClick={() => handleAddMember(profile)}
+                        className="text-xs font-medium hover:opacity-80 transition shrink-0"
+                        style={{ color: '#1A1A2E' }}
+                      >
                         Ajouter
                       </button>
                     </div>
@@ -423,15 +429,14 @@ export default function CerclePage() {
             </div>
           )}
 
-          {/* ── Zone d'action (quitter / supprimer) ── */}
+          {/* Zone d'action */}
           <div className="mt-2">
-            {/* Confirmation en cours */}
             {confirmAction ? (
-              <div className="bg-[#2a1a1a] border border-red-500/20 rounded-2xl p-4">
-                <p className="text-white text-sm font-medium mb-1">
+              <div className="rounded-2xl p-4" style={{ border: '1px solid rgba(239,68,68,0.2)', background: '#EDEAE3' }}>
+                <p className="text-sm font-medium mb-1" style={{ color: '#1A1A2E' }}>
                   {confirmAction === 'delete' ? 'Supprimer ce cercle ?' : 'Quitter ce cercle ?'}
                 </p>
-                <p className="text-[#7a7268] text-xs mb-4">
+                <p className="text-xs mb-4" style={{ color: '#9A9690' }}>
                   {confirmAction === 'delete'
                     ? 'Tous les membres seront retirés. Cette action est irréversible.'
                     : 'Tu pourras être réinvité plus tard.'}
@@ -440,7 +445,8 @@ export default function CerclePage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => { setConfirmAction(null); setActionError('') }}
-                    className="flex-1 py-2.5 border border-white/15 rounded-xl text-[#7a7268] text-sm hover:text-white transition"
+                    className="flex-1 py-2.5 rounded-xl text-sm transition"
+                    style={{ border: '1px solid #D5D0C8', color: '#9A9690' }}
                   >
                     Annuler
                   </button>
@@ -455,27 +461,26 @@ export default function CerclePage() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                {/* Owner : supprimer */}
                 {canDelete && (
                   <button
                     onClick={() => setConfirmAction('delete')}
-                    className="w-full py-2.5 text-red-400 text-sm border border-red-500/20 rounded-xl hover:bg-red-500/10 transition"
+                    className="w-full py-2.5 text-red-400 text-sm rounded-xl hover:bg-red-500/10 transition"
+                    style={{ border: '1px solid rgba(239,68,68,0.2)' }}
                   >
                     Supprimer le cercle
                   </button>
                 )}
-                {/* Membre simple : quitter */}
                 {canLeave && (
                   <button
                     onClick={() => setConfirmAction('leave')}
-                    className="w-full py-2.5 text-[#7a7268] text-sm border border-white/10 rounded-xl hover:text-white hover:border-white/25 transition"
+                    className="w-full py-2.5 text-sm rounded-xl transition"
+                    style={{ color: '#9A9690', border: '1px solid #D5D0C8' }}
                   >
                     Quitter le cercle
                   </button>
                 )}
-                {/* Owner qui veut "partir" */}
                 {isOwner && !isAdmin && (
-                  <p className="text-center text-[#7a7268] text-xs px-4">
+                  <p className="text-center text-xs px-4" style={{ color: '#9A9690' }}>
                     Tu es l&apos;admin de ce cercle. Supprime-le pour en partir.
                   </p>
                 )}

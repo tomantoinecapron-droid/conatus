@@ -38,7 +38,6 @@ export default function PremiumPage() {
       setIsPro(profile?.is_pro ?? false)
       setProfileLoading(false)
 
-      // Récupérer la date de renouvellement si Pro
       if (profile?.is_pro && data.user.email) {
         fetch('/api/create-portal-session', {
           method: 'POST',
@@ -95,58 +94,58 @@ export default function PremiumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-20">
+    <div className="min-h-screen pb-20" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* Header */}
-      <div className="px-4 pt-14 pb-4 flex items-center gap-3 border-b border-white/8">
-        <a href="/profil" className="text-[#7a7268] hover:text-white transition">
+      <div className="px-4 pt-14 pb-4 flex items-center gap-3" style={{ borderBottom: '1px solid #D5D0C8' }}>
+        <a href="/profil" className="transition" style={{ color: '#9A9690' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </a>
-        <h1 className="text-white font-semibold text-base">Conatus Pro ✦</h1>
+        <h1 className="font-semibold text-base" style={{ color: '#1A1A2E' }}>Conatus Pro ✦</h1>
       </div>
 
       <div className="px-4 pt-8 pb-6 max-w-lg mx-auto">
 
         {/* Titre */}
         <div className="text-center mb-8">
-          <span className="text-[#c9440e] text-xs font-medium tracking-widest uppercase">Conatus Pro</span>
-          <h2 className="font-serif text-2xl text-white mt-1">Lis plus, retiens mieux</h2>
-          <p className="text-[#7a7268] text-sm mt-2">Débloques tout le potentiel de ta bibliothèque.</p>
+          <span className="text-xs font-medium tracking-widest uppercase" style={{ color: '#9A9690' }}>Conatus Pro</span>
+          <h2 className="font-serif text-2xl mt-1" style={{ color: '#1A1A2E' }}>Lis plus, retiens mieux</h2>
+          <p className="text-sm mt-2" style={{ color: '#9A9690' }}>Débloques tout le potentiel de ta bibliothèque.</p>
         </div>
 
         {/* Comparaison Gratuit / Pro */}
         <div className="grid grid-cols-2 gap-3 mb-8">
 
           {/* Gratuit */}
-          <div className="bg-[#242018] border border-white/8 rounded-xl p-4">
-            <p className="text-[#7a7268] text-[10px] uppercase tracking-widest font-medium mb-3">Gratuit</p>
+          <div className="rounded-xl p-4" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
+            <p className="text-[10px] uppercase tracking-widest font-medium mb-3" style={{ color: '#9A9690' }}>Gratuit</p>
             <ul className="flex flex-col gap-2.5">
               {FREE_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mt-0.5 w-3.5 h-3.5 flex-shrink-0 rounded-full border border-white/15 flex items-center justify-center">
-                    <span className="w-1 h-1 rounded-full bg-[#7a7268]" />
+                  <span className="mt-0.5 w-3.5 h-3.5 flex-shrink-0 rounded-full flex items-center justify-center" style={{ border: '1px solid #D5D0C8' }}>
+                    <span className="w-1 h-1 rounded-full" style={{ background: '#9A9690' }} />
                   </span>
-                  <span className="text-[#7a7268] text-xs leading-snug">{f}</span>
+                  <span className="text-xs leading-snug" style={{ color: '#9A9690' }}>{f}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Pro */}
-          <div className="bg-[#c9440e]/8 border border-[#c9440e]/30 rounded-xl p-4 relative">
-            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#c9440e] text-white text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full whitespace-nowrap">
+          <div className="rounded-xl p-4 relative" style={{ background: '#EDEAE3', border: '1px solid #1A1A2E' }}>
+            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full whitespace-nowrap" style={{ background: '#1A1A2E', color: '#F7F4EE' }}>
               ✦ PRO
             </div>
-            <p className="text-[#c9440e] text-[10px] uppercase tracking-widest font-medium mb-3 mt-1">Pro</p>
+            <p className="text-[10px] uppercase tracking-widest font-medium mb-3 mt-1" style={{ color: '#1A1A2E' }}>Pro</p>
             <ul className="flex flex-col gap-2.5">
               {PRO_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <svg className="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9440e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  <span className="text-white text-xs leading-snug">{f}</span>
+                  <span className="text-xs leading-snug" style={{ color: '#1A1A2E' }}>{f}</span>
                 </li>
               ))}
             </ul>
@@ -156,32 +155,33 @@ export default function PremiumPage() {
 
         {profileLoading ? (
           <div className="flex justify-center py-8">
-            <div className="text-[#7a7268] text-sm">Chargement...</div>
+            <div className="text-sm" style={{ color: '#9A9690' }}>Chargement...</div>
           </div>
         ) : isPro ? (
-          <div className="border border-[#c9440e]/25 rounded-xl p-6 bg-[#c9440e]/5">
+          <div className="rounded-xl p-6" style={{ border: '1px solid #D5D0C8', background: '#EDEAE3' }}>
             <div className="flex items-center justify-center gap-2 mb-3">
-              <span className="text-[10px] font-medium text-white/60 border border-white/20 rounded px-2 py-0.5">✦ Pro</span>
+              <span className="text-[10px] font-medium rounded px-2 py-0.5" style={{ color: '#1A1A2E', border: '1px solid #D5D0C8' }}>✦ Pro</span>
             </div>
-            <p className="text-white font-semibold text-center">Tu es abonné Pro</p>
+            <p className="font-semibold text-center" style={{ color: '#1A1A2E' }}>Tu es abonné Pro</p>
             {renewalDate ? (
-              <p className="text-[#7a7268] text-xs text-center mt-1.5">
-                Prochain renouvellement : <span className="text-white/70">{renewalDate}</span>
+              <p className="text-xs text-center mt-1.5" style={{ color: '#9A9690' }}>
+                Prochain renouvellement : <span style={{ color: '#1A1A2E' }}>{renewalDate}</span>
               </p>
             ) : (
-              <p className="text-[#7a7268] text-xs text-center mt-1.5">
+              <p className="text-xs text-center mt-1.5" style={{ color: '#9A9690' }}>
                 Toutes les fonctionnalités Pro sont débloquées.
               </p>
             )}
             <button
               onClick={handlePortal}
               disabled={portalLoading}
-              className="mt-4 w-full py-2.5 rounded-full text-sm font-medium border border-white/20 text-[#7a7268] hover:text-white hover:border-white/40 transition disabled:opacity-50"
+              className="mt-4 w-full py-2.5 rounded text-sm font-medium transition disabled:opacity-50"
+              style={{ border: '1px solid #D5D0C8', color: '#9A9690', borderRadius: '6px' }}
             >
               {portalLoading ? 'Redirection…' : 'Gérer mon abonnement →'}
             </button>
             {error && (
-              <p className="text-center text-[#c9440e] text-xs font-medium mt-3">{error}</p>
+              <p className="text-center text-red-500 text-xs font-medium mt-3">{error}</p>
             )}
           </div>
         ) : (
@@ -189,41 +189,43 @@ export default function PremiumPage() {
             {/* Plans tarifaires */}
             <div className="flex flex-col gap-3">
 
-              {/* Annuel — le plus populaire */}
-              <div className="relative border border-[#c9440e]/50 rounded-xl p-4 bg-[#c9440e]/5">
-                <div className="absolute -top-3 left-4 bg-[#c9440e] text-white text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full">
+              {/* Annuel */}
+              <div className="relative rounded-xl p-4" style={{ border: '1px solid #1A1A2E', background: '#EDEAE3' }}>
+                <div className="absolute -top-3 left-4 text-[9px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full" style={{ background: '#1A1A2E', color: '#F7F4EE' }}>
                   Le plus populaire
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <div>
-                    <p className="text-white font-semibold text-base">12,99 €<span className="text-[#7a7268] text-xs font-normal"> / an</span></p>
-                    <p className="text-[#7a7268] text-xs mt-0.5">soit 1,08 €/mois</p>
+                    <p className="font-semibold text-base" style={{ color: '#1A1A2E' }}>12,99 €<span className="text-xs font-normal" style={{ color: '#9A9690' }}> / an</span></p>
+                    <p className="text-xs mt-0.5" style={{ color: '#9A9690' }}>soit 1,08 €/mois</p>
                   </div>
-                  <span className="text-[10px] font-semibold text-[#c9440e] bg-[#c9440e]/15 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ background: '#E3E0D8', color: '#1A1A2E' }}>
                     −62 %
                   </span>
                 </div>
                 <button
                   onClick={() => handleCheckout('yearly')}
                   disabled={loading !== null}
-                  className="mt-3 w-full py-2.5 rounded-full text-sm font-semibold bg-[#c9440e] text-white hover:opacity-90 transition disabled:opacity-50"
+                  className="mt-3 w-full py-2.5 text-sm font-semibold hover:opacity-90 transition disabled:opacity-50"
+                  style={{ background: '#1A1A2E', color: '#F7F4EE', borderRadius: '6px' }}
                 >
                   {loading === 'yearly' ? 'Redirection…' : 'S\'abonner — 12,99 €/an'}
                 </button>
               </div>
 
               {/* Mensuel */}
-              <div className="border border-white/10 rounded-xl p-4 bg-white/2">
+              <div className="rounded-xl p-4" style={{ border: '1px solid #D5D0C8', background: '#EDEAE3' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white font-semibold text-base">3,49 €<span className="text-[#7a7268] text-xs font-normal"> / mois</span></p>
-                    <p className="text-[#7a7268] text-xs mt-0.5">Sans engagement</p>
+                    <p className="font-semibold text-base" style={{ color: '#1A1A2E' }}>3,49 €<span className="text-xs font-normal" style={{ color: '#9A9690' }}> / mois</span></p>
+                    <p className="text-xs mt-0.5" style={{ color: '#9A9690' }}>Sans engagement</p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleCheckout('monthly')}
                   disabled={loading !== null}
-                  className="mt-3 w-full py-2.5 rounded-full text-sm font-medium border border-white/20 text-white hover:border-white/40 transition disabled:opacity-50"
+                  className="mt-3 w-full py-2.5 text-sm font-medium transition disabled:opacity-50"
+                  style={{ border: '1px solid #D5D0C8', color: '#1A1A2E', borderRadius: '6px' }}
                 >
                   {loading === 'monthly' ? 'Redirection…' : 'S\'abonner — 3,49 €/mois'}
                 </button>
@@ -232,10 +234,10 @@ export default function PremiumPage() {
             </div>
 
             {error && (
-              <p className="text-center text-[#c9440e] text-xs font-medium mt-4">{error}</p>
+              <p className="text-center text-red-500 text-xs font-medium mt-4">{error}</p>
             )}
 
-            <p className="text-center text-[#7a7268]/50 text-[10px] mt-5">
+            <p className="text-center text-[10px] mt-5" style={{ color: '#9A9690' }}>
               Paiement sécurisé par Stripe · Résiliation à tout moment
             </p>
           </>

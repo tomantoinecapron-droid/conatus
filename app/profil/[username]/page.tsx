@@ -10,20 +10,20 @@ const STATUS_LABEL: Record<string, string> = {
 }
 const STATUS_COLOR: Record<string, string> = {
   lu: 'text-[#9A9690]',
-  en_cours: 'text-[#c9440e]',
-  a_lire: 'text-white/30',
+  en_cours: 'text-[#1A1A2E]',
+  a_lire: 'text-[#9A9690]',
 }
 const STATUS_DOT: Record<string, string> = {
-  lu: 'bg-[#9A9690]/70',
-  en_cours: 'bg-[#c9440e]',
-  a_lire: 'bg-white/20',
+  lu: 'bg-[#9A9690]',
+  en_cours: 'bg-[#1A1A2E]',
+  a_lire: 'bg-[#D5D0C8]',
 }
 
 function Stars({ n }: { n: number }) {
   if (!n || n < 1) return null
   const full = Math.round(n)
   return (
-    <span className="text-[#c9440e]/60 text-[11px] tracking-[-1px]">
+    <span className="text-[11px] tracking-[-1px]" style={{ color: '#9A9690' }}>
       {'★'.repeat(full)}{'☆'.repeat(Math.max(0, 5 - full))}
     </span>
   )
@@ -122,17 +122,17 @@ export default function ProfilPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-        <div className="text-[#7a7268] text-sm">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F4EE' }}>
+        <div className="text-sm" style={{ color: '#9A9690' }}>Chargement...</div>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center pb-24">
-        <p className="font-serif text-xl text-white">Utilisateur introuvable</p>
-        <a href="/social" className="text-[#c9440e] text-sm mt-3">← Explorer</a>
+      <div className="min-h-screen flex flex-col items-center justify-center pb-24" style={{ background: '#F7F4EE' }}>
+        <p className="font-serif text-xl" style={{ color: '#1A1A2E' }}>Utilisateur introuvable</p>
+        <a href="/social" className="text-sm mt-3" style={{ color: '#9A9690' }}>← Explorer</a>
         <BottomNav />
       </div>
     )
@@ -142,19 +142,19 @@ export default function ProfilPage() {
   const luCount = readings.filter(r => r.status === 'lu').length
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-28">
+    <div className="min-h-screen pb-28" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* ── Header ── */}
       <div className="px-6 pt-14 pb-8">
 
         {/* Avatar + actions */}
         <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="w-14 h-14 rounded-full overflow-hidden bg-[#2a2520] shrink-0 border border-white/8">
+          <div className="w-14 h-14 rounded-full overflow-hidden shrink-0" style={{ background: '#E3E0D8', border: '1px solid #D5D0C8' }}>
             {profile.avatar_url
               ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
               : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="font-serif text-[22px] text-white/30">
+                  <span className="font-serif text-[22px]" style={{ color: '#9A9690' }}>
                     {(profile.full_name || username || '?')[0].toUpperCase()}
                   </span>
                 </div>
@@ -165,7 +165,8 @@ export default function ProfilPage() {
             <div className="flex items-center gap-3 mt-1">
               <a
                 href="/profil/edit"
-                className="text-[#7a7268] hover:text-white/60 transition"
+                className="transition"
+                style={{ color: '#9A9690' }}
                 aria-label="Modifier le profil"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -175,7 +176,8 @@ export default function ProfilPage() {
               </a>
               <a
                 href="/settings"
-                className="text-[#7a7268] hover:text-white/60 transition"
+                className="transition"
+                style={{ color: '#9A9690' }}
                 aria-label="Paramètres"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -188,44 +190,44 @@ export default function ProfilPage() {
         </div>
 
         {/* Nom */}
-        <h1 className="font-serif text-[36px] leading-[1.1] text-white tracking-tight mb-1">
+        <h1 className="font-serif text-[36px] leading-[1.1] tracking-tight mb-1" style={{ color: '#1A1A2E' }}>
           {profile.full_name || `@${username}`}
         </h1>
 
         {/* Handle + Pro */}
-        <p className="text-[#7a7268] text-[13px] mb-4">
+        <p className="text-[13px] mb-4" style={{ color: '#9A9690' }}>
           @{username}
           {profile.is_pro && (
-            <span className="ml-2 text-white/30 text-[10px] border border-white/10 rounded px-1.5 py-0.5 leading-none">✦ Pro</span>
+            <span className="ml-2 text-[10px] rounded px-1.5 py-0.5 leading-none" style={{ color: '#1A1A2E', border: '1px solid #D5D0C8' }}>✦ Pro</span>
           )}
         </p>
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-white/45 text-[14px] italic leading-relaxed mb-5 max-w-[280px] font-serif">
+          <p className="text-[14px] italic leading-relaxed mb-5 max-w-[280px] font-serif" style={{ color: '#9A9690' }}>
             {profile.bio}
           </p>
         )}
 
         {/* Stats inline */}
-        <div className="flex items-center gap-2.5 flex-wrap text-[12px] text-[#7a7268]">
+        <div className="flex items-center gap-2.5 flex-wrap text-[12px]" style={{ color: '#9A9690' }}>
           <span>
-            <span className="text-white/70 font-medium">{luCount}</span>{' '}
+            <span className="font-medium" style={{ color: '#1A1A2E' }}>{luCount}</span>{' '}
             lu{luCount !== 1 ? 's' : ''}
           </span>
-          <span className="text-white/15">·</span>
+          <span style={{ color: '#D5D0C8' }}>·</span>
           <span>
-            <span className="text-white/70 font-medium">{notesCount}</span>{' '}
+            <span className="font-medium" style={{ color: '#1A1A2E' }}>{notesCount}</span>{' '}
             fiche{notesCount !== 1 ? 's' : ''}
           </span>
-          <span className="text-white/15">·</span>
+          <span style={{ color: '#D5D0C8' }}>·</span>
           <span>
-            <span className="text-white/70 font-medium">{followersCount}</span>{' '}
+            <span className="font-medium" style={{ color: '#1A1A2E' }}>{followersCount}</span>{' '}
             abonné{followersCount !== 1 ? 's' : ''}
           </span>
-          <span className="text-white/15">·</span>
+          <span style={{ color: '#D5D0C8' }}>·</span>
           <span>
-            <span className="text-white/70 font-medium">{followingCount}</span>{' '}
+            <span className="font-medium" style={{ color: '#1A1A2E' }}>{followingCount}</span>{' '}
             abonnement{followingCount !== 1 ? 's' : ''}
           </span>
         </div>
@@ -235,26 +237,26 @@ export default function ProfilPage() {
           <button
             onClick={handleFollow}
             disabled={followLoading}
-            className={`mt-5 text-[12px] px-5 py-2 rounded-full border transition-all disabled:opacity-40 ${
-              isFollowing
-                ? 'border-white/20 text-white/50 hover:border-white/10 hover:text-white/30'
-                : 'border-white/20 text-white/70 hover:border-[#c9440e]/40 hover:text-white'
-            }`}
+            className="mt-5 text-[12px] px-5 py-2 transition disabled:opacity-40"
+            style={{
+              border: '1px solid #D5D0C8',
+              color: isFollowing ? '#9A9690' : '#1A1A2E',
+              borderRadius: '6px',
+            }}
           >
             {isFollowing ? 'Abonné' : "S'abonner"}
           </button>
         )}
       </div>
 
-
       {/* ── Bibliothèque ── */}
       {readings.length > 0 && (
         <section className="mb-10">
           <div className="px-6 mb-4 flex items-center gap-4">
-            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase text-[#7a7268] shrink-0">
+            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>
               Bibliothèque
             </h2>
-            <div className="flex-1 h-px bg-white/6" />
+            <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
           </div>
 
           <div className="px-6">
@@ -267,7 +269,7 @@ export default function ProfilPage() {
                     className={`flex items-baseline justify-between gap-4 py-3.5 group ${isOwnProfile ? 'cursor-pointer' : 'pointer-events-none'}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-serif text-[15px] text-white leading-snug line-clamp-1 group-hover:text-white/80 transition">
+                      <p className="font-serif text-[15px] leading-snug line-clamp-1 transition" style={{ color: '#1A1A2E' }}>
                         {reading.books?.title}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -275,27 +277,28 @@ export default function ProfilPage() {
                           <a
                             href={`/auteur/${encodeURIComponent(reading.books.author)}`}
                             onClick={e => e.stopPropagation()}
-                            className="text-[#7a7268] text-[12px] truncate hover:text-white transition"
+                            className="text-[12px] truncate transition"
+                            style={{ color: '#9A9690' }}
                           >
                             {reading.books.author}
                           </a>
                         ) : null}
                         {reading.rating > 0 && (
                           <>
-                            <span className="text-white/15 text-[10px]">·</span>
+                            <span className="text-[10px]" style={{ color: '#D5D0C8' }}>·</span>
                             <Stars n={reading.rating} />
                           </>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[reading.status] ?? 'bg-white/20'}`} />
-                      <span className={`text-[11px] ${STATUS_COLOR[reading.status] ?? 'text-[#7a7268]'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[reading.status] ?? 'bg-[#D5D0C8]'}`} />
+                      <span className={`text-[11px] ${STATUS_COLOR[reading.status] ?? 'text-[#9A9690]'}`}>
                         {STATUS_LABEL[reading.status] ?? ''}
                       </span>
                     </div>
                   </a>
-                  {!isLast && <div className="h-px bg-white/5" />}
+                  {!isLast && <div className="h-px" style={{ background: '#D5D0C8' }} />}
                 </div>
               )
             })}
@@ -307,10 +310,10 @@ export default function ProfilPage() {
       {recentNotes.length > 0 && (
         <section className="mb-10">
           <div className="px-6 mb-4 flex items-center gap-4">
-            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase text-[#7a7268] shrink-0">
+            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>
               Fiches récentes
             </h2>
-            <div className="flex-1 h-px bg-white/6" />
+            <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
           </div>
 
           <div className="px-6 flex flex-col gap-6">
@@ -321,15 +324,16 @@ export default function ProfilPage() {
                 : note.content
               return (
                 <div key={note.id} className="group">
-                  <p className="font-serif italic text-[14px] text-white/50 leading-relaxed mb-2">
+                  <p className="font-serif italic text-[14px] leading-relaxed mb-2" style={{ color: '#9A9690' }}>
                     &ldquo;{excerpt}&rdquo;
                   </p>
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[#7a7268] text-[12px] truncate">{bookTitle}</p>
+                    <p className="text-[12px] truncate" style={{ color: '#9A9690' }}>{bookTitle}</p>
                     {isOwnProfile && note.reading_id && (
                       <a
                         href={`/fiche/${note.reading_id}`}
-                        className="text-[#c9440e]/50 text-[11px] hover:text-[#c9440e] transition shrink-0"
+                        className="text-[11px] transition shrink-0"
+                        style={{ color: '#9A9690' }}
                       >
                         Lire →
                       </a>
@@ -344,10 +348,10 @@ export default function ProfilPage() {
 
       {/* ── État vide ── */}
       {readings.length === 0 && (
-        <div className="px-6 py-16 flex flex-col items-center gap-2 text-[#7a7268]">
-          <p className="font-serif text-base">Bibliothèque vide pour l'instant</p>
+        <div className="px-6 py-16 flex flex-col items-center gap-2">
+          <p className="font-serif text-base" style={{ color: '#9A9690' }}>Bibliothèque vide pour l&apos;instant</p>
           {isOwnProfile && (
-            <a href="/bibliotheque" className="text-[#c9440e] text-sm mt-1">Ajouter des livres →</a>
+            <a href="/bibliotheque" className="text-sm mt-1" style={{ color: '#1A1A2E' }}>Ajouter des livres →</a>
           )}
         </div>
       )}
@@ -357,7 +361,8 @@ export default function ProfilPage() {
         <div className="flex justify-center pt-4 pb-2">
           <button
             onClick={async () => { await supabase.auth.signOut(); window.location.href = '/' }}
-            className="flex items-center gap-2 text-[#7a7268] text-[12px] border border-white/10 rounded-full px-5 py-2 hover:border-white/20 hover:text-white/60 transition"
+            className="flex items-center gap-2 text-[12px] rounded-full px-5 py-2 transition"
+            style={{ color: '#9A9690', border: '1px solid #D5D0C8' }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

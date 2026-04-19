@@ -45,25 +45,31 @@ export default function AuthPage() {
     setLoading(false)
   }
 
-  const inputClass =
-    'w-full bg-[#1a1714] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-[#7a7268] text-sm outline-none focus:border-[#c9440e] transition'
-
   return (
-    <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center px-6">
-      <a href="/" className="mb-10 text-4xl font-serif text-white tracking-tight">
-        con<span className="text-[#c9440e]">a</span>tus
+    <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: '#F7F4EE' }}>
+      <a href="/" className="mb-10 text-4xl font-serif tracking-tight" style={{ color: '#1A1A2E' }}>
+        con<span style={{ color: '#9A9690' }}>a</span>tus
       </a>
-      <div className="w-full max-w-sm bg-[#242018] border border-white/10 rounded-2xl p-8">
-        <div className="flex bg-[#1a1714] rounded-full p-1 mb-8">
+      <div className="w-full max-w-sm rounded-2xl p-8" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
+        {/* Toggle mode */}
+        <div className="flex rounded-full p-1 mb-8" style={{ background: '#F7F4EE' }}>
           <button
             onClick={() => setMode('signup')}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition ${mode === 'signup' ? 'bg-[#c9440e] text-white' : 'text-[#7a7268]'}`}
+            className="flex-1 py-2 rounded-full text-sm font-medium transition"
+            style={{
+              background: mode === 'signup' ? '#1A1A2E' : 'transparent',
+              color: mode === 'signup' ? '#F7F4EE' : '#9A9690',
+            }}
           >
             S'inscrire
           </button>
           <button
             onClick={() => setMode('login')}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition ${mode === 'login' ? 'bg-[#c9440e] text-white' : 'text-[#7a7268]'}`}
+            className="flex-1 py-2 rounded-full text-sm font-medium transition"
+            style={{
+              background: mode === 'login' ? '#1A1A2E' : 'transparent',
+              color: mode === 'login' ? '#F7F4EE' : '#9A9690',
+            }}
           >
             Se connecter
           </button>
@@ -76,17 +82,19 @@ export default function AuthPage() {
                 placeholder="Ton prénom"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                className={inputClass}
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition"
+                style={{ background: '#F7F4EE', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
               />
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7a7268] text-sm select-none">@</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm select-none" style={{ color: '#9A9690' }}>@</span>
                 <input
                   type="text"
                   placeholder="nom d'utilisateur"
                   value={username}
                   onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   required={mode === 'signup'}
-                  className={`${inputClass} pl-8`}
+                  className="w-full rounded-xl pl-8 pr-4 py-3 text-sm outline-none transition"
+                  style={{ background: '#F7F4EE', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
                 />
               </div>
             </>
@@ -97,7 +105,8 @@ export default function AuthPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className={inputClass}
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition"
+            style={{ background: '#F7F4EE', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
           />
           <input
             type="password"
@@ -105,13 +114,15 @@ export default function AuthPage() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            className={inputClass}
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition"
+            style={{ background: '#F7F4EE', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
           />
-          {message && <p className="text-sm text-center text-[#c9440e]">{message}</p>}
+          {message && <p className="text-sm text-center" style={{ color: '#1A1A2E' }}>{message}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#c9440e] text-white py-3 rounded-full text-sm font-medium hover:opacity-90 transition mt-2 disabled:opacity-50"
+            className="py-3 text-sm font-medium hover:opacity-90 transition mt-2 disabled:opacity-50"
+            style={{ background: '#1A1A2E', color: '#F7F4EE', borderRadius: '6px' }}
           >
             {loading ? 'Chargement...' : mode === 'signup' ? 'Créer mon compte' : 'Se connecter'}
           </button>

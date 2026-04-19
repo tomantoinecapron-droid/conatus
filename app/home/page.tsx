@@ -27,33 +27,9 @@ const STATUS_ACTION: Record<string, string> = {
 }
 
 const SELECTION_DU_MOIS = [
-  {
-    category: 'ROMAN CONTEMPORAIN',
-    title: 'Normal People',
-    author: 'Sally Rooney',
-    comment: "Une exploration sincère de l'amour entre deux êtres que tout oppose. Rooney saisit avec précision quelque chose d'essentiel sur la jeunesse et le désir.",
-    rating: 4,
-    bg: '#EDEAE3',
-    amazon: 'https://www.amazon.fr/s?k=Normal+People+Sally+Rooney',
-  },
-  {
-    category: 'CLASSIQUE',
-    title: 'Les Frères Karamazov',
-    author: 'Fiodor Dostoïevski',
-    comment: 'Le testament littéraire de Dostoïevski. Une fresque sur la foi, la liberté et la culpabilité sans équivalent dans la littérature mondiale.',
-    rating: 5,
-    bg: '#E3E0D8',
-    amazon: 'https://www.amazon.fr/s?k=Les+Frères+Karamazov',
-  },
-  {
-    category: 'SÉLECTION PRINTEMPS',
-    title: "L'Élégance du hérisson",
-    author: 'Muriel Barbery',
-    comment: 'Une gardienne d\'immeuble secrètement cultivée, une enfant désabusée. Barbery écrit avec grâce sur la beauté cachée du quotidien.',
-    rating: 4,
-    bg: '#EDEAE3',
-    amazon: 'https://www.amazon.fr/s?k=Elegance+Herisson+Barbery',
-  },
+  { category: 'ROMAN CONTEMPORAIN', title: 'Normal People', author: 'Sally Rooney' },
+  { category: 'CLASSIQUE', title: 'Les Frères Karamazov', author: 'Fiodor Dostoïevski' },
+  { category: 'SÉLECTION PRINTEMPS', title: "L'Élégance du hérisson", author: 'Muriel Barbery' },
 ]
 
 export default function HomePage() {
@@ -460,41 +436,24 @@ export default function HomePage() {
       )}
 
       {/* ── SÉLECTION DU MOIS ── */}
-      <section className="mb-6">
-        <div className="flex items-center justify-between px-5 mb-3">
+      <section className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690', display: 'flex', alignItems: 'center' }}>
             <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#9A9690', marginRight: '8px' }} />
             Sélection du mois
           </h2>
         </div>
 
-        <div className="flex gap-3 px-5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+        <div className="grid grid-cols-3 gap-4">
           {SELECTION_DU_MOIS.map((book, i) => (
-            <div
-              key={i}
-              className="shrink-0 w-[72vw] max-w-[280px] snap-start p-4 flex flex-col justify-between gap-3"
-              style={{ backgroundColor: book.bg, border: '1px solid #D5D0C8', borderRadius: '10px', boxShadow: '0 2px 8px rgba(26,26,46,0.06)' }}
-            >
-              <div>
-                <p style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', background: '#E3E0D8', color: '#9A9690', padding: '3px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '8px' }}>
-                  {book.category}
-                </p>
-                <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: '400', color: '#1A1A2E', lineHeight: '1.2', marginBottom: '4px' }}>
-                  {book.title}
-                </p>
-                <p className="text-xs mb-3" style={{ color: '#9A9690' }}>{book.author}</p>
-                <p className="text-[13px] italic leading-relaxed line-clamp-3" style={{ color: '#1A1A2E' }}>
-                  {book.comment}
-                </p>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm tracking-tight leading-none" style={{ color: '#9A9690' }}>
-                  {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
-                </span>
-                <a href={book.amazon} target="_blank" rel="noopener noreferrer" style={{ fontSize: '10px', color: '#9A9690' }}>
-                  Amazon →
-                </a>
-              </div>
+            <div key={i} style={{ borderTop: '1px solid #D5D0C8', paddingTop: '10px' }}>
+              <p style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9A9690', marginBottom: '6px' }}>
+                {book.category}
+              </p>
+              <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '13px', fontWeight: '400', color: '#1A1A2E', lineHeight: '1.3', marginBottom: '4px' }}>
+                {book.title}
+              </p>
+              <p style={{ fontSize: '11px', color: '#9A9690' }}>{book.author}</p>
             </div>
           ))}
         </div>

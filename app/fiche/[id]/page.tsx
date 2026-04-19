@@ -24,7 +24,6 @@ export default function Fiche() {
   const [deleting, setDeleting] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Nouveaux champs
   const [startedAt, setStartedAt] = useState('')
   const [finishedAt, setFinishedAt] = useState('')
   const [recommendedBy, setRecommendedBy] = useState('')
@@ -61,8 +60,6 @@ export default function Fiche() {
     setLoading(false)
   }
 
-  // ── Sauvegarde note + rating (debounced) ──────────────────────────────────
-
   const doSave = async (currentNote: string, currentRating: number) => {
     if (!reading) return
     const ops: Promise<any>[] = [
@@ -96,8 +93,6 @@ export default function Fiche() {
     doSave(note, next)
   }
 
-  // ── Champs annexes (save on blur) ─────────────────────────────────────────
-
   const saveField = async (field: string, value: string) => {
     await supabase.from('readings').update({ [field]: value || null }).eq('id', id)
   }
@@ -106,8 +101,6 @@ export default function Fiche() {
     await supabase.from('readings').update({ status }).eq('id', id)
     setReading((r: any) => ({ ...r, status }))
   }
-
-  // ── Citations ─────────────────────────────────────────────────────────────
 
   const addCitation = async () => {
     if (!newCitation.trim() || !reading) return
@@ -125,8 +118,6 @@ export default function Fiche() {
     setCitations(prev => prev.filter(c => c.id !== citId))
   }
 
-  // ── Partage ───────────────────────────────────────────────────────────────
-
   const handleShare = async () => {
     if (!isPublic) {
       await supabase.from('readings').update({ is_public: true }).eq('id', id)
@@ -142,29 +133,25 @@ export default function Fiche() {
     setTimeout(() => setCopyStatus('idle'), 2500)
   }
 
-  // ── Suppression ───────────────────────────────────────────────────────────
-
   const deleteReading = async () => {
     setDeleting(true)
     await supabase.from('readings').delete().eq('id', id)
     window.location.href = '/bibliotheque'
   }
 
-  // ── Rendu ─────────────────────────────────────────────────────────────────
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-        <div className="text-[#7a7268] text-sm">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F4EE' }}>
+        <div className="text-sm" style={{ color: '#9A9690' }}>Chargement...</div>
       </div>
     )
   }
 
   if (!reading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex flex-col items-center justify-center gap-3 pb-24">
-        <p className="text-white font-serif text-lg">Lecture introuvable</p>
-        <a href="/bibliotheque" className="text-[#c9440e] text-sm">← Bibliothèque</a>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 pb-24" style={{ background: '#F7F4EE' }}>
+        <p className="font-serif text-lg" style={{ color: '#1A1A2E' }}>Lecture introuvable</p>
+        <a href="/bibliotheque" className="text-sm" style={{ color: '#9A9690' }}>← Bibliothèque</a>
         <BottomNav />
       </div>
     )
@@ -175,24 +162,24 @@ export default function Fiche() {
   const showFinishedAt = reading.status === 'lu'
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-28">
+    <div className="min-h-screen pb-28" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* ── Navigation ── */}
       <div className="px-5 pt-12 pb-2 flex items-center justify-between">
-        <a href="/bibliotheque" className="text-[#7a7268] hover:text-white transition flex items-center gap-1.5">
+        <a href="/bibliotheque" className="flex items-center gap-1.5 transition" style={{ color: '#9A9690' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
           <span className="text-xs">Bibliothèque</span>
         </a>
 
-        {/* Bouton partager */}
         <button
           onClick={handleShare}
-          className="flex items-center gap-1.5 text-[#7a7268] hover:text-white transition text-xs"
+          className="flex items-center gap-1.5 transition text-xs"
+          style={{ color: '#9A9690' }}
         >
           {copyStatus === 'copied' ? (
-            <span className="text-white/70 text-[11px]">Lien copié ✓</span>
+            <span className="text-[11px]" style={{ color: '#1A1A2E' }}>Lien copié ✓</span>
           ) : (
             <>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -206,41 +193,43 @@ export default function Fiche() {
       </div>
 
       {/* ── En-tête livre ── */}
-      <div className="px-5 pt-3 pb-6 border-b border-white/8">
-        <h1 className="font-serif text-[26px] leading-tight text-white mb-1.5">{book?.title}</h1>
+      <div className="px-5 pt-3 pb-6" style={{ borderBottom: '1px solid #D5D0C8' }}>
+        <h1 className="font-serif text-[26px] leading-tight mb-1.5" style={{ color: '#1A1A2E' }}>{book?.title}</h1>
         {book?.author && (
           <a
             href={`/auteur/${encodeURIComponent(book.author)}`}
-            className="text-[#7a7268] text-sm mb-3 hover:text-white transition inline-block"
+            className="text-sm mb-3 transition inline-block"
+            style={{ color: '#9A9690' }}
           >
             {book.author}
           </a>
         )}
         <div className="flex items-center gap-2 flex-wrap">
           {book?.category && (
-            <span className="text-white/50 text-[10px] border border-white/15 rounded px-2 py-0.5 leading-none">
+            <span className="text-[10px] rounded px-2 py-0.5 leading-none" style={{ color: '#9A9690', border: '1px solid #D5D0C8', background: '#E3E0D8' }}>
               {book.category}
             </span>
           )}
           {book?.published_year && (
-            <span className="text-[#7a7268] text-[11px]">{book.published_year}</span>
+            <span className="text-[11px]" style={{ color: '#9A9690' }}>{book.published_year}</span>
           )}
         </div>
       </div>
 
       {/* ── Statut ── */}
-      <div className="px-5 py-5 border-b border-white/8">
-        <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-3">Statut</p>
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
+        <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: '#9A9690' }}>Statut</p>
         <div className="flex gap-2">
           {(['a_lire', 'en_cours', 'lu'] as const).map(s => (
             <button
               key={s}
               onClick={() => updateStatus(s)}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition ${
-                reading.status === s
-                  ? 'bg-[#c9440e] text-white'
-                  : 'border border-white/15 text-[#7a7268] hover:border-white/30 hover:text-white'
-              }`}
+              className="px-4 py-1.5 rounded text-xs font-medium transition"
+              style={{
+                background: reading.status === s ? '#1A1A2E' : 'transparent',
+                color: reading.status === s ? '#F7F4EE' : '#9A9690',
+                border: reading.status === s ? '1px solid #1A1A2E' : '1px solid #D5D0C8',
+              }}
             >
               {STATUS_LABEL[s]}
             </button>
@@ -250,75 +239,79 @@ export default function Fiche() {
 
       {/* ── Dates + recommandé par ── */}
       {(showStartedAt || recommendedBy !== undefined) && (
-        <div className="px-5 py-5 border-b border-white/8 flex flex-col gap-4">
+        <div className="px-5 py-5 flex flex-col gap-4" style={{ borderBottom: '1px solid #D5D0C8' }}>
 
           {showStartedAt && (
             <div className="flex items-center gap-4">
-              <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Commencé le</label>
+              <label className="text-[9px] uppercase tracking-widest shrink-0 w-20" style={{ color: '#9A9690' }}>Commencé le</label>
               <input
                 type="date"
                 value={startedAt}
                 onChange={e => setStartedAt(e.target.value)}
                 onBlur={e => saveField('started_at', e.target.value)}
-                className="bg-transparent text-white/70 text-[13px] outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1 max-w-[160px]"
+                className="text-[13px] outline-none transition pb-0.5 flex-1 max-w-[160px]"
+                style={{ background: 'transparent', color: '#1A1A2E', borderBottom: '1px solid #D5D0C8' }}
               />
             </div>
           )}
 
           {showFinishedAt && (
             <div className="flex items-center gap-4">
-              <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Terminé le</label>
+              <label className="text-[9px] uppercase tracking-widest shrink-0 w-20" style={{ color: '#9A9690' }}>Terminé le</label>
               <input
                 type="date"
                 value={finishedAt}
                 onChange={e => setFinishedAt(e.target.value)}
                 onBlur={e => saveField('finished_at', e.target.value)}
-                className="bg-transparent text-white/70 text-[13px] outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1 max-w-[160px]"
+                className="text-[13px] outline-none transition pb-0.5 flex-1 max-w-[160px]"
+                style={{ background: 'transparent', color: '#1A1A2E', borderBottom: '1px solid #D5D0C8' }}
               />
             </div>
           )}
 
           <div className="flex items-center gap-4">
-            <label className="text-[9px] text-[#7a7268] uppercase tracking-widest shrink-0 w-20">Recommandé</label>
+            <label className="text-[9px] uppercase tracking-widest shrink-0 w-20" style={{ color: '#9A9690' }}>Recommandé</label>
             <input
               type="text"
               placeholder="Par qui ou quoi..."
               value={recommendedBy}
               onChange={e => setRecommendedBy(e.target.value)}
               onBlur={e => saveField('recommended_by', e.target.value)}
-              className="bg-transparent text-white/70 text-[13px] placeholder-[#7a7268]/30 outline-none border-b border-white/10 focus:border-[#c9440e]/40 transition pb-0.5 flex-1"
+              className="text-[13px] outline-none transition pb-0.5 flex-1"
+              style={{ background: 'transparent', color: '#1A1A2E', borderBottom: '1px solid #D5D0C8' }}
             />
           </div>
         </div>
       )}
 
       {/* ── Note étoiles ── */}
-      <div className="px-5 py-5 border-b border-white/8">
-        <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-3">Ma note</p>
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
+        <p className="text-[9px] uppercase tracking-widest mb-3" style={{ color: '#9A9690' }}>Ma note</p>
         <div className="flex gap-2 mb-1.5">
           {[1, 2, 3, 4, 5].map(n => (
             <button
               key={n}
               onClick={() => handleRatingChange(n)}
-              className={`text-[28px] leading-none transition ${n <= rating ? 'text-[#c9440e]' : 'text-white/15 hover:text-white/35'}`}
+              className="text-[28px] leading-none transition"
+              style={{ color: n <= rating ? '#1A1A2E' : '#D5D0C8' }}
             >
               ★
             </button>
           ))}
         </div>
         {rating > 0 && (
-          <p className="text-[#7a7268] text-xs italic">{RATING_LABEL[rating]}</p>
+          <p className="text-xs italic" style={{ color: '#9A9690' }}>{RATING_LABEL[rating]}</p>
         )}
       </div>
 
       {/* ── Fiche de lecture ── */}
-      <div className="px-5 py-5 border-b border-white/8">
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[9px] text-[#7a7268] uppercase tracking-widest">Ma fiche</p>
-          <span className={`text-[10px] transition ${
-            saveStatus === 'saved' ? 'text-white/70' :
-            saveStatus === 'pending' ? 'text-[#7a7268]' : 'opacity-0'
-          }`}>
+          <p className="text-[9px] uppercase tracking-widest" style={{ color: '#9A9690' }}>Ma fiche</p>
+          <span className="text-[10px] transition" style={{
+            color: saveStatus === 'saved' ? '#1A1A2E' : '#9A9690',
+            opacity: saveStatus === 'idle' ? 0 : 1,
+          }}>
             {saveStatus === 'saved' ? 'Sauvegardé ✓' : 'Sauvegarde...'}
           </span>
         </div>
@@ -327,29 +320,31 @@ export default function Fiche() {
           onChange={e => handleNoteChange(e.target.value)}
           placeholder="Tes impressions, ce qui t'a marqué, les idées à retenir..."
           rows={8}
-          className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-3.5 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition resize-none leading-relaxed"
+          className="w-full rounded-xl px-4 py-3.5 text-sm outline-none transition resize-none leading-relaxed"
+          style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
         />
       </div>
 
       {/* ── Citations ── */}
-      <div className="px-5 py-5 border-b border-white/8">
-        <p className="text-[9px] text-[#7a7268] uppercase tracking-widest mb-4">Citations</p>
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
+        <p className="text-[9px] uppercase tracking-widest mb-4" style={{ color: '#9A9690' }}>Citations</p>
 
         {citations.length > 0 && (
           <div className="flex flex-col gap-3 mb-5">
             {citations.map(c => (
               <div key={c.id} className="flex items-start gap-3 group">
-                <div className="flex-1 border-l-2 border-[#c9440e]/30 pl-3.5 py-1">
-                  <p className="font-serif italic text-[14px] leading-relaxed text-white/70">
+                <div className="flex-1 pl-3.5 py-1" style={{ borderLeft: '2px solid #D5D0C8' }}>
+                  <p className="font-serif italic text-[14px] leading-relaxed" style={{ color: '#1A1A2E' }}>
                     « {c.content} »
                   </p>
                   {c.page && (
-                    <p className="text-[#7a7268]/50 text-[10px] mt-1">p. {c.page}</p>
+                    <p className="text-[10px] mt-1" style={{ color: '#9A9690' }}>p. {c.page}</p>
                   )}
                 </div>
                 <button
                   onClick={() => deleteCitation(c.id)}
-                  className="mt-1.5 text-[#7a7268] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all shrink-0"
+                  className="mt-1.5 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all shrink-0"
+                  style={{ color: '#9A9690' }}
                   aria-label="Supprimer"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -361,7 +356,6 @@ export default function Fiche() {
           </div>
         )}
 
-        {/* Ajouter une citation */}
         <div className="flex flex-col gap-2">
           <input
             type="text"
@@ -369,7 +363,8 @@ export default function Fiche() {
             value={newCitation}
             onChange={e => setNewCitation(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && addCitation()}
-            className="w-full bg-[#242018] border border-white/8 rounded-xl px-4 py-2.5 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition"
+            className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition"
+            style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
           />
           <div className="flex gap-2">
             <input
@@ -378,12 +373,14 @@ export default function Fiche() {
               value={newCitationPage}
               onChange={e => setNewCitationPage(e.target.value)}
               min="1"
-              className="w-36 bg-[#242018] border border-white/8 rounded-xl px-4 py-2 text-white placeholder-[#7a7268]/40 text-sm outline-none focus:border-[#c9440e]/40 transition"
+              className="w-36 rounded-xl px-4 py-2 text-sm outline-none transition"
+              style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
             />
             <button
               onClick={addCitation}
               disabled={!newCitation.trim()}
-              className="flex-1 bg-[#c9440e] text-white rounded-xl text-sm hover:opacity-90 transition disabled:opacity-30 py-2 font-medium"
+              className="flex-1 rounded text-sm hover:opacity-90 transition disabled:opacity-30 py-2 font-medium"
+              style={{ background: '#1A1A2E', color: '#F7F4EE', borderRadius: '6px' }}
             >
               Ajouter
             </button>
@@ -402,10 +399,11 @@ export default function Fiche() {
           </button>
         ) : (
           <div className="flex items-center gap-3 flex-wrap">
-            <p className="text-white/50 text-xs">Confirmer la suppression ?</p>
+            <p className="text-xs" style={{ color: '#9A9690' }}>Confirmer la suppression ?</p>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="text-[#7a7268] text-xs px-3 py-1.5 rounded-full border border-white/10 hover:text-white transition"
+              className="text-xs px-3 py-1.5 rounded-full transition"
+              style={{ color: '#9A9690', border: '1px solid #D5D0C8' }}
             >
               Annuler
             </button>

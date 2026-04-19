@@ -7,8 +7,8 @@ import BottomNav from '../components/BottomNav'
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-4 px-6 mb-1">
-      <p className="text-[10px] font-medium tracking-[0.12em] uppercase text-[#7a7268] shrink-0">{children}</p>
-      <div className="flex-1 h-px bg-white/6" />
+      <p className="text-[10px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>{children}</p>
+      <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
     </div>
   )
 }
@@ -17,8 +17,8 @@ function Row({ label, sub, right }: { label: string; sub?: string; right: React.
   return (
     <div className="flex items-center justify-between gap-4 px-6 py-4">
       <div className="min-w-0">
-        <p className="text-[14px] text-white leading-snug">{label}</p>
-        {sub && <p className="text-[12px] text-[#7a7268] mt-0.5">{sub}</p>}
+        <p className="text-[14px] leading-snug" style={{ color: '#1A1A2E' }}>{label}</p>
+        {sub && <p className="text-[12px] mt-0.5" style={{ color: '#9A9690' }}>{sub}</p>}
       </div>
       <div className="shrink-0">{right}</div>
     </div>
@@ -29,8 +29,8 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   return (
     <button
       onClick={() => onChange(!value)}
-      className={`relative w-10 h-5.5 rounded-full transition-colors ${value ? 'bg-[#c9440e]' : 'bg-white/10'}`}
-      style={{ height: '22px', width: '40px' }}
+      className="relative rounded-full transition-colors"
+      style={{ height: '22px', width: '40px', background: value ? '#1A1A2E' : '#D5D0C8' }}
     >
       <span
         className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-[18px]' : 'translate-x-[3px]'}`}
@@ -44,20 +44,17 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  // Email / mot de passe
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [credMessage, setCredMessage] = useState<{ text: string; ok: boolean } | null>(null)
   const [credSaving, setCredSaving] = useState(false)
 
-  // Préférences (stockées dans profiles)
   const [notifReminders, setNotifReminders] = useState(true)
   const [notifFollowers, setNotifFollowers] = useState(true)
   const [isPublic, setIsPublic] = useState(true)
   const [prefSaving, setPrefSaving] = useState(false)
 
-  // Danger
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -113,7 +110,6 @@ export default function SettingsPage() {
 
   const deleteAccount = async () => {
     setDeleting(true)
-    // Supprimer les données utilisateur puis le compte auth
     await Promise.all([
       supabase.from('readings').delete().eq('user_id', user.id),
       supabase.from('notes').delete().eq('user_id', user.id),
@@ -128,8 +124,8 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-        <div className="text-[#7a7268] text-sm">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F4EE' }}>
+        <div className="text-sm" style={{ color: '#9A9690' }}>Chargement...</div>
       </div>
     )
   }
@@ -137,20 +133,21 @@ export default function SettingsPage() {
   const username = profile?.username || user?.user_metadata?.username || ''
 
   return (
-    <div className="min-h-screen bg-[#1a1714] text-white pb-28">
+    <div className="min-h-screen pb-28" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* ── Top bar ── */}
       <div className="px-6 pt-14 pb-6 flex items-center gap-3">
         <a
           href={username ? `/profil/${username}` : '/profil'}
-          className="text-[#7a7268] hover:text-white transition"
+          className="transition"
+          style={{ color: '#9A9690' }}
           aria-label="Retour"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </a>
-        <h1 className="font-serif text-[22px] text-white">Paramètres</h1>
+        <h1 className="font-serif text-[22px]" style={{ color: '#1A1A2E' }}>Paramètres</h1>
       </div>
 
       {/* ── Compte ── */}
@@ -162,44 +159,47 @@ export default function SettingsPage() {
           sub={user?.email}
           right={null}
         />
-        <div className="h-px bg-white/5 mx-6" />
+        <div className="h-px mx-6" style={{ background: '#D5D0C8' }} />
 
         <div className="px-6 py-4 flex flex-col gap-3">
           <div>
-            <label className="text-[10px] text-[#7a7268] uppercase tracking-widest mb-1.5 block">Nouvel email</label>
+            <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color: '#9A9690' }}>Nouvel email</label>
             <input
               type="email"
               value={newEmail}
               onChange={e => setNewEmail(e.target.value)}
               placeholder={user?.email}
-              className="w-full bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition placeholder-[#7a7268]/30"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none transition"
+              style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
             />
           </div>
           <div>
-            <label className="text-[10px] text-[#7a7268] uppercase tracking-widest mb-1.5 block">Nouveau mot de passe</label>
+            <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color: '#9A9690' }}>Nouveau mot de passe</label>
             <input
               type="password"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition placeholder-[#7a7268]/30"
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none transition"
+              style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
             />
           </div>
           {newPassword && (
             <div>
-              <label className="text-[10px] text-[#7a7268] uppercase tracking-widest mb-1.5 block">Confirmer le mot de passe</label>
+              <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color: '#9A9690' }}>Confirmer le mot de passe</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#242018] border border-white/8 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#c9440e]/50 transition placeholder-[#7a7268]/30"
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none transition"
+                style={{ background: '#EDEAE3', border: '1px solid #D5D0C8', color: '#1A1A2E' }}
               />
             </div>
           )}
 
           {credMessage && (
-            <p className={`text-[12px] ${credMessage.ok ? 'text-white/70' : 'text-[#c9440e]'}`}>
+            <p className="text-[12px]" style={{ color: credMessage.ok ? '#1A1A2E' : 'rgb(239,68,68)' }}>
               {credMessage.text}
             </p>
           )}
@@ -208,7 +208,8 @@ export default function SettingsPage() {
             <button
               onClick={saveCredentials}
               disabled={credSaving}
-              className="self-start text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition disabled:opacity-50"
+              className="self-start text-[12px] font-medium px-4 py-2 hover:opacity-90 transition disabled:opacity-50"
+              style={{ background: '#1A1A2E', color: '#F7F4EE', borderRadius: '6px' }}
             >
               {credSaving ? 'Sauvegarde...' : 'Mettre à jour'}
             </button>
@@ -225,14 +226,11 @@ export default function SettingsPage() {
             <Row
               label="Conatus Pro"
               sub="Abonnement actif"
-              right={<span className="text-[#c9440e] text-[11px]">✦ Actif</span>}
+              right={<span className="text-[11px]" style={{ color: '#1A1A2E' }}>✦ Actif</span>}
             />
-            <div className="h-px bg-white/5 mx-6" />
+            <div className="h-px mx-6" style={{ background: '#D5D0C8' }} />
             <div className="px-6 py-3">
-              <a
-                href="/premium"
-                className="text-[12px] text-[#7a7268] hover:text-white transition"
-              >
+              <a href="/premium" className="text-[12px] transition" style={{ color: '#9A9690' }}>
                 Gérer ou résilier mon abonnement →
               </a>
             </div>
@@ -244,11 +242,12 @@ export default function SettingsPage() {
               sub="Fonctionnalités limitées"
               right={null}
             />
-            <div className="h-px bg-white/5 mx-6" />
+            <div className="h-px mx-6" style={{ background: '#D5D0C8' }} />
             <div className="px-6 py-3">
               <a
                 href="/premium"
-                className="inline-flex items-center gap-2 text-[12px] font-medium text-white bg-[#c9440e] px-4 py-2 rounded-full hover:opacity-90 transition"
+                className="inline-flex items-center gap-2 text-[12px] font-medium px-4 py-2 hover:opacity-90 transition"
+                style={{ background: '#1A1A2E', color: '#F7F4EE', borderRadius: '6px' }}
               >
                 Passer à Pro ✦
               </a>
@@ -271,7 +270,7 @@ export default function SettingsPage() {
             />
           }
         />
-        <div className="h-px bg-white/5 mx-6" />
+        <div className="h-px mx-6" style={{ background: '#D5D0C8' }} />
         <Row
           label="Nouveaux abonnés"
           sub="Quand quelqu'un commence à te suivre"
@@ -282,7 +281,7 @@ export default function SettingsPage() {
             />
           }
         />
-        {prefSaving && <p className="text-[10px] text-[#7a7268] px-6 pb-2">Sauvegarde...</p>}
+        {prefSaving && <p className="text-[10px] px-6 pb-2" style={{ color: '#9A9690' }}>Sauvegarde...</p>}
       </div>
 
       {/* ── Confidentialité ── */}
@@ -314,16 +313,17 @@ export default function SettingsPage() {
               Supprimer mon compte
             </button>
           ) : (
-            <div className="border border-red-500/20 rounded-xl px-4 py-4">
-              <p className="text-white/70 text-[13px] mb-1">Suppression définitive</p>
-              <p className="text-[#7a7268] text-[12px] mb-4 leading-snug">
+            <div className="rounded-xl px-4 py-4" style={{ border: '1px solid rgba(239,68,68,0.2)' }}>
+              <p className="text-[13px] mb-1" style={{ color: '#1A1A2E' }}>Suppression définitive</p>
+              <p className="text-[12px] mb-4 leading-snug" style={{ color: '#9A9690' }}>
                 Toutes tes données seront effacées : bibliothèque, fiches, citations, abonnements.
                 Cette action est irréversible.
               </p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="text-[#7a7268] text-[12px] px-4 py-1.5 rounded-full border border-white/10 hover:text-white transition"
+                  className="text-[12px] px-4 py-1.5 rounded-full transition"
+                  style={{ color: '#9A9690', border: '1px solid #D5D0C8' }}
                 >
                   Annuler
                 </button>

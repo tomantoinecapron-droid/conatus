@@ -33,8 +33,8 @@ export default function ProfilRedirect() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#1a1714] flex items-center justify-center">
-      <div className="text-[#7a7268] text-sm">Chargement...</div>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F4EE' }}>
+      <div className="text-sm" style={{ color: '#9A9690' }}>Chargement...</div>
     </div>
   )
 }
