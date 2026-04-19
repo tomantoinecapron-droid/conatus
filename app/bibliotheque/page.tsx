@@ -319,7 +319,7 @@ export default function Bibliotheque() {
     <div className="min-h-screen pb-24" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-5" style={{ borderBottom: '1px solid #D5D0C8' }}>
+      <div className="px-6 pt-12 pb-5" style={{ borderBottom: '1px solid #D5D0C8', paddingBottom: '20px' }}>
         <h1 className="font-serif text-[30px] leading-tight mb-4" style={{ color: '#1A1A2E' }}>Ma bibliothèque</h1>
 
         {myBooks.length > 0 && (
@@ -347,7 +347,7 @@ export default function Bibliotheque() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex px-6 mb-5 gap-6" style={{ borderBottom: '1px solid #D5D0C8' }}>
+      <div className="flex px-6 gap-6" style={{ borderBottom: '1px solid #D5D0C8', marginTop: '16px', marginBottom: '16px' }}>
         {([
           { key: 'biblio', label: 'Bibliothèque' },
           { key: 'auteurs', label: 'Auteurs' },
@@ -462,7 +462,7 @@ export default function Bibliotheque() {
           )}
 
           {/* ── Filtres : statut + tri ── */}
-          <div className="px-5 mb-3 flex items-center justify-between gap-3">
+          <div className="px-5 mb-3 flex items-center justify-between gap-3" style={{ paddingTop: '16px' }}>
             <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide flex-1">
               {STATUS_FILTERS.map(f => {
                 const count = f.key === 'tous' ? myBooks.length : myBooks.filter(r => r.status === f.key).length

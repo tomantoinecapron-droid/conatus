@@ -144,8 +144,8 @@ export default function ProfilPage() {
   return (
     <div className="min-h-screen pb-28" style={{ background: '#F7F4EE', color: '#1A1A2E' }}>
 
-      {/* ── Header ── */}
-      <div className="px-6 pt-14 pb-8">
+      {/* ── Zone supérieure : identité ── */}
+      <div style={{ background: '#EDEAE3', padding: '56px 24px 24px' }}>
 
         {/* Avatar + actions */}
         <div className="flex items-start justify-between gap-3 mb-4">
@@ -248,6 +248,9 @@ export default function ProfilPage() {
           </button>
         )}
       </div>
+
+      {/* ── Zone inférieure : contenu ── */}
+      <div style={{ background: '#F7F4EE', padding: '24px 0 0' }}>
 
       {/* ── Bibliothèque ── */}
       {readings.length > 0 && (
@@ -371,6 +374,8 @@ export default function ProfilPage() {
           </button>
         </div>
       )}
+
+      </div>{/* fin zone inférieure */}
 
       <BottomNav />
     </div>
