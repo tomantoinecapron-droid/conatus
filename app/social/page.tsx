@@ -142,7 +142,7 @@ export default function SocialPage() {
 
       {/* Tabs */}
       <div className="px-5 mb-5">
-        <div className="flex gap-1 rounded-xl p-1" style={{ background: '#EDEAE3' }}>
+        <div className="flex gap-1 rounded-xl p-1" style={{ background: '#EDEAE3', border: '0.5px solid #D5D0C8' }}>
           {(['lecteurs', 'cercles'] as Tab[]).map(t => (
             <button
               key={t}
@@ -190,7 +190,7 @@ export default function SocialPage() {
                 return (
                   <div key={profile.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
                     <a href={`/profil/${profile.username}`} className="shrink-0">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                         {profile.avatar_url
                           ? <img src={profile.avatar_url} className="w-full h-full object-cover" alt={profile.username} />
                           : <span className="font-serif text-base leading-none" style={{ color: '#1A1A2E' }}>{profile.username?.[0]?.toUpperCase()}</span>

@@ -42,6 +42,8 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [totalBooks, setTotalBooks] = useState(0)
+  const [luCount, setLuCount] = useState(0)
+  const [notesCount, setNotesCount] = useState(0)
   const [isPro, setIsPro] = useState(false)
   const [loading, setLoading] = useState(true)
   const progressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -92,6 +94,12 @@ export default function HomePage() {
     setMyRecentBooks(myRecentRes.data || [])
     setIsPro(profileRes.data?.is_pro ?? false)
     setTotalBooks((allMyBooksRes.data || []).length)
+    setNotesCount(notesCountRes.count ?? 0)
+
+    const { count: luTotal } = await supabase
+      .from('readings').select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('status', 'lu')
+    setLuCount(luTotal ?? 0)
 
     const { data: recentNotes } = await supabase
       .from('notes').select('created_at')
@@ -192,77 +200,55 @@ export default function HomePage() {
 
       {/* ── Header ── */}
       <div
-        className="flex items-center justify-between relative overflow-hidden"
         style={{
-          background: '#F7F4EE',
-          backgroundImage: 'radial-gradient(circle, rgba(26,26,46,0.04) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-          padding: '32px 20px 24px',
+          background: '#EDEAE3',
+          padding: '28px 24px 24px',
           borderBottom: '1px solid #D5D0C8',
         }}
       >
-        <div className="flex-1 min-w-0 pr-3">
-          <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '13px', color: '#9A9690', marginBottom: '8px' }}>
+        {/* Top row: date + cloche */}
+        <div className="flex items-center justify-between mb-3">
+          <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9A9690' }}>
             {today}
           </p>
-          <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '28px', fontWeight: '400', color: '#1A1A2E', lineHeight: '1.1' }}>
-            {totalBooks} livre{totalBooks !== 1 ? 's' : ''}
-          </p>
+          <a href="/notifications" className="relative p-1.5 -mr-1.5 shrink-0">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {unreadCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5" style={{ background: '#1A1A2E' }}>
+                <span className="text-[9px] font-bold leading-none" style={{ color: '#F7F4EE' }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
+              </span>
+            )}
+          </a>
         </div>
 
-        {/* Cloche */}
-        <a href="/notifications" className="relative p-1.5 shrink-0">
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          {unreadCount > 0 && (
-            <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] rounded-full flex items-center justify-center px-0.5" style={{ background: '#1A1A2E' }}>
-              <span className="text-[9px] font-bold leading-none" style={{ color: '#F7F4EE' }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
-            </span>
-          )}
-        </a>
+        {/* Chiffre + sous-titre */}
+        <p style={{ fontFamily: 'var(--font-baskerville)', fontSize: '38px', fontWeight: '400', color: '#1A1A2E', lineHeight: '1', marginBottom: '4px' }}>
+          {totalBooks} livre{totalBooks !== 1 ? 's' : ''}
+        </p>
+        <p style={{ fontFamily: 'var(--font-baskerville)', fontSize: '13px', fontStyle: 'italic', color: '#9A9690', marginBottom: '20px' }}>
+          dans ta bibliothèque
+        </p>
 
-        {/* Colonnes grecques décoratives */}
-        <svg
-          aria-hidden
-          viewBox="0 0 80 60"
-          width="80"
-          height="60"
-          fill="none"
-          stroke="#9A9690"
-          strokeOpacity="0.08"
-          strokeWidth="0.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="pointer-events-none shrink-0 ml-3"
-        >
-          <line x1="2" y1="6" x2="78" y2="6" />
-          <line x1="4" y1="9" x2="76" y2="9" />
-          <line x1="2" y1="54" x2="78" y2="54" />
-          <line x1="4" y1="57" x2="76" y2="57" />
-          <line x1="9" y1="10" x2="23" y2="10" />
-          <line x1="10" y1="12" x2="22" y2="12" />
-          <line x1="11" y1="13" x2="11" y2="52" strokeWidth="0.6" />
-          <line x1="16" y1="13" x2="16" y2="52" strokeWidth="0.6" />
-          <line x1="21" y1="13" x2="21" y2="52" strokeWidth="0.6" />
-          <line x1="10" y1="52" x2="22" y2="52" />
-          <line x1="9" y1="54" x2="23" y2="54" />
-          <line x1="33" y1="10" x2="47" y2="10" />
-          <line x1="34" y1="12" x2="46" y2="12" />
-          <line x1="35" y1="13" x2="35" y2="52" strokeWidth="0.6" />
-          <line x1="40" y1="13" x2="40" y2="52" strokeWidth="0.6" />
-          <line x1="45" y1="13" x2="45" y2="52" strokeWidth="0.6" />
-          <line x1="34" y1="52" x2="46" y2="52" />
-          <line x1="33" y1="54" x2="47" y2="54" />
-          <line x1="57" y1="10" x2="71" y2="10" />
-          <line x1="58" y1="12" x2="70" y2="12" />
-          <line x1="59" y1="13" x2="59" y2="52" strokeWidth="0.6" />
-          <line x1="64" y1="13" x2="64" y2="52" strokeWidth="0.6" />
-          <line x1="69" y1="13" x2="69" y2="52" strokeWidth="0.6" />
-          <line x1="58" y1="52" x2="70" y2="52" />
-          <line x1="57" y1="54" x2="71" y2="54" />
-        </svg>
+        {/* Stats row */}
+        <div className="flex items-center gap-6">
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#1A1A2E', lineHeight: '1' }}>{luCount}</p>
+            <p style={{ fontSize: '11px', color: '#9A9690', marginTop: '2px' }}>lus</p>
+          </div>
+          <div className="w-px h-6" style={{ background: '#D5D0C8' }} />
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#1A1A2E', lineHeight: '1' }}>{enCours.length}</p>
+            <p style={{ fontSize: '11px', color: '#9A9690', marginTop: '2px' }}>en cours</p>
+          </div>
+          <div className="w-px h-6" style={{ background: '#D5D0C8' }} />
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#1A1A2E', lineHeight: '1' }}>{notesCount}</p>
+            <p style={{ fontSize: '11px', color: '#9A9690', marginTop: '2px' }}>fiches</p>
+          </div>
+        </div>
       </div>
 
       {/* ── Séparateur ── */}
@@ -274,7 +260,7 @@ export default function HomePage() {
 
       {/* ── EN COURS + À LIRE ── */}
       <section className="px-5 mb-5">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-3 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
           <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690', display: 'flex', alignItems: 'center' }}>
             <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#9A9690', marginRight: '8px' }} />
             Lecture
@@ -335,7 +321,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                   <div>
-                    <span className="text-[9px] font-medium uppercase tracking-wide mb-1.5 inline-block px-1.5 py-0.5 rounded-full" style={{ background: '#E3E0D8', color: '#9A9690' }}>À lire</span>
+                    <span className="text-[9px] font-medium uppercase tracking-wide mb-1.5 inline-block px-1.5 py-0.5 rounded-full" style={{ background: '#E3E0D8', color: '#9A9690', border: '0.5px solid #D5D0C8' }}>À lire</span>
                     <p className="line-clamp-3" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '17px', fontWeight: '400', color: '#1A1A2E', lineHeight: '1.2', marginTop: '4px' }}>{nextBook.books?.title}</p>
                   </div>
                   <p className="text-[10px] truncate" style={{ color: '#9A9690' }}>{nextBook.books?.author?.split(' ').pop()}</p>
@@ -400,7 +386,7 @@ export default function HomePage() {
       {/* ── MES CERCLES ── */}
       {myCircles.length > 0 && (
         <section className="mb-6">
-          <div className="flex items-center justify-between px-5 mb-2.5">
+          <div className="flex items-center justify-between px-5 mb-3 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
             <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690', display: 'flex', alignItems: 'center' }}>
               <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#9A9690', marginRight: '8px' }} />
               Mes cercles
@@ -437,7 +423,7 @@ export default function HomePage() {
 
       {/* ── SÉLECTION DU MOIS ── */}
       <section className="px-5 mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
           <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690', display: 'flex', alignItems: 'center' }}>
             <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#9A9690', marginRight: '8px' }} />
             Sélection du mois
@@ -461,7 +447,7 @@ export default function HomePage() {
 
       {/* ── OBJECTIFS ── */}
       <section className="px-5 mb-5">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-3 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
           <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690' }}>Objectifs</h2>
           <a href="/objectifs" style={{ fontSize: '10px', color: '#9A9690' }}>Voir →</a>
         </div>
@@ -483,7 +469,7 @@ export default function HomePage() {
 
       {/* ── FEED ── */}
       <section className="px-5 mb-6">
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-3 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
           <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690' }}>Activité</h2>
           <a href="/social" style={{ fontSize: '10px', color: '#9A9690' }}>Explorer →</a>
         </div>
@@ -505,7 +491,7 @@ export default function HomePage() {
                   style={i < feed.length - 1 ? { borderColor: '#D5D0C8' } : {}}
                 >
                   <a href={`/profil/${username}`} className="shrink-0">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                       {avatarUrl
                         ? <img src={avatarUrl} className="w-full h-full object-cover" alt="" />
                         : <span className="font-serif text-xs leading-none" style={{ color: '#1A1A2E' }}>{username?.[0]?.toUpperCase() ?? '?'}</span>}
@@ -544,7 +530,9 @@ export default function HomePage() {
       {/* ── SUGGESTIONS ── */}
       {suggestions.length > 0 && (
         <section className="px-5 mb-6">
-          <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690', marginBottom: '10px' }}>À découvrir</h2>
+          <div className="mb-3 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
+            <h2 style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A9690' }}>À découvrir</h2>
+          </div>
           <div className="rounded-2xl overflow-hidden" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
             {suggestions.map((book, i) => (
               <div key={book.id} className={`flex items-center gap-3 px-4 py-3 ${i < suggestions.length - 1 ? 'border-b' : ''}`}

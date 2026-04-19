@@ -6,9 +6,8 @@ import BottomNav from '../components/BottomNav'
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-4 px-6 mb-1">
-      <p className="text-[10px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>{children}</p>
-      <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
+    <div className="px-6 mb-1 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
+      <p className="text-[10px] font-medium tracking-[0.12em] uppercase" style={{ color: '#9A9690' }}>{children}</p>
     </div>
   )
 }

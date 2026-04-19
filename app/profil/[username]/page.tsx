@@ -149,7 +149,7 @@ export default function ProfilPage() {
 
         {/* Avatar + actions */}
         <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="w-14 h-14 rounded-full overflow-hidden shrink-0" style={{ background: '#E3E0D8', border: '1px solid #D5D0C8' }}>
+          <div className="w-14 h-14 rounded-full overflow-hidden shrink-0" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
             {profile.avatar_url
               ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
               : (
@@ -252,11 +252,10 @@ export default function ProfilPage() {
       {/* ── Bibliothèque ── */}
       {readings.length > 0 && (
         <section className="mb-10">
-          <div className="px-6 mb-4 flex items-center gap-4">
-            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>
+          <div className="px-6 mb-4 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
+            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase" style={{ color: '#9A9690' }}>
               Bibliothèque
             </h2>
-            <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
           </div>
 
           <div className="px-6">
@@ -309,11 +308,10 @@ export default function ProfilPage() {
       {/* ── Fiches récentes ── */}
       {recentNotes.length > 0 && (
         <section className="mb-10">
-          <div className="px-6 mb-4 flex items-center gap-4">
-            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase shrink-0" style={{ color: '#9A9690' }}>
+          <div className="px-6 mb-4 pb-2" style={{ borderBottom: '0.5px solid #D5D0C8' }}>
+            <h2 className="text-[11px] font-medium tracking-[0.12em] uppercase" style={{ color: '#9A9690' }}>
               Fiches récentes
             </h2>
-            <div className="flex-1 h-px" style={{ background: '#D5D0C8' }} />
           </div>
 
           <div className="px-6 flex flex-col gap-6">

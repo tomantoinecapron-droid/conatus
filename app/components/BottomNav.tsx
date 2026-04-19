@@ -67,7 +67,7 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 backdrop-blur z-50"
-      style={{ background: 'rgba(237,234,227,0.95)', borderTop: '1px solid #D5D0C8' }}
+      style={{ background: 'rgba(237,234,227,0.95)', borderTop: '1px solid #C8C3BB' }}
     >
       <div className="max-w-lg mx-auto flex">
         {tabs.map((tab) => (
@@ -77,7 +77,7 @@ export default function BottomNav() {
             className="flex-1 flex flex-col items-center gap-1 py-3 transition-opacity"
           >
             {tab.active ? (
-              <span className="flex items-center justify-center rounded-xl px-3 py-0.5" style={{ background: '#E3E0D8' }}>
+              <span className="flex items-center justify-center rounded-xl px-3 py-0.5" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                 {tab.icon(true)}
               </span>
             ) : (

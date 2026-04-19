@@ -193,7 +193,7 @@ export default function Fiche() {
       </div>
 
       {/* ── En-tête livre ── */}
-      <div className="px-5 pt-3 pb-6" style={{ borderBottom: '1px solid #D5D0C8' }}>
+      <div className="mx-5 mt-4 mb-0 rounded-[10px]" style={{ background: '#EDEAE3', border: '0.5px solid #D5D0C8', padding: '20px' }}>
         <h1 className="font-serif text-[26px] leading-tight mb-1.5" style={{ color: '#1A1A2E' }}>{book?.title}</h1>
         {book?.author && (
           <a
@@ -204,9 +204,9 @@ export default function Fiche() {
             {book.author}
           </a>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap mt-2">
           {book?.category && (
-            <span className="text-[10px] rounded px-2 py-0.5 leading-none" style={{ color: '#9A9690', border: '1px solid #D5D0C8', background: '#E3E0D8' }}>
+            <span className="text-[10px] rounded px-2 py-0.5 leading-none" style={{ color: '#9A9690', border: '0.5px solid #D5D0C8', background: '#E3E0D8' }}>
               {book.category}
             </span>
           )}

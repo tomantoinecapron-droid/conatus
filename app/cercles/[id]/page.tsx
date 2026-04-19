@@ -293,7 +293,7 @@ export default function CerclePage() {
               {feed.map((item, i) => (
                 <div key={item.id} className="flex items-center gap-3 px-4 py-3" style={i < feed.length - 1 ? { borderBottom: '1px solid #D5D0C8' } : {}}>
                   <a href={`/profil/${item.profile?.username}`} className="shrink-0">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                       {item.profile?.avatar_url ? (
                         <img src={item.profile.avatar_url} className="w-full h-full object-cover" alt="" />
                       ) : (
@@ -337,7 +337,7 @@ export default function CerclePage() {
               return (
                 <div key={member.user_id} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: '#EDEAE3', border: '1px solid #D5D0C8' }}>
                   <a href={`/profil/${p?.username}`} className="shrink-0">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8' }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                       {p?.avatar_url ? (
                         <img src={p.avatar_url} className="w-full h-full object-cover" alt={p.username} />
                       ) : (
@@ -404,7 +404,7 @@ export default function CerclePage() {
                 <div className="flex flex-col gap-2 mt-3">
                   {inviteResults.map(profile => (
                     <div key={profile.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: '#F7F4EE', border: '1px solid #D5D0C8' }}>
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden shrink-0" style={{ background: '#E3E0D8' }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden shrink-0" style={{ background: '#E3E0D8', border: '0.5px solid #D5D0C8' }}>
                         {profile.avatar_url ? (
                           <img src={profile.avatar_url} className="w-full h-full object-cover" alt={profile.username} />
                         ) : (
