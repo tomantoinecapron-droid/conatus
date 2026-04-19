@@ -252,7 +252,7 @@ export default function CerclePage() {
                 </svg>
               )}
               {isAdmin && !isOwner && (
-                <span className="text-[10px] text-amber-400 border border-amber-400/30 px-2 py-0.5 rounded-full">admin</span>
+                <span className="text-[10px] text-[#9A9690] border border-white/20 px-2 py-0.5 rounded-full">admin</span>
               )}
             </div>
             {circle.description && (
@@ -393,7 +393,7 @@ export default function CerclePage() {
                 />
               </div>
               {inviteError && <p className="text-red-400 text-xs mt-2">{inviteError}</p>}
-              {inviteSuccess && <p className="text-emerald-400 text-xs mt-2">{inviteSuccess}</p>}
+              {inviteSuccess && <p className="text-white/70 text-xs mt-2">{inviteSuccess}</p>}
               {inviteLoading && <p className="text-[#7a7268] text-xs mt-3 text-center">Recherche...</p>}
               {!inviteLoading && inviteQuery.trim() && inviteResults.length === 0 && (
                 <p className="text-[#7a7268] text-xs mt-3 text-center">Aucun résultat</p>

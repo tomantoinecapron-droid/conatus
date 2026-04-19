@@ -192,7 +192,7 @@ export default function Fiche() {
           className="flex items-center gap-1.5 text-[#7a7268] hover:text-white transition text-xs"
         >
           {copyStatus === 'copied' ? (
-            <span className="text-emerald-400 text-[11px]">Lien copié ✓</span>
+            <span className="text-white/70 text-[11px]">Lien copié ✓</span>
           ) : (
             <>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -316,7 +316,7 @@ export default function Fiche() {
         <div className="flex items-center justify-between mb-3">
           <p className="text-[9px] text-[#7a7268] uppercase tracking-widest">Ma fiche</p>
           <span className={`text-[10px] transition ${
-            saveStatus === 'saved' ? 'text-emerald-400' :
+            saveStatus === 'saved' ? 'text-white/70' :
             saveStatus === 'pending' ? 'text-[#7a7268]' : 'opacity-0'
           }`}>
             {saveStatus === 'saved' ? 'Sauvegardé ✓' : 'Sauvegarde...'}

@@ -394,7 +394,7 @@ export default function StatsPage() {
                 <p className="text-[#7a7268] text-[11px]">
                   {goalPct >= 100 ? 'Objectif atteint ✓' : `${goalPct}%`}
                   {aheadBehind !== null && aheadBehind !== 0 && (
-                    <span className={`ml-2 ${aheadBehind > 0 ? 'text-emerald-400/70' : 'text-[#c9440e]/60'}`}>
+                    <span className={`ml-2 ${aheadBehind > 0 ? 'text-white/70/70' : 'text-[#c9440e]/60'}`}>
                       {aheadBehind > 0 ? `+${aheadBehind} d'avance` : `${Math.abs(aheadBehind)} de retard`}
                     </span>
                   )}
@@ -405,7 +405,7 @@ export default function StatsPage() {
                   </p>
                 )}
                 {goalPct >= 100 && (
-                  <p className="text-emerald-400/50 text-[11px] mt-0.5 italic">
+                  <p className="text-[#9A9690]/60 text-[11px] mt-0.5 italic">
                     Bravo — encore {daysLeft} jours pour aller plus loin.
                   </p>
                 )}
@@ -463,7 +463,7 @@ export default function StatsPage() {
       <section className="mb-10">
         <SectionTitle>Défi du mois</SectionTitle>
         <div className="px-6">
-          <div className={`border-l-2 pl-5 py-0.5 ${challengeDone ? 'border-emerald-400/35' : 'border-[#c9440e]/40'}`}>
+          <div className={`border-l-2 pl-5 py-0.5 ${challengeDone ? 'border-white/20' : 'border-[#c9440e]/40'}`}>
             <p className="text-[10px] uppercase tracking-[0.14em] text-[#7a7268] mb-2 capitalize">
               {MONTHS_FR[cm]}
             </p>
@@ -480,7 +480,7 @@ export default function StatsPage() {
                 </span>
               )}
               {challengeDone ? (
-                <span className="text-emerald-400/65 text-[12px] italic">Relevé ce mois ✓</span>
+                <span className="text-[#9A9690]/80 text-[12px] italic">Relevé ce mois ✓</span>
               ) : (
                 <span className="text-[#7a7268]/35 text-[11px] italic">À relever avant fin {MONTHS_FR[cm]}</span>
               )}

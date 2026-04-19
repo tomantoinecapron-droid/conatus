@@ -9,12 +9,12 @@ const STATUS_LABEL: Record<string, string> = {
   lu: 'Lu', en_cours: 'En cours', a_lire: 'À lire',
 }
 const STATUS_COLOR: Record<string, string> = {
-  lu: 'text-emerald-400/80',
+  lu: 'text-[#9A9690]',
   en_cours: 'text-[#c9440e]',
   a_lire: 'text-white/30',
 }
 const STATUS_DOT: Record<string, string> = {
-  lu: 'bg-emerald-400/70',
+  lu: 'bg-[#9A9690]/70',
   en_cours: 'bg-[#c9440e]',
   a_lire: 'bg-white/20',
 }

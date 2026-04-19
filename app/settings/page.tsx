@@ -199,7 +199,7 @@ export default function SettingsPage() {
           )}
 
           {credMessage && (
-            <p className={`text-[12px] ${credMessage.ok ? 'text-emerald-400' : 'text-[#c9440e]'}`}>
+            <p className={`text-[12px] ${credMessage.ok ? 'text-white/70' : 'text-[#c9440e]'}`}>
               {credMessage.text}
             </p>
           )}

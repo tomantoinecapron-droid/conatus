@@ -229,7 +229,7 @@ export default function EditProfilPage() {
 
         {/* Feedback */}
         {message && (
-          <p className={`text-xs text-center font-medium mt-4 ${message.type === 'success' ? 'text-green-400' : 'text-[#c9440e]'}`}>
+          <p className={`text-xs text-center font-medium mt-4 ${message.type === 'success' ? 'text-white/70' : 'text-[#c9440e]'}`}>
             {message.text}
           </p>
         )}

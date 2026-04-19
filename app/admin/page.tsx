@@ -94,7 +94,7 @@ export default function AdminPage() {
       <div className="px-5 pt-12 pb-4 border-b border-white/8 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] text-amber-400 border border-amber-400/30 px-2 py-0.5 rounded-full font-medium">ADMIN</span>
+            <span className="text-[10px] text-[#9A9690] border border-white/20 px-2 py-0.5 rounded-full font-medium">ADMIN</span>
           </div>
           <h1 className="font-serif text-2xl text-white">Administration</h1>
         </div>
@@ -214,7 +214,7 @@ export default function AdminPage() {
                     {user.full_name || user.username}
                   </p>
                   {user.is_admin && (
-                    <span className="text-[10px] text-amber-400 border border-amber-400/30 px-1.5 py-0.5 rounded-full shrink-0">admin</span>
+                    <span className="text-[10px] text-[#9A9690] border border-white/20 px-1.5 py-0.5 rounded-full shrink-0">admin</span>
                   )}
                 </div>
                 <p className="text-[#7a7268] text-xs truncate">@{user.username}</p>

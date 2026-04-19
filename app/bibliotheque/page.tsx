@@ -43,10 +43,10 @@ const STATUS_FILTERS: { key: Status; label: string }[] = [
 
 const STATUS_LABEL: Record<string, string> = { a_lire: 'À lire', en_cours: 'En cours', lu: 'Lu' }
 const STATUS_COLOR: Record<string, string> = {
-  a_lire: 'text-[#7a7268]', en_cours: 'text-[#c9440e]', lu: 'text-emerald-400',
+  a_lire: 'text-[#7a7268]', en_cours: 'text-[#c9440e]', lu: 'text-white/70',
 }
 const STATUS_DOT: Record<string, string> = {
-  a_lire: 'bg-white/20', en_cours: 'bg-[#c9440e]', lu: 'bg-emerald-400/70',
+  a_lire: 'bg-white/20', en_cours: 'bg-[#c9440e]', lu: 'bg-[#9A9690]/70',
 }
 
 const SORT_OPTIONS: { key: SortBy; label: string }[] = [

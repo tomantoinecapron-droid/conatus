@@ -269,7 +269,7 @@ export default function ObjectifsPage() {
       <div className="px-5 pt-8">
         <button
           onClick={handleSave}
-          className={`w-full py-3.5 rounded-full text-sm font-medium transition ${saved ? 'bg-[#2e7d32] text-white' : 'bg-[#c9440e] text-white hover:opacity-90'}`}
+          className={`w-full py-3.5 rounded-full text-sm font-medium transition ${saved ? 'bg-[#9A9690] text-white' : 'bg-[#c9440e] text-white hover:opacity-90'}`}
         >
           {saved ? 'Sauvegardé ✓' : 'Sauvegarder mes objectifs'}
         </button>

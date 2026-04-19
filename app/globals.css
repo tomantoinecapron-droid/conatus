@@ -1,35 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #1a1714;
-  --foreground: #ffffff;
+  --background: #F7F4EE;
+  --foreground: #1A1A2E;
 
-  --cream: #F5F0E8;
-  --cream-dark: #EDE6D6;
-  --cream-mid: #E8DFC8;
-  --sage: #8A9E7A;
-  --sage-dark: #5E7A52;
-  --sage-light: #C4D4B8;
-  --moss: #3D5C38;
-  --amber-warm: #C8A96E;
-  --amber-light: #E8D5A8;
-  --text-dark: #2A2A1E;
-  --text-mid: #4A4A38;
-  --text-muted: #7A7A68;
+  --parchment: #F7F4EE;
+  --surface: #EDEAE3;
+  --surface-hover: #E3E0D8;
+  --border-warm: #D5D0C8;
+  --muted: #9A9690;
+  --ink: #1A1A2E;
+
+  /* Legacy aliases — remapped to new palette */
+  --cream: #F7F4EE;
+  --cream-dark: #EDEAE3;
+  --cream-mid: #E3E0D8;
+  --moss: #1A1A2E;
+  --sage: #9A9690;
+  --sage-dark: #9A9690;
+  --sage-light: #E3E0D8;
+  --amber-warm: #9A9690;
+  --amber-light: #EDEAE3;
+  --text-dark: #1A1A2E;
+  --text-mid: #1A1A2E;
+  --text-muted: #9A9690;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans), 'DM Sans', sans-serif;
+  --color-parchment: var(--parchment);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-warm: var(--border-warm);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-serif: Georgia, "Times New Roman", serif;
   --font-mono: monospace;
 }
 
 body {
-  background: var(--cream);
-  color: var(--text-dark);
-  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .scrollbar-hide {
